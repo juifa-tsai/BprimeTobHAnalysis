@@ -49,15 +49,17 @@ Implementation:
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "../../BprimeTobH/interface/format.h"
-#include "../../BprimeTobH/interface/TriggerBooking.h"
-#include "../../BprimeTobH/interface/Njettiness.hh"
-#include "../../BprimeTobH/interface/Nsubjettiness.hh"
+#include "BpbH/BprimeTobH/interface/format.h"
+#include "BpbH/BprimeTobH/interface/TriggerBooking.h"
+#include "BpbH/BprimeTobH/interface/Njettiness.hh"
+#include "BpbH/BprimeTobH/interface/Nsubjettiness.hh"
 
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h" 
 
-#include "../../BprimeTobHAnalysis/interface/JetID.h"
+#include "BpbH/BprimeTobH/interface/JetID.h"
+#include "BpbH/BprimeTobH/interface/JetSelector.h"
+#include "BpbH/BprimeTobH/interface/FatJetSelector.h"
 
 //
 // class declaration
@@ -115,6 +117,9 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double subjet2CSVDiscMax_ ; 
     const double HTMin_ ; 
     const double HTMax_ ; 
+    edm::ParameterSet jetSelParams_ ; 
+    edm::ParameterSet fatJetSelParams_ ; 
+    edm::ParameterSet higgsJetSelParams_ ; 
 
     TChain*            chain_;
 
@@ -171,6 +176,9 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   subjet2CSVDiscMax_(iConfig.getParameter<double>("Subjet2CSVDiscMax")),
   HTMin_(iConfig.getParameter<double>("HTMin")), 
   HTMax_(iConfig.getParameter<double>("HTMax")),
+  jetSelParams_(iConfig.getParameter<edm::ParameterSet>("JetSelParams")), 
+  fatJetSelParams_(iConfig.getParameter<edm::ParameterSet>("FatJetSelParams")), 
+  higgsJetSelParams_(iConfig.getParameter<edm::ParameterSet>("HiggsJetSelParams")), 
   isData_(0),
   evtwt_(1), 
   puweight_(1)  
@@ -314,6 +322,13 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
   pat::strbitset retak5 = jetIDTight.getBitTemplate() ;
   pat::strbitset retca8 = fatjetIDLoose.getBitTemplate() ;
 
+  JetSelector jetSelAK5(jetSelParams_) ; 
+  FatJetSelector jetSelCA8(fatJetSelParams_) ; 
+  FatJetSelector jetSelHiggs(higgsJetSelParams_) ; 
+  //JetSelector jetSelBJets(jetSelParams_) ; 
+  pat::strbitset retjetidak5 = jetSelAK5.getBitTemplate() ; 
+  pat::strbitset retjetidca8 = jetSelCA8.getBitTemplate() ; 
+
   ofstream fout("Evt_NoJets.txt") ; 
   if ( isData_ ) {
     fout << "EvtInfo.RunNo " << " EvtInfo.LumiNo " << " EvtInfo.EvtNo " << std::endl ;
@@ -447,13 +462,15 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       //Fix h_FatJets_Pt->Fill(FatJetInfo.Pt[ifatjet]);
 
       //// Fat jet selection
-      if ( FatJetInfo.Pt[ifatjet] < fatJetPtMin_ 
-          || FatJetInfo.Pt[ifatjet] > fatJetPtMax_ ) continue; //// apply jet pT cut
-      if ( fabs(FatJetInfo.Eta[ifatjet]) > fatJetAbsEtaMax_ ) continue; //// apply jet eta cut
-      if ( FatJetInfo.MassPruned[ifatjet] < fatJetPrunedMassMin_ 
-          || FatJetInfo.MassPruned[ifatjet] > fatJetPrunedMassMax_ ) continue; //// apply pruned jet mass cut 
-      retca8.set(false);
-      if ( fatjetIDLoose(ifatjet,retca8) == 0 ) continue; //// apply loose jet ID
+      retjetidca8.set(false) ;
+      if (jetSelCA8(ifatjet,retjetidca8) == 0) continue ; 
+      //if ( FatJetInfo.Pt[ifatjet] < fatJetPtMin_ 
+      //    || FatJetInfo.Pt[ifatjet] > fatJetPtMax_ ) continue; //// apply jet pT cut
+      //if ( fabs(FatJetInfo.Eta[ifatjet]) > fatJetAbsEtaMax_ ) continue; //// apply jet eta cut
+      //if ( FatJetInfo.MassPruned[ifatjet] < fatJetPrunedMassMin_ 
+      //    || FatJetInfo.MassPruned[ifatjet] > fatJetPrunedMassMax_ ) continue; //// apply pruned jet mass cut 
+      //retca8.set(false);
+      //if ( fatjetIDLoose(ifatjet,retca8) == 0 ) continue; //// apply loose jet ID
 
       TLorentzVector fatjet_p4;
       fatjet_p4.SetPtEtaPhiM(FatJetInfo.Pt[ifatjet], FatJetInfo.Eta[ifatjet], 
@@ -526,10 +543,12 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     for (int ijet = 0; ijet < JetInfo.Size; ++ijet) { 
 
-      if ( JetInfo.Pt[ijet] < jetPtMin_ || JetInfo.Pt[ijet] > jetPtMax_ ) continue ; 
-      if ( fabs(JetInfo.Eta[ijet]) > jetAbsEtaMax_ ) continue ; 
-      retak5.set(false);
-      if ( jetIDTight(ijet,retak5) == 0 ) continue; 
+      //DM if ( JetInfo.Pt[ijet] < jetPtMin_ || JetInfo.Pt[ijet] > jetPtMax_ ) continue ; 
+      //DM if ( fabs(JetInfo.Eta[ijet]) > jetAbsEtaMax_ ) continue ; 
+      //DM retak5.set(false);
+      //DM if ( jetIDTight(ijet,retak5) == 0 ) continue; 
+      retjetidak5.set(false) ;
+      if (jetSelAK5(ijet,retjetidak5) == 0) continue ; 
 
       ++njets ; 
 

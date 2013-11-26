@@ -105,7 +105,7 @@ options.register('doPUReweighting', True,
     "Do pileup reweighting"
 )
 
-options.setDefault('maxEvents', -1000) 
+options.setDefault('maxEvents', 1000) 
 
 options.parseArguments()
 
@@ -124,6 +124,8 @@ process.source = cms.Source("EmptySource")
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outFilename) 
     )
+
+from BpbH.BprimeTobH.HiggsJetSelector_cfi import * 
 
 process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
@@ -154,6 +156,9 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     Subjet2CSVDiscMax   = cms.double(options.subjet2CSVDiscMax),
     HTMin               = cms.double(options.hTMin),
     HTMax               = cms.double(options.hTMax), 
+    JetSelParams        = defaultJetSelectionParameters.clone(), 
+    FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
+    HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(), 
     ) 
 
 process.p = cms.Path(process.BprimebH)
