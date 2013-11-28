@@ -105,7 +105,7 @@ options.register('doPUReweighting', True,
     "Do pileup reweighting"
 )
 
-options.setDefault('maxEvents', 1000) 
+options.setDefault('maxEvents', -1000) 
 
 options.parseArguments()
 
@@ -125,6 +125,7 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outFilename) 
     )
 
+from BpbH.BprimeTobH.TriggerSelector_cfi import * 
 from BpbH.BprimeTobH.HiggsJetSelector_cfi import * 
 from BpbH.BprimeTobH.HTSelector_cfi import * 
 
@@ -133,7 +134,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string('ntuple/tree'),
     InputFiles          = cms.vstring(FileNames), 
-    HLTPaths            = cms.vint32(3225,4136,4137,5089,5537,5538), 
+    #HLTPaths            = cms.vint32(3225,4136,4137,5089,5537,5538), 
+    HLTPaths            = defaultTriggerSelectionParameters.clone(), 
     DoPUReweighting     = cms.bool(options.doPUReweighting),
     File_PUDistMC       = cms.string('pileup_Data_Summer12_53X_S10.root'),
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),

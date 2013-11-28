@@ -57,6 +57,8 @@ Implementation:
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h" 
 
+#include "BpbH/BprimeTobH/interface/TriggerSelector.h"
+#include "BpbH/BprimeTobH/interface/VertexSelector.h"
 #include "BpbH/BprimeTobH/interface/JetSelector.h"
 #include "BpbH/BprimeTobH/interface/FatJetSelector.h"
 #include "BpbH/BprimeTobH/interface/HTSelector.h"
@@ -92,7 +94,8 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const int                       reportEvery_; 
     const std::string               inputTTree_;
     const std::vector<std::string>  inputFiles_;
-    const std::vector<int>          hltPaths_; 
+    //const std::vector<string>       hltPaths_; 
+    const edm::ParameterSet         hltPaths_; 
     const int                       doPUReweighting_ ;
     const std::string               file_PUDistMC_ ;
     const std::string               file_PUDistData_ ;
@@ -117,10 +120,10 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double subjet2CSVDiscMax_ ; 
     const double HTMin_ ; 
     const double HTMax_ ; 
-    edm::ParameterSet jetSelParams_ ; 
-    edm::ParameterSet fatJetSelParams_ ; 
-    edm::ParameterSet higgsJetSelParams_ ; 
-    edm::ParameterSet HTSelParams_ ; 
+    const edm::ParameterSet jetSelParams_ ; 
+    const edm::ParameterSet fatJetSelParams_ ; 
+    const edm::ParameterSet higgsJetSelParams_ ; 
+    const edm::ParameterSet HTSelParams_ ; 
 
     TChain*            chain_;
 
@@ -153,7 +156,8 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   reportEvery_(iConfig.getParameter<int>("ReportEvery")),
   inputTTree_(iConfig.getParameter<std::string>("InputTTree")),
   inputFiles_(iConfig.getParameter<std::vector<std::string> >("InputFiles")),
-  hltPaths_(iConfig.getParameter<std::vector<int> >("HLTPaths")),
+  //hltPaths_(iConfig.getParameter<std::vector<string> >("HLTPaths")),
+  hltPaths_(iConfig.getParameter<edm::ParameterSet>("HLTPaths")),
   doPUReweighting_(iConfig.getParameter<bool>("DoPUReweighting")), 
   file_PUDistMC_(iConfig.getParameter<std::string>("File_PUDistMC")),
   file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
@@ -365,14 +369,16 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     if ( doPUReweighting_ && !isData_ ) puweight_ = LumiWeights_.weight(EvtInfo.TrueIT[0]) ; 
 
     nGoodVtxs = 0 ;
-    /**\ Select good vertices */
-    for (int iVtx=0; iVtx < VtxInfo.Size; ++iVtx) {
-      if (   VtxInfo.Type[iVtx]==1
-          && VtxInfo.isFake[iVtx]==false
-          && VtxInfo.Ndof[iVtx]>4
-          && VtxInfo.Rho[iVtx]<2.
-          && VtxInfo.z[iVtx]<24.) { ++nGoodVtxs ; }
-    }
+    VertexSelector vtxSel(VtxInfo) ; 
+    nGoodVtxs = vtxSel.NGoodVtxs()
+    //DM/**\ Select good vertices */
+    //DMfor (int iVtx=0; iVtx < VtxInfo.Size; ++iVtx) {
+    //DM  if (   VtxInfo.Type[iVtx]==1
+    //DM      && VtxInfo.isFake[iVtx]==false
+    //DM      && VtxInfo.Ndof[iVtx]>4
+    //DM      && VtxInfo.Rho[iVtx]<2.
+    //DM      && VtxInfo.z[iVtx]<24.) { ++nGoodVtxs ; }
+    //DM}
     if (nGoodVtxs < 1)  { edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex " ; continue ; }
 
     FillHisto(TString("AllEvents")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt_) ; 
@@ -381,14 +387,17 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     FillHisto(TString("AllEvents")+TString("_nFatJets"), FatJetInfo.Size, evtwt_*puweight_) ; 
     h_cutflow -> Fill("AllEvents", 1) ; 
 
-    for ( std::vector<int>::const_iterator ihlt = hltPaths_.begin();
-        ihlt != hltPaths_.end(); ++ihlt ) { 
-      if (EvtInfo.TrgBook[*ihlt] == 1) { 
-        passHLT = true ; 
-        break ; 
-      }
-      else passHLT = false ; 
-    }
+    TriggerSelector trigSel(hltPaths_) ; 
+    passHLT = trigSel.getTrigDecision(EvtInfo) ; 
+
+    //for ( std::vector<int>::const_iterator ihlt = hltPaths_.begin();
+    //    ihlt != hltPaths_.end(); ++ihlt ) { 
+    //  if (EvtInfo.TrgBook[*ihlt] == 1) { 
+    //    passHLT = true ; 
+    //    break ; 
+    //  }
+    //  else passHLT = false ; 
+    //}
 
     if ( !passHLT ) continue ; 
 
