@@ -128,6 +128,7 @@ process.TFileService = cms.Service("TFileService",
 from BpbH.BprimeTobH.TriggerSelector_cfi import * 
 from BpbH.BprimeTobH.HiggsJetSelector_cfi import * 
 from BpbH.BprimeTobH.HTSelector_cfi import * 
+from BpbH.BprimeTobHAnalysis.EventSelector_cfi import * 
 
 process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
@@ -163,6 +164,7 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(), 
     HTSelParams         = defaultHTSelectionParameters.clone(),
+    EvtSelParams        = defaultEventSelectionParameters.clone(),
     ) 
 
 process.p = cms.Path(process.BprimebH)

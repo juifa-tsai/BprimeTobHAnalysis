@@ -57,11 +57,12 @@ Implementation:
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h" 
 
-#include "BpbH/BprimeTobH/interface/TriggerSelector.h"
-#include "BpbH/BprimeTobH/interface/VertexSelector.h"
-#include "BpbH/BprimeTobH/interface/JetSelector.h"
-#include "BpbH/BprimeTobH/interface/FatJetSelector.h"
-#include "BpbH/BprimeTobH/interface/HTSelector.h"
+//#include "BpbH/BprimeTobH/interface/TriggerSelector.h"
+//#include "BpbH/BprimeTobH/interface/VertexSelector.h"
+//#include "BpbH/BprimeTobH/interface/JetSelector.h"
+//#include "BpbH/BprimeTobH/interface/FatJetSelector.h"
+//#include "BpbH/BprimeTobH/interface/HTSelector.h"
+#include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
 
 //
 // class declaration
@@ -89,7 +90,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     // ----------member data ---------------------------
 
     //// Configurables 
-
+    
     int                             maxEvents_; 
     const int                       reportEvery_; 
     const std::string               inputTTree_;
@@ -124,6 +125,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const edm::ParameterSet fatJetSelParams_ ; 
     const edm::ParameterSet higgsJetSelParams_ ; 
     const edm::ParameterSet HTSelParams_ ; 
+    const edm::ParameterSet evtSelParams_ ; 
 
     TChain*            chain_;
 
@@ -185,6 +187,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   fatJetSelParams_(iConfig.getParameter<edm::ParameterSet>("FatJetSelParams")), 
   higgsJetSelParams_(iConfig.getParameter<edm::ParameterSet>("HiggsJetSelParams")), 
   HTSelParams_(iConfig.getParameter<edm::ParameterSet>("HTSelParams")), 
+  evtSelParams_(iConfig.getParameter<edm::ParameterSet>("EvtSelParams")), 
   isData_(0),
   evtwt_(1), 
   puweight_(1)  
@@ -219,6 +222,7 @@ void BprimeTobHAnalysis::beginJob() {
   FatJetInfo.Register(chain_,"FatJetInfo");
   SubJetInfo.Register(chain_,"SubJetInfo");
   LepInfo.Register(chain_);
+  EventSelector eSelector(evtSelParams_,EvtInfo,VtxInfo,JetInfo,FatJetInfo,SubJetInfo);  
 
   if(maxEvents_<0 || maxEvents_>chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
 
@@ -370,7 +374,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     nGoodVtxs = 0 ;
     VertexSelector vtxSel(VtxInfo) ; 
-    nGoodVtxs = vtxSel.NGoodVtxs()
+    nGoodVtxs = vtxSel.NGoodVtxs(); 
     //DM/**\ Select good vertices */
     //DMfor (int iVtx=0; iVtx < VtxInfo.Size; ++iVtx) {
     //DM  if (   VtxInfo.Type[iVtx]==1
