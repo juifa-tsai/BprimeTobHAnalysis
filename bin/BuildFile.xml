@@ -1,5 +1,4 @@
 <bin name="HistCummulative" file="histCummulative.cc">
-  <use name="BpbH/BprimeTobHAnalysis"/> 
   <use name="root"/>
 </bin>
 

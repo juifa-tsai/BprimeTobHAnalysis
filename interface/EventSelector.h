@@ -26,36 +26,64 @@ class EventSelector {
     enum SELECTYPES_t {EVTSEL, VTXSEL, JETSEL, BJETSEL, FATJETSEL, HIGGSJETSEL, HTSEL, LEPTONVETO} ; 
 
     EventSelector (edm::ParameterSet const& params, 
-        const EvtInfoBranches &evt, const VertexInfoBranches &vtx, 
-        const JetInfoBranches &jet, const JetInfoBranches &fatjet, const JetInfoBranches &subjet) ; 
+        EvtInfoBranches &evt, VertexInfoBranches &vtx, 
+        JetInfoBranches &jet, JetInfoBranches &fatjet, JetInfoBranches &subjet) ; 
     ~EventSelector() ; 
+
+    void printEventStatus();
+    int passCode(); 
+    void reset();
+    std::vector<std::string> getCutLevels();
+
+    bool passes();
+    bool passesTrigger();
+    int primaryVertex();
+    int nGoodJets();
+    int nGoodBJets();
+    int nGoodFatJets();
+    int nGoodHiggsJets(); 
 
   private: 
 
+    void jetSel() ; 
+    void bjetSel() ; 
+    void fatjetSel() ; 
+    void higgsjetSel() ; 
+
     //// Configurables 
-    //edm::ParameterSet evtSelParams_;
-    const EvtInfoBranches* evtInfo_ ; 
-    const VertexInfoBranches* vtxInfo_;
-    const JetInfoBranches* jetInfo_;
-    const JetInfoBranches* fatjetInfo_; 
-    const JetInfoBranches* subjetInfo_; 
+    EvtInfoBranches*    evtInfo_ ; 
+    VertexInfoBranches* vtxInfo_;
+    JetInfoBranches*    jetInfo_;
+    JetInfoBranches*    fatjetInfo_; 
+    JetInfoBranches*    subjetInfo_; 
 
-    //// Other members 
-    edm::ParameterSet trigSelParams_;
-    edm::ParameterSet vtxSelParams_;
-    edm::ParameterSet jetSelParams_;
-    edm::ParameterSet bjetSelParams_;
-    edm::ParameterSet fatjetSelParams_;
-    edm::ParameterSet higgsjetSelParams_; 
+    TriggerSelector* trigSelector_ ;
+    VertexSelector*  vtxSelector_ ;
+    JetSelector*     jetSelector_ ;
+    JetSelector*     bjetSelector_ ;
+    FatJetSelector*  fatjetSelector_ ; 
+    FatJetSelector*  higgsjetSelector_ ; 
+    HTSelector*      htSelector_ ; 
 
-    const TriggerSelector* trigSelector_ ;
-    const VertexSelector* vtxSelector_ ;
-    const JetSelector* jetSelector_ ;
-    const JetSelector* bjetSelector_ ;
-    const FatJetSelector* fatjetSelector_ ; 
-    const FatJetSelector* higgsjetSelector_ ; 
-    const HTSelector* htSelector_ ; 
+    std::vector<std::string> cutLevels_ ; 
 
+    int nGoodPV_ ;
+    bool trigDecision_ ; 
+    std::vector<int> goodJets_;
+    std::vector<int> goodBJets_;
+    std::vector<int> goodFatJets_;
+    std::vector<int> goodHiggsJets_;
+
+    int minNJets_ ; 
+    int maxNJets_ ; 
+    int minNBJets_ ; 
+    int maxNBJets_ ; 
+    int minNFatJets_ ; 
+    int maxNFatJets_ ; 
+    int minNHiggsJets_ ; 
+    int maxNHiggsJets_ ; 
+
+    int passLevel_ ; 
     bool passes_ ; 
 
 } ; 

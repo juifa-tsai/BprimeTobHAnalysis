@@ -51,17 +51,12 @@ Implementation:
 
 #include "BpbH/BprimeTobH/interface/format.h"
 #include "BpbH/BprimeTobH/interface/TriggerBooking.h"
-#include "BpbH/BprimeTobH/interface/Njettiness.hh"
-#include "BpbH/BprimeTobH/interface/Nsubjettiness.hh"
+//#include "BpbH/BprimeTobH/interface/Njettiness.hh"
+//#include "BpbH/BprimeTobH/interface/Nsubjettiness.hh"
 
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h" 
 
-//#include "BpbH/BprimeTobH/interface/TriggerSelector.h"
-//#include "BpbH/BprimeTobH/interface/VertexSelector.h"
-//#include "BpbH/BprimeTobH/interface/JetSelector.h"
-//#include "BpbH/BprimeTobH/interface/FatJetSelector.h"
-//#include "BpbH/BprimeTobH/interface/HTSelector.h"
 #include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
 
 //
@@ -148,6 +143,9 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
 
     std::map<TString, TH1D*> hmap_1d ;  
 
+    EventSelector *eSelector_ ; 
+    std::vector<std::string> cutLevels_; 
+
 };
 
 //
@@ -222,11 +220,12 @@ void BprimeTobHAnalysis::beginJob() {
   FatJetInfo.Register(chain_,"FatJetInfo");
   SubJetInfo.Register(chain_,"SubJetInfo");
   LepInfo.Register(chain_);
-  EventSelector eSelector(evtSelParams_,EvtInfo,VtxInfo,JetInfo,FatJetInfo,SubJetInfo);  
+  eSelector_ = new EventSelector(evtSelParams_,EvtInfo,VtxInfo,JetInfo,FatJetInfo,SubJetInfo);  
+  cutLevels_ = eSelector_->getCutLevels();
 
   if(maxEvents_<0 || maxEvents_>chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
 
-  // example from ExcitedQuark 
+  //example from ExcitedQuark 
   //eSelector = new eventSelector(SelectionParameters,EvtInfo,LepInfo,JetInfo,VtxInfo);
   //cutLevels = eSelector->getCutLevels();
 
@@ -249,41 +248,44 @@ void BprimeTobHAnalysis::beginJob() {
 
 void BprimeTobHAnalysis::CreateHistos(const TString& cutname) {
 
-  AddHisto(cutname ,"_nPVtx_NoPUWt"               ,"N(PV), No PU weight"       ,50     ,-0.5     ,49.5    ) ; 
-  AddHisto(cutname ,"_nPVtx_PUWt"                 ,"N(PV)"                     ,50     ,-0.5     ,49.5    ) ; 
-  AddHisto(cutname ,"_nJets"                      ,"N(AK5 jets)"               ,20     ,-0.5     ,19.5    ) ; 
-  AddHisto(cutname ,"_nBJets"                     ,"N(b jets)"                 ,20     ,-0.5     ,19.5    ) ; 
-  AddHisto(cutname ,"_nFatJets"                   ,"N(fat jets)"               ,20     ,-0.5     ,19.5    ) ; 
-  AddHisto(cutname ,"_nHJets"                     ,"N(Higgs jets)"             ,20     ,-0.5     ,19.5    ) ; 
-  AddHisto(cutname ,"_FatJets_Pt"                 ,"p_{T}(fat jets)"           ,1000   ,0.       ,1000.   ) ; 
-  AddHisto(cutname ,"_FatJets_Eta"                ,"#eta(fat jets)"            ,50     ,-4.      ,4.      ) ; 
-  AddHisto(cutname ,"_FatJets_Mass"               ,"Fat jet mass [GeV]"        ,100    ,0.       ,2000.   ) ; 
-  AddHisto(cutname ,"_FatJets_MassPruned"         ,"Fat jet pruned mass [GeV]" ,100    ,0.       ,2000.   ) ; 
-  AddHisto(cutname ,"_FatJets_tau2ByTau1"         ,"Fat jet #tau2/#tau1"       ,20     ,0.       ,1.      ) ; 
-  AddHisto(cutname ,"_FatJets_tau3ByTau2"         ,"Fat jet #tau2/#tau1"       ,20     ,0.       ,1.      ) ; 
-  AddHisto(cutname ,"_FatJets_tau3ByTau1"         ,"Fat jet #tau2/#tau1"       ,20     ,0.       ,1.      ) ; 
-  AddHisto(cutname ,"_FatJets_CombinedSVBJetTags" ,"Fat jet CSV discriminator" ,20     ,0.       ,1.      ) ; 
+  AddHisto(cutname ,"_nPVtx_NoPUWt"                ,"N(PV), No PU weight"                       ,50     ,-0.5     ,49.5    ) ; 
+  AddHisto(cutname ,"_nPVtx_PUWt"                  ,"N(PV)"                                     ,50     ,-0.5     ,49.5    ) ; 
+  AddHisto(cutname ,"_nJets"                       ,"N(AK5 jets)"                               ,20     ,-0.5     ,19.5    ) ; 
+  AddHisto(cutname ,"_nBJets"                      ,"N(b jets)"                                 ,20     ,-0.5     ,19.5    ) ; 
+  AddHisto(cutname ,"_nFatJets"                    ,"N(fat jets)"                               ,20     ,-0.5     ,19.5    ) ; 
+  AddHisto(cutname ,"_nHJets"                      ,"N(Higgs jets)"                             ,20     ,-0.5     ,19.5    ) ; 
+  AddHisto(cutname ,"_FatJets_Pt"                  ,"p_{T}(fat jets)"                           ,1000   ,0.       ,1000.   ) ; 
+  AddHisto(cutname ,"_FatJets_Eta"                 ,"#eta(fat jets)"                            ,50     ,-4.      ,4.      ) ; 
+  AddHisto(cutname ,"_FatJets_Mass"                ,"Fat jet mass [GeV]"                        ,100    ,0.       ,2000.   ) ; 
+  AddHisto(cutname ,"_FatJets_MassPruned"          ,"Fat jet pruned mass [GeV]"                 ,100    ,0.       ,2000.   ) ; 
+  AddHisto(cutname ,"_FatJets_tau2ByTau1"          ,"Fat jet #tau2/#tau1"                       ,20     ,0.       ,1.      ) ; 
+  AddHisto(cutname ,"_FatJets_tau3ByTau2"          ,"Fat jet #tau2/#tau1"                       ,20     ,0.       ,1.      ) ; 
+  AddHisto(cutname ,"_FatJets_tau3ByTau1"          ,"Fat jet #tau2/#tau1"                       ,20     ,0.       ,1.      ) ; 
+  AddHisto(cutname ,"_FatJets_CombinedSVBJetTags"  ,"Fat jet CSV discriminator"                 ,20     ,0.       ,1.      ) ; 
 
-  AddHisto(cutname ,"_SubJet1_Pt"                 ,"SubJet1 p_{T} [GeV]"       ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_SubJet1_Eta"                ,"SubJet1 #eta"              ,50     ,-4.      ,4.      ) ;
-  AddHisto(cutname ,"_SubJet1_Mass"               ,"SubJet1 mass [GeV]"        ,100    ,0.       ,2000.   ) ; 
-  AddHisto(cutname ,"_SubJet1_CombinedSVBJetTags" ,"SubJet1 CSV discriminator" ,20     ,0.       ,1.      ) ; 
+  AddHisto(cutname ,"_SubJet1_Pt"                  ,"SubJet1 p_{T} [GeV]"                       ,100    ,0.       ,2000.   ) ;
+  AddHisto(cutname ,"_SubJet1_Eta"                 ,"SubJet1 #eta"                              ,50     ,-4.      ,4.      ) ;
+  AddHisto(cutname ,"_SubJet1_Mass"                ,"SubJet1 mass [GeV]"                        ,100    ,0.       ,2000.   ) ; 
+  AddHisto(cutname ,"_SubJet1_CombinedSVBJetTags"  ,"SubJet1 CSV discriminator"                 ,20     ,0.       ,1.      ) ; 
 
-  AddHisto(cutname ,"_SubJet2_Pt"                 ,"SubJet2 p_{T} [GeV]"       ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_SubJet2_Eta"                ,"SubJet2 #eta"              ,50     ,-4.      ,4.      ) ;
-  AddHisto(cutname ,"_SubJet2_Mass"               ,"SubJet2 mass [GeV]"        ,100    ,0.       ,2000.   ) ; 
-  AddHisto(cutname ,"_SubJet2_CombinedSVBJetTags" ,"SubJet2 CSV discriminator" ,20     ,0.       ,1.      ) ; 
+  AddHisto(cutname ,"_SubJet2_Pt"                  ,"SubJet2 p_{T} [GeV]"                       ,100    ,0.       ,2000.   ) ;
+  AddHisto(cutname ,"_SubJet2_Eta"                 ,"SubJet2 #eta"                              ,50     ,-4.      ,4.      ) ;
+  AddHisto(cutname ,"_SubJet2_Mass"                ,"SubJet2 mass [GeV]"                        ,100    ,0.       ,2000.   ) ; 
+  AddHisto(cutname ,"_SubJet2_CombinedSVBJetTags"  ,"SubJet2 CSV discriminator"                 ,20     ,0.       ,1.      ) ; 
 
-  AddHisto(cutname ,"_HiggsJet_Pt"                ,"p_{T} (Higgs jet)[GeV]"    ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_HiggsJet_Eta"               ,"#eta (Higgs jet)"          ,50     ,-4.      ,4.      ) ;
-  AddHisto(cutname ,"_HiggsJet_Mass"              ,"Mass (Higgs jet) [GeV]"    ,100    ,0.       ,200.    ) ; 
+  AddHisto(cutname ,"_HiggsJet_Pt"                 ,"p_{T} (Higgs jet)[GeV]"                    ,100    ,0.       ,2000.   ) ;
+  AddHisto(cutname ,"_HiggsJet_Eta"                ,"#eta (Higgs jet)"                          ,50     ,-4.      ,4.      ) ;
+  AddHisto(cutname ,"_HiggsJet_Mass"               ,"Mass (Higgs jet) [GeV]"                    ,100    ,0.       ,200.    ) ; 
 
-  AddHisto(cutname ,"_BJet_Pt"                    ,"p_{T} (b jet)[GeV]"        ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_BJet_Eta"                   ,"#eta (b jet)"              ,50     ,-4.      ,4.      ) ;
+  AddHisto(cutname ,"_BJet_Pt"                     ,"p_{T} (b jet)[GeV]"                        ,100    ,0.       ,2000.   ) ;
+  AddHisto(cutname ,"_BJet_Eta"                    ,"#eta (b jet)"                              ,50     ,-4.      ,4.      ) ;
 
-  AddHisto(cutname ,"_HT"                         ,"H_{T}[GeV]"                 ,200   ,0.       ,4000.   ) ;
-  AddHisto(cutname ,"_bprimePt"                   ,"b' p_{T} [GeV]"             ,100   ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_bprimeMass"                 ,"b' mass [GeV]"              ,40    ,0.       ,2000.   ) ;
+  AddHisto(cutname ,"_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading 2 CA8 and AK5 jets) [GeV]"  ,200   ,0.       ,4000.   ) ;
+  AddHisto(cutname ,"_HTAK5_leading4"              ,"H_{T} (leading 4 AK5 jets) [GeV]"          ,200   ,0.       ,4000.   ) ;
+  AddHisto(cutname ,"_HTAK5"                       ,"H_{T} (AK5 jets) [GeV]"                    ,200   ,0.       ,4000.   ) ;
+  AddHisto(cutname ,"_HT"                          ,"H_{T}[GeV]"                                ,200   ,0.       ,4000.   ) ;
+  AddHisto(cutname ,"_bprimePt"                    ,"b' p_{T} [GeV]"                            ,100   ,0.       ,2000.   ) ;
+  AddHisto(cutname ,"_bprimeMass"                  ,"b' mass [GeV]"                             ,40    ,0.       ,2000.   ) ;
 
   return ; 
 
@@ -364,6 +366,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     int nGoodVtxs(0) ;
     int njets(0) ; 
+    int nfatjets(0) ; 
+    double H_TCA8_leading2_AK5_leading2(0) ; 
+    double H_TAK5_leading4(0) ; 
+    double H_TAK5(0) ; 
     double H_T(0) ; 
 
     chain_->GetEntry(entry);
@@ -472,24 +478,27 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     } //// Loop over all gen particles 
 
+    JetCollection ak5jets ; 
+    JetCollection ak5jets_leading4 ; 
+    JetCollection bjets ; 
     JetCollection fatjets ; 
     JetCollection higgsjets ; 
-    JetCollection bjets ; 
+    JetCollection jets_CA8_leading2_AK5_leading2 ; 
 
     for (int ifatjet=0; ifatjet < FatJetInfo.Size; ++ifatjet) {
 
       //Fix h_FatJets_Pt->Fill(FatJetInfo.Pt[ifatjet]);
 
       //// Fat jet selection
-      retjetidca8.set(false) ;
+      //retjetidca8.set(false) ;
       //if (jetSelCA8( FatJetInfo,ifatjet,SubJetInfo,retjetidca8) == 0) continue ; 
-      //if ( FatJetInfo.Pt[ifatjet] < fatJetPtMin_ 
-      //    || FatJetInfo.Pt[ifatjet] > fatJetPtMax_ ) continue; //// apply jet pT cut
-      //if ( fabs(FatJetInfo.Eta[ifatjet]) > fatJetAbsEtaMax_ ) continue; //// apply jet eta cut
+      if ( FatJetInfo.Pt[ifatjet] < fatJetPtMin_ 
+          || FatJetInfo.Pt[ifatjet] > fatJetPtMax_ ) continue; //// apply jet pT cut
+      if ( fabs(FatJetInfo.Eta[ifatjet]) > fatJetAbsEtaMax_ ) continue; //// apply jet eta cut
       //if ( FatJetInfo.MassPruned[ifatjet] < fatJetPrunedMassMin_ 
       //    || FatJetInfo.MassPruned[ifatjet] > fatJetPrunedMassMax_ ) continue; //// apply pruned jet mass cut 
-      //retca8.set(false);
-      //if ( fatjetIDLoose(FatJetInfo, ifatjet,retca8) == 0 ) continue; //// apply loose jet ID
+      retca8.set(false);
+      if ( fatjetIDLoose(FatJetInfo, ifatjet,retca8) == 0 ) continue; //// apply loose jet ID
       
       TLorentzVector fatjet_p4;
       fatjet_p4.SetPtEtaPhiM(FatJetInfo.Pt[ifatjet], FatJetInfo.Eta[ifatjet], 
@@ -543,8 +552,11 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
         Jet thisjet(FatJetInfo, ifatjet) ; 
         fatjets.push_back(thisjet) ; 
+        if (nfatjets < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
 
         p4_fatJets.push_back(fatjet_p4) ; 
+
+        ++nfatjets ; 
 
         //// Higgs tagging
         if ( SubJetInfo.CombinedSVBJetTags[iSubJet1] > subjet1CSVDiscMin_ 
@@ -574,6 +586,11 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       //retak5.set(false);
       //if ( jetIDTight(JetInfo, ijet,retak5) == 0 ) continue; 
 
+      Jet thisjet(JetInfo, ijet) ; 
+      ak5jets.push_back(thisjet) ; 
+      if (njets < 4) ak5jets_leading4.push_back(thisjet) ; 
+      if (njets < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
+
       ++njets ; 
 
       TLorentzVector jet_p4;
@@ -600,7 +617,6 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         bjet_p4.SetPtEtaPhiM(JetInfo.Pt[ijet], JetInfo.Eta[ijet], 
             JetInfo.Phi[ijet], JetInfo.Mass[ijet]);
 
-        Jet thisjet(JetInfo, ijet) ; 
         bjets.push_back(thisjet) ; 
 
         p4_bJets.push_back(bjet_p4) ; 
@@ -609,9 +625,39 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     } //// Loop over AK5 jets 
 
+    HT HTAK5 ; 
+    HTAK5.setJetCollection(ak5jets) ; 
+    HTAK5.buildHT() ; 
+    H_TAK5 = HTAK5.getHT() ; 
+
+    HT HTAK5_leading4 ; 
+    HTAK5_leading4.setJetCollection(ak5jets_leading4) ; 
+    HTAK5_leading4.buildHT() ; 
+    H_TAK5_leading4 = HTAK5_leading4.getHT() ; 
+
+    HT HTCA8_leading2_AK5_leading2 ; 
+    HTCA8_leading2_AK5_leading2.setJetCollection(jets_CA8_leading2_AK5_leading2) ; 
+    HTCA8_leading2_AK5_leading2.buildHT() ; 
+    H_TCA8_leading2_AK5_leading2 = HTCA8_leading2_AK5_leading2.getHT() ; 
+
+    HT MyHT ; 
+    MyHT.setJetCollection(higgsjets) ; 
+    MyHT.setJetCollection(bjets) ; 
+    MyHT.buildHT() ; 
+    H_T = MyHT.getHT() ; 
+
+    FillHisto(TString("TriggerSel")+TString("_HTCA8_leading2_AK5_leading2"), H_TCA8_leading2_AK5_leading2, evtwt_) ; 
+    FillHisto(TString("TriggerSel")+TString("_HTAK5_leading4"), H_TAK5_leading4, evtwt_) ; 
+    FillHisto(TString("TriggerSel")+TString("_HTAK5"), H_TAK5, evtwt_) ; 
+    FillHisto(TString("TriggerSel")+TString("_HT"), H_T, evtwt_) ; 
+
     if (p4_fatJets.size() >= 1) {
       FillHisto(TString("FatJetSel")+TString("_nJets"), njets, evtwt_) ; 
       FillHisto(TString("FatJetSel")+TString("_nBJets"), p4_bJets.size(), evtwt_) ; 
+      FillHisto(TString("FatJetSel")+TString("_HTCA8_leading2_AK5_leading2"), H_TCA8_leading2_AK5_leading2, evtwt_) ; 
+      FillHisto(TString("FatJetSel")+TString("_HTAK5_leading4"), H_TAK5_leading4, evtwt_) ; 
+      FillHisto(TString("FatJetSel")+TString("_HTAK5"), H_TAK5, evtwt_) ; 
+      FillHisto(TString("FatJetSel")+TString("_HT"), H_T, evtwt_) ; 
       for (std::vector<TLorentzVector>::const_iterator ib = p4_bJets.begin(); ib != p4_bJets.end(); ++ib) { 
         FillHisto(TString("FatJetSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
         FillHisto(TString("FatJetSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
@@ -623,6 +669,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
       FillHisto(TString("HiggsJetSel")+TString("_nJets"), njets, evtwt_) ; 
       FillHisto(TString("HiggsJetSel")+TString("_nBJets"), p4_bJets.size(), evtwt_) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_HTCA8_leading2_AK5_leading2"), H_TCA8_leading2_AK5_leading2, evtwt_) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_HTAK5_leading4"), H_TAK5_leading4, evtwt_) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_HTAK5"), H_TAK5, evtwt_) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_HT"), H_T, evtwt_) ; 
       for (std::vector<TLorentzVector>::const_iterator ib = p4_bJets.begin(); ib != p4_bJets.end(); ++ib) { 
         FillHisto(TString("HiggsJetSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
         FillHisto(TString("HiggsJetSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
@@ -632,14 +682,11 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       if (p4_bJets.size() >= 2 ) { 
 
         FillHisto(TString("BJetsSel")+TString("_nJets"), njets, evtwt_) ; 
+        FillHisto(TString("BJetsSel")+TString("_HTCA8_leading2_AK5_leading2"), H_TCA8_leading2_AK5_leading2, evtwt_) ; 
+        FillHisto(TString("BJetsSel")+TString("_HTAK5_leading4"), H_TAK5_leading4, evtwt_) ; 
+        FillHisto(TString("BJetsSel")+TString("_HTAK5"), H_TAK5, evtwt_) ; 
+        FillHisto(TString("BJetsSel")+TString("_HT"), H_T, evtwt_) ; 
         h_cutflow -> Fill("BJetsSel", 1) ;
-
-        HT MyHT ; 
-        MyHT.setJetCollection(higgsjets) ; 
-        MyHT.setJetCollection(bjets) ; 
-        MyHT.buildHT() ; 
-
-        H_T = MyHT.getHT() ; 
 
         //for (std::vector<TLorentzVector>::const_iterator ihig = p4_higgsJets.begin(); ihig != p4_higgsJets.end(); ++ihig) { 
         //  H_T += ihig->Pt() ; 
@@ -657,7 +704,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         FillHisto(TString("HTSel")+TString("_nJets"), njets, evtwt_) ; 
         FillHisto(TString("HTSel")+TString("_nBJets"), p4_bJets.size(), evtwt_) ; 
         FillHisto(TString("HTSel")+TString("_nHJets"), p4_higgsJets.size(), evtwt_) ; 
-        FillHisto(TString("HTSel")+TString("_HT") ,H_T ,evtwt_)  ; 
+        FillHisto(TString("HTSel")+TString("_HTCA8_leading2_AK5_leading2"), H_TCA8_leading2_AK5_leading2, evtwt_) ; 
+        FillHisto(TString("HTSel")+TString("_HTAK5_leading4"), H_TAK5_leading4, evtwt_) ; 
+        FillHisto(TString("HTSel")+TString("_HTAK5"), H_TAK5, evtwt_) ; 
+        FillHisto(TString("HTSel")+TString("_HT"), H_T, evtwt_) ; 
         if ( !isData_ ) h_cutflow -> Fill("HTSel", 1) ; 
 
         //// Reconstruct b' candidates
