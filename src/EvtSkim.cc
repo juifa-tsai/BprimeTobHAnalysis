@@ -54,16 +54,15 @@ Implementation:
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include "BpbH/BprimeTobH/interface/TriggerBooking.h"
-//#include "BpbH/BprimeTobH/interface/Njettiness.hh"
-//#include "BpbH/BprimeTobH/interface/Nsubjettiness.hh"
 
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h" 
 
 #include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
-
 #include "BpbH/BprimeTobHAnalysis/interface/reRegistGen.hh"
 #include "BpbH/BprimeTobHAnalysis/interface/reRegistJet.hh"
+#include "BpbH/BprimeTobHAnalysis/interface/BTagSFUtil-tprime.h"
+#include "BpbH/BprimeTobHAnalysis/interface/GetBTag_SF_EFF.h"
 
 //
 // class declaration
@@ -98,7 +97,12 @@ class EvtSkim : public edm::EDAnalyzer{
     const std::string               hist_PUDistMC_;
     const std::string               hist_PUDistData_;
 
+    const edm::ParameterSet         bjetSelParams_ ; 
+    const edm::ParameterSet         bTagSFUtilParameters_; 
     const edm::ParameterSet         evtSelParams_; 
+
+    bool                            modifyBTags_ ; 
+    int                             nJetsToModify_ ; 
 
     TChain*            chain_;
     TTree*		         newtree;	
@@ -152,7 +156,11 @@ EvtSkim::EvtSkim(const edm::ParameterSet& iConfig) :
   file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
   hist_PUDistMC_(iConfig.getParameter<std::string>("Hist_PUDistMC")),
   hist_PUDistData_(iConfig.getParameter<std::string>("Hist_PUDistData")),
+  bjetSelParams_(iConfig.getParameter<edm::ParameterSet>("BJetSelParams")), 
+  bTagSFUtilParameters_(iConfig.getParameter<edm::ParameterSet>("BTagSFUtilParameters")),  
   evtSelParams_(iConfig.getParameter<edm::ParameterSet>("EvtSelParams")),
+  modifyBTags_(iConfig.getParameter<bool>("ModifyBTags")), 
+  nJetsToModify_(iConfig.getParameter<int>("NJetsToModify")), 
   isData_(0),
   evtwt_(1), 
   puweight_(1)  
@@ -221,13 +229,66 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   if(  chain_ == 0) return;
 
-  ofstream fout("Evt_NoJets.txt"); 
+  std::string btagAlgo ;
+  if (bjetSelParams_.getParameter<double>("jetCSVDiscMin") >= 0.244
+      && bjetSelParams_.getParameter<double>("jetCSVDiscMin") < 0.679) btagAlgo = "CSVL" ;  
+  else if (bjetSelParams_.getParameter<double>("jetCSVDiscMin") >= 0.679
+      && bjetSelParams_.getParameter<double>("jetCSVDiscMin") <  0.844) btagAlgo = "CSVM" ; 
+  else if (bjetSelParams_.getParameter<double>("jetCSVDiscMin") >= 0.844) btagAlgo = "CSVT" ;  
 
-  edm::LogInfo("StartingAnalysisLoop") << "Starting analysis loop\n";
+  JetSelector jetSelBTaggedAK5(bjetSelParams_) ; 
+  pat::strbitset retjetidbtaggedak5 = jetSelBTaggedAK5.getBitTemplate() ; 
+  BTagSFUtil* btsf = new BTagSFUtil(bTagSFUtilParameters_) ; 
+  btsf -> setSeed(1) ;  
 
-  for(int entry=0; entry<maxEvents_; entry++){
-    if( (entry%reportEvery_) == 0) edm::LogInfo("Event") << entry << " of " << maxEvents_; 
+  for(int entry = 0; entry < maxEvents_; ++entry){ 
+
     chain_->GetEntry(entry);
+
+    JetCollection ak5jets ; 
+    std::vector< std::pair<float, float> > jet_pt_eta ; 
+    if (EvtInfo.McFlag && modifyBTags_ ) {
+      btsf->setSeed(entry*1e+12+EvtInfo.RunNo*1e+6+EvtInfo.EvtNo);
+
+      for ( int ijet = 0; ijet < JetInfo.Size; ++ijet ) {
+        std::pair<float, float> thisjet_pt_eta(JetInfo.Et[ijet],JetInfo.Eta[ijet]) ; 
+        jet_pt_eta.push_back(thisjet_pt_eta) ; 
+        Jet thisjet(JetInfo, ijet) ; 
+        retjetidbtaggedak5.set(false) ;
+        bool isbtagged = (bool)jetSelBTaggedAK5(JetInfo, ijet,retjetidbtaggedak5) ; 
+        if (ijet < nJetsToModify_) thisjet.setIsBTagged(btagAlgo, isbtagged) ; 
+        ak5jets.push_back(thisjet) ; 
+      }
+      btsf -> readDB(iSetup,jet_pt_eta) ; 
+
+    }
+
+    for (int ijet = 0; ijet < (int)ak5jets.size(); ++ijet) { 
+      if ( ijet >= nJetsToModify_ ) break ; 
+        edm::LogInfo("EvtSkim") << " btag algo = " << btagAlgo  ; 
+      double btag_sf = btsf->getSF("MUJETSWPBTAG" + btagAlgo ,ijet) ;  
+      double btag_eff = btsf->BtagEff_[0] ;  
+      if ( btag_sf < 0 || btag_eff < 0 ) { 
+        edm::LogWarning("EvtSkim") << " ModifyBTagsWithSF: SF < 0, something is wrong (maybe just out of range where SF measured). Doing nothing. " ; 
+        continue ; 
+      }
+      if ( btagAlgo == "CSVL" ) ak5jets[ijet].IsBtaggedCSVL() ; 
+      else if ( btagAlgo == "CSVM" ) ak5jets[ijet].IsBtaggedCSVM() ; 
+      else if ( btagAlgo == "CSVT" ) ak5jets[ijet].IsBtaggedCSVT() ; 
+      bool jetisbtag ; 
+      btsf->modifyBTagsWithSF(jetisbtag, ak5jets[ijet].GenFlavor(), btag_sf, btag_eff);
+      if ( btagAlgo == "CSVL" ) {
+        if( jetisbtag != ak5jets[ijet].IsBtaggedCSVL() ) edm::LogInfo("EvtSkim") << " Jet CVSL btag been modified. " ; 
+      }
+      else if ( btagAlgo == "CSVM" ) {
+        if( jetisbtag != ak5jets[ijet].IsBtaggedCSVM() ) edm::LogInfo("EvtSkim") << " Jet CVSM btag been modified. " ; 
+      }
+      else if ( btagAlgo == "CSVT" ) {
+        if( jetisbtag != ak5jets[ijet].IsBtaggedCSVT() ) edm::LogInfo("EvtSkim") << " Jet CVST btag been modified. " ; 
+      } 
+      ak5jets[ijet].setIsBTagged(btagAlgo, jetisbtag) ; 
+
+    }
 
     eSelector_->reset(); 
     int code = eSelector_->passCode();
@@ -255,8 +316,6 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
 
   } //// entry loop 
-
-  fout.close(); 
 
 }
 

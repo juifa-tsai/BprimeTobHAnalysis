@@ -6,7 +6,7 @@ from inputFiles_cfi import *
 
 options = VarParsing('python')
 
-options.register('outFilename', 'evtSkim.root',
+options.register('outFilename', 'BtagEff.root',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Output file name"
@@ -101,7 +101,7 @@ options.register('doPUReweighting', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Do pileup reweighting"
-)
+    )
 
 options.setDefault('maxEvents', -1000) 
 
@@ -123,15 +123,9 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outFilename) 
     )
 
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-#process.load("RecoBTag.PerformanceDB.BTagPerformanceDBWinter13") 
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB2013")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB2013")
-
-from BpbH.BprimeTobHAnalysis.BTagSFUtilParameters_cfi import * 
 from BpbH.BprimeTobHAnalysis.EventSelector_cfi import * 
 
-process.EvtSkim = cms.EDAnalyzer('EvtSkim',
+process.BTagEff = cms.EDAnalyzer('BTagEff',
     MaxEvents            = cms.int32(options.maxEvents),
     ReportEvery          = cms.int32(options.reportEvery),  
     InputTTree           = cms.string('ntuple/tree'),
@@ -142,14 +136,12 @@ process.EvtSkim = cms.EDAnalyzer('EvtSkim',
     File_PUDistData      = cms.string('pileup_Data_Summer12_53X_S10.root'),
     Hist_PUDistMC        = cms.string('pileup_mc'),
     Hist_PUDistData      = cms.string('pileup_data'),
-    BJetSelParams        = defaultBJetSelectionParameters.clone(), 
-    BTagSFUtilParameters = defaultBTagSFUtilParameters.clone(
-      DeBug = cms.untracked.bool(True)
-      ), 
-    EvtSelParams         = defaultEventSelectionParameters.clone(),
-    ModifyBTags          = cms.bool(True), 
-    NJetsToModify        = cms.int32(8), 
+    EvtSelParams         = defaultEventSelectionParameters.clone(
+      CutLevels         = cms.vstring('Trigger', 'Vertex', 'MinHiggsjets', 'MaxHiggsjets', 'MinNJets', 'MaxNJets', 'HT'),  
+      ),
+    JetSelParams      = defaultJetSelectionParameters.clone(), 
+    BJetSelParams     = defaultBJetSelectionParameters.clone(), 
     ) 
 
-process.p = cms.Path(process.EvtSkim)
+process.p = cms.Path(process.BTagEff)
 

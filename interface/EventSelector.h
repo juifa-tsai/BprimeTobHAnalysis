@@ -38,17 +38,24 @@ class EventSelector {
     bool passes();
     bool passesTrigger();
     int primaryVertex();
-    int nGoodJets();
-    int nGoodBJets();
     int nGoodFatJets();
     int nGoodHiggsJets(); 
+    int nGoodJets();
+    int nGoodBJets();
+
+    JetCollection goodJets();
+    JetCollection goodBJets();
+    JetCollection goodFatJets();
+    JetCollection goodHiggsJets();
 
   private: 
 
-    void jetSel() ; 
-    void bjetSel() ; 
     void fatjetSel() ; 
     void higgsjetSel() ; 
+    void jetSel() ; 
+    void bjetSel() ; 
+    bool HTSel() ; 
+    bool hasOverlap(Jet&, JetCollection&) ; 
 
     //// Configurables 
     EvtInfoBranches*    evtInfo_ ; 
@@ -66,22 +73,25 @@ class EventSelector {
     HTSelector*      htSelector_ ; 
 
     std::vector<std::string> cutLevels_ ; 
+    bool removeJetHiggsJetOverlap_ ; 
 
     int nGoodPV_ ;
     bool trigDecision_ ; 
-    std::vector<int> goodJets_;
-    std::vector<int> goodBJets_;
-    std::vector<int> goodFatJets_;
-    std::vector<int> goodHiggsJets_;
+    JetCollection goodJets_;
+    JetCollection goodBJets_;
+    JetCollection goodFatJets_;
+    JetCollection goodHiggsJets_;
+    HT HT_ ; 
 
-    int minNJets_ ; 
-    int maxNJets_ ; 
-    int minNBJets_ ; 
-    int maxNBJets_ ; 
-    int minNFatJets_ ; 
-    int maxNFatJets_ ; 
-    int minNHiggsJets_ ; 
-    int maxNHiggsJets_ ; 
+    int    minNJets_ ; 
+    int    maxNJets_ ; 
+    int    minNBJets_ ; 
+    int    maxNBJets_ ; 
+    int    minNFatJets_ ; 
+    int    maxNFatJets_ ; 
+    int    minNHiggsJets_ ; 
+    int    maxNHiggsJets_ ; 
+    double HTVal_ ; 
 
     int passLevel_ ; 
     bool passes_ ; 
