@@ -123,12 +123,6 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outFilename) 
     )
 
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-#process.load("RecoBTag.PerformanceDB.BTagPerformanceDBWinter13") 
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB2013")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB2013")
-
-from BpbH.BprimeTobHAnalysis.BTagSFUtilParameters_cfi import * 
 from BpbH.BprimeTobHAnalysis.EventSelector_cfi import * 
 
 process.EvtSkim = cms.EDAnalyzer('EvtSkim',
@@ -142,13 +136,7 @@ process.EvtSkim = cms.EDAnalyzer('EvtSkim',
     File_PUDistData      = cms.string('pileup_Data_Summer12_53X_S10.root'),
     Hist_PUDistMC        = cms.string('pileup_mc'),
     Hist_PUDistData      = cms.string('pileup_data'),
-    BJetSelParams        = defaultBJetSelectionParameters.clone(), 
-    BTagSFUtilParameters = defaultBTagSFUtilParameters.clone(
-      DeBug = cms.untracked.bool(True)
-      ), 
     EvtSelParams         = defaultEventSelectionParameters.clone(),
-    ModifyBTags          = cms.bool(True), 
-    NJetsToModify        = cms.int32(8), 
     ) 
 
 process.p = cms.Path(process.EvtSkim)

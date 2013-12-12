@@ -139,6 +139,10 @@ class BTagEff : public edm::EDAnalyzer{
     TH2D*   h2_btagEff_ptJet_etaJet_cFlav ; 
     TH2D*   h2_btagEff_ptJet_etaJet_lFlav ;  
     TH2D*   h2_btagEff_ptJet_etaJet_0Flav ;  
+    TH1D*   h_btagEff_ptJet_bFlav ; 
+    TH1D*   h_btagEff_ptJet_cFlav ; 
+    TH1D*   h_btagEff_ptJet_lFlav ;  
+    TH1D*   h_btagEff_ptJet_0Flav ;  
     TH1D*   h_nbtaggedJets_bFlav ; 
     TH1D*   h_nbtaggedJets_cFlav ; 
     TH1D*   h_nbtaggedJets_lFlav ;  
@@ -204,10 +208,10 @@ void BTagEff::beginJob(){
     h_cutflow -> GetXaxis() -> SetBinLabel(ii+1, (cutLevels_.at(ii)).c_str()) ;  
   }
 
-  h2_ptJet_etaJet_bFlav         = fs->make<TH2D>("h2_ptJet_etaJet_bFlav"         , ";p_{T} (b flavour jet) [GeV]; #eta (jet); Events"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
-  h2_ptJet_etaJet_cFlav         = fs->make<TH2D>("h2_ptJet_etaJet_cFlav"         , ";p_{T} (c flavour jet) [GeV]; #eta (jet); Events"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
-  h2_ptJet_etaJet_lFlav         = fs->make<TH2D>("h2_ptJet_etaJet_lFlav"         , ";p_{T} (light flavour jet) [GeV]; #eta (jet); Events" ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
-  h2_ptJet_etaJet_0Flav         = fs->make<TH2D>("h2_ptJet_etaJet_0Flav"         , ";p_{T} (flavourless jet) [GeV]; #eta (jet); Events" ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
+  h2_ptJet_etaJet_bFlav = fs->make<TH2D>("h2_ptJet_etaJet_bFlav" ,";p_{T} (b flavour jet) [GeV]; #eta (jet); Events"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
+  h2_ptJet_etaJet_cFlav = fs->make<TH2D>("h2_ptJet_etaJet_cFlav" ,";p_{T} (c flavour jet) [GeV]; #eta (jet); Events"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
+  h2_ptJet_etaJet_lFlav = fs->make<TH2D>("h2_ptJet_etaJet_lFlav" ,";p_{T} (light flavour jet) [GeV]; #eta (jet); Events" ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
+  h2_ptJet_etaJet_0Flav = fs->make<TH2D>("h2_ptJet_etaJet_0Flav" ,";p_{T} (flavourless jet) [GeV]; #eta (jet); Events"   ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
   h_nJets_bFlav = fs->make<TH1D>("h_nJets_bFlav" , ";N(b-tagged jets) ;Events" ,20 ,-0.5 ,19.5) ; 
   h_nJets_cFlav = fs->make<TH1D>("h_nJets_cFlav" , ";N(b-tagged jets) ;Events" ,20 ,-0.5 ,19.5) ; 
   h_nJets_lFlav = fs->make<TH1D>("h_nJets_lFlav" , ";N(b-tagged jets) ;Events" ,20 ,-0.5 ,19.5) ;  
@@ -215,11 +219,15 @@ void BTagEff::beginJob(){
   h2_ptJet_etaJet_bFlav_btagged = fs->make<TH2D>("h2_ptJet_etaJet_bFlav_btagged" , ";p_{T} (b flavour jet) [GeV]; #eta (jet); Events"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
   h2_ptJet_etaJet_cFlav_btagged = fs->make<TH2D>("h2_ptJet_etaJet_cFlav_btagged" , ";p_{T} (c flavour jet) [GeV]; #eta (jet); Events"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
   h2_ptJet_etaJet_lFlav_btagged = fs->make<TH2D>("h2_ptJet_etaJet_lFlav_btagged" , ";p_{T} (light flavour jet) [GeV]; #eta (jet); Events" ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
-  h2_ptJet_etaJet_0Flav_btagged = fs->make<TH2D>("h2_ptJet_etaJet_0Flav_btagged" , ";p_{T} (flavourless jet) [GeV]; #eta (jet); Events" ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
+  h2_ptJet_etaJet_0Flav_btagged = fs->make<TH2D>("h2_ptJet_etaJet_0Flav_btagged" , ";p_{T} (flavourless jet) [GeV]; #eta (jet); Events"   ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
   h2_btagEff_ptJet_etaJet_bFlav = fs->make<TH2D>("h2_btagEff_ptJet_etaJet_bFlav" , ";p_{T} (b flavour jet) [GeV]; #eta (jet); CSVM b-tagging efficiency"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
   h2_btagEff_ptJet_etaJet_cFlav = fs->make<TH2D>("h2_btagEff_ptJet_etaJet_cFlav" , ";p_{T} (c flavour jet) [GeV]; #eta (jet); CSVM b-tagging efficiency"     ,1000 ,0. ,1000. ,80 ,-4. ,4.) ; 
   h2_btagEff_ptJet_etaJet_lFlav = fs->make<TH2D>("h2_btagEff_ptJet_etaJet_lFlav" , ";p_{T} (light flavour jet) [GeV]; #eta (jet); CSVM b-tagging efficiency" ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
-  h2_btagEff_ptJet_etaJet_0Flav = fs->make<TH2D>("h2_btagEff_ptJet_etaJet_0Flav" , ";p_{T} (flvourless jet) [GeV]; #eta (jet); CSVM b-tagging efficiency" , 1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
+  h2_btagEff_ptJet_etaJet_0Flav = fs->make<TH2D>("h2_btagEff_ptJet_etaJet_0Flav" , ";p_{T} (flvourless jet) [GeV]; #eta (jet); CSVM b-tagging efficiency"    ,1000 ,0. ,1000. ,80 ,-4. ,4.) ;  
+  h_btagEff_ptJet_bFlav = fs->make<TH1D>("h_btagEff_ptJet_bFlav" , ";p_{T} (b flavour jet) [GeV]; CSVM b-tagging efficiency"     ,1000 ,0. ,1000.) ; 
+  h_btagEff_ptJet_cFlav = fs->make<TH1D>("h_btagEff_ptJet_cFlav" , ";p_{T} (c flavour jet) [GeV]; CSVM b-tagging efficiency"     ,1000 ,0. ,1000.) ; 
+  h_btagEff_ptJet_lFlav = fs->make<TH1D>("h_btagEff_ptJet_lFlav" , ";p_{T} (light flavour jet) [GeV]; CSVM b-tagging efficiency" ,1000 ,0. ,1000.) ;  
+  h_btagEff_ptJet_0Flav = fs->make<TH1D>("h_btagEff_ptJet_0Flav" , ";p_{T} (flvourless jet) [GeV]; CSVM b-tagging efficiency"    ,1000 ,0. ,1000.) ;  
   h_nbtaggedJets_bFlav = fs->make<TH1D>("h_nbtaggedJets_bFlav" , ";N(b-tagged jets) ;Events" ,20 ,-0.5 ,19.5) ; 
   h_nbtaggedJets_cFlav = fs->make<TH1D>("h_nbtaggedJets_cFlav" , ";N(b-tagged jets) ;Events" ,20 ,-0.5 ,19.5) ; 
   h_nbtaggedJets_lFlav = fs->make<TH1D>("h_nbtaggedJets_lFlav" , ";N(b-tagged jets) ;Events" ,20 ,-0.5 ,19.5) ;  
@@ -352,6 +360,11 @@ void BTagEff::endJob(){
   h2_btagEff_ptJet_etaJet_cFlav -> Divide(h2_ptJet_etaJet_cFlav_btagged, h2_ptJet_etaJet_cFlav); 
   h2_btagEff_ptJet_etaJet_lFlav -> Divide(h2_ptJet_etaJet_lFlav_btagged, h2_ptJet_etaJet_lFlav);  
   h2_btagEff_ptJet_etaJet_0Flav -> Divide(h2_ptJet_etaJet_0Flav_btagged, h2_ptJet_etaJet_0Flav);  
+
+  h_btagEff_ptJet_bFlav -> Divide(h2_ptJet_etaJet_bFlav_btagged->ProjectionX(), h2_ptJet_etaJet_bFlav->ProjectionX()); 
+  h_btagEff_ptJet_cFlav -> Divide(h2_ptJet_etaJet_cFlav_btagged->ProjectionX(), h2_ptJet_etaJet_cFlav->ProjectionX()); 
+  h_btagEff_ptJet_lFlav -> Divide(h2_ptJet_etaJet_lFlav_btagged->ProjectionX(), h2_ptJet_etaJet_lFlav->ProjectionX());  
+  h_btagEff_ptJet_0Flav -> Divide(h2_ptJet_etaJet_0Flav_btagged->ProjectionX(), h2_ptJet_etaJet_0Flav->ProjectionX());  
 
 }
 

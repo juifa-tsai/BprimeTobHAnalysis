@@ -175,7 +175,6 @@ bool EventSelector::HTSel () {
   HT_.setJetCollection(goodJets_) ; 
   HT_.buildHT() ; 
   HTVal_ = HT_.getHT() ; 
-  edm::LogInfo("EventSelector") << " >>>> N jets = " << goodJets_.size() << " HT = " << HTVal_ ; 
   pat::strbitset retht = htSelector_->getBitTemplate() ; 
   retht.set(false) ; 
   return htSelector_->operator()(HT_, retht) ; 
