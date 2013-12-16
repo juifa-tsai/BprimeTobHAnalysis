@@ -9,19 +9,22 @@
 class ApplyBTagSF {
 
   public:
-  ApplyBTagSF(JetCollection&, double, std::string, std::string) ;
-  ~ApplyBTagSF() ; 
+  //ApplyBTagSF(JetCollection&, double, std::string, std::string) ;
+    ApplyBTagSF(JetCollection&, double, std::string, double, double) ; 
+    ~ApplyBTagSF() ; 
 
-  JetCollection getBtaggedJetsWithSF () ; 
+    JetCollection getBtaggedJetsWithSF () ; 
 
   private:
 
-  JetCollection jets_ ; 
-  double bDisc_ ; 
-  JetCollection btaggedJetsWithSF_ ; 
+    JetCollection jets_ ; 
+    double bDisc_ ; 
+    JetCollection btaggedJetsWithSF_ ; 
 
-  std::string algo_ ;
-  std::string mode_ ; 
+    std::string algo_ ;
+    double SFbShift_ ; 
+    double SFlShift_ ; 
+    //std::string mode_ ; 
 
 };
 

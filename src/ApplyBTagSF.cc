@@ -2,11 +2,14 @@
 #include "BpbH/BprimeTobHAnalysis/interface/SFb-pt_WITHttbar_payload_EPS13.h"
 #include "BpbH/BprimeTobHAnalysis/interface/SFlightFuncs_EPS2013.h"
 
-ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, std::string algo_, std::string mode_) : 
+//ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, std::string algo_, std::string mode_) : 
+ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, std::string algo, double SFbShift, double SFlShift) : 
   jets_(jets),
   bDisc_(bDisc),
-  algo_(algo_),
-  mode_(mode_) 
+  algo_(algo),
+  //mode_(mode_),
+  SFbShift_(SFbShift),
+  SFlShift_(SFlShift) 
 {
   btaggedJetsWithSF_.clear() ; 
 }
@@ -14,7 +17,7 @@ ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, std::string algo_, s
 ApplyBTagSF::~ApplyBTagSF() {
   btaggedJetsWithSF_.clear() ; 
   algo_.clear();
-  mode_.clear(); 
+  //mode_.clear(); 
 }
 
 JetCollection ApplyBTagSF::getBtaggedJetsWithSF () { 
@@ -32,7 +35,7 @@ JetCollection ApplyBTagSF::getBtaggedJetsWithSF () {
 
   for (JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet) {
 
-    jet_flavor = ijet->GenFlavor() ; 
+    jet_flavor = abs(ijet->GenFlavor()) ; 
     jet_et     = ijet->Et()        ; 
     jet_phi    = ijet->Eta()       ; 
     jet_eta    = ijet->Phi()       ; 
@@ -46,108 +49,53 @@ JetCollection ApplyBTagSF::getBtaggedJetsWithSF () {
     }
 
     double errscale(1.);
-    if (abs(jet_flavor) == 4) errscale *= 2. ; 
+    if ( jet_flavor == 4) errscale *= 2. ; 
 
-    if (strcmp(algo_.c_str(), "CSVL") == 0) {
-      if (strcmp(mode_.c_str(), "Mean") == 0)            BTagSF = SFb_CSVL->Eval(jet_et) ; 
-      else if (strcmp(mode_.c_str(), "1sigmaUp") == 0)   BTagSF = SFb_CSVL->Eval(jet_et)*( 1 - (errscale*SFb_CSVL_error[ptbin]) ) ; 
-      else if (strcmp(mode_.c_str(), "1sigmaDown") == 0) BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFb_CSVL_error[ptbin]) ) ; 
-      else {
-        edm::LogError("ApplyBTagSF") << " Wrong b-tagging mode_ chosen: " << mode_  << ". Choose between Mean, 1sigmaUp, or 1sigmaDown." ; 
-        return btaggedJetsWithSF_ ; 
-      }
-    }
-    else if (strcmp(algo_.c_str(), "CSVM") == 0) {
-      if (strcmp(mode_.c_str(), "Mean") == 0)            BTagSF = SFb_CSVL->Eval(jet_et) ; 
-      else if (strcmp(mode_.c_str(), "1sigmaUp") == 0)   BTagSF = SFb_CSVL->Eval(jet_et)*( 1 - (errscale*SFb_CSVM_error[ptbin]) ) ; 
-      else if (strcmp(mode_.c_str(), "1sigmaDown") == 0) BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFb_CSVM_error[ptbin]) ) ; 
-      else {
-        edm::LogError("ApplyBTagSF") << " Wrong b-tagging mode_ chosen: " << mode_  << ". Choose between Mean, 1sigmaUp, or 1sigmaDown." ; 
-        return btaggedJetsWithSF_ ; 
-      }
-    }
-    else if (strcmp(algo_.c_str(), "CSVT") == 0) {
-      if (strcmp(mode_.c_str(), "Mean") == 0)            BTagSF = SFb_CSVL->Eval(jet_et) ; 
-      else if (strcmp(mode_.c_str(), "1sigmaUp") == 0)   BTagSF = SFb_CSVL->Eval(jet_et)*( 1 - (errscale*SFb_CSVT_error[ptbin]) ) ; 
-      else if (strcmp(mode_.c_str(), "1sigmaDown") == 0) BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFb_CSVT_error[ptbin]) ) ; 
-      else {
-        edm::LogError("ApplyBTagSF") << " Wrong b-tagging mode_ chosen: " << mode_  << ". Choose between Mean, 1sigmaUp, or 1sigmaDown." ; 
-        return btaggedJetsWithSF_ ; 
-      }
-    }
+    if ( jet_et < 20. )  jet_et = 20.;
+    if ( jet_et > 800. ) jet_et = 800.;
+
+    if (strcmp(algo_.c_str(), "CSVL") == 0) 
+      BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVL_error[ptbin]) ) ; 
+    else if (strcmp(algo_.c_str(), "CSVM") == 0) 
+      BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVM_error[ptbin]) ) ; 
+    else if (strcmp(algo_.c_str(), "CSVT") == 0) 
+      BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVT_error[ptbin]) ) ; 
     else {
       edm::LogError("ApplyBTagSF") << " Wrong b-tagging algo_ chosen: " << algo_ << ". Choose between CSVL, CSVM, or CSVT." ; 
       return btaggedJetsWithSF_ ; 
     }
 
     if (strcmp(algo_.c_str(), "CSVL") == 0) {
-      if (strcmp(mode_.c_str(), "Mean") == 0) {
-        for (int ii = 0; ii < 4; ++ii) {
-          if ( jet_eta >= SFlight_CSVL_etamin[ii] && jet_eta < SFlight_CSVL_etamax[ii] ) {
-            LightJetSF = (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ; 
-          }
+      for (int ii = 0; ii < 4; ++ii) {
+        if ( jet_eta >= SFlight_CSVL_etamin[ii] && jet_eta < SFlight_CSVL_etamax[ii] ) {
+          LightJetSF = (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) + 
+            SFlShift_ > 0 ? 
+            SFlShift_*( (GetSFlmax("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) - 
+                (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ) : 
+            SFlShift_*( (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) - 
+                (GetSFlmin("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ) ; 
         }
-      }
-      else if (strcmp(mode_.c_str(), "1sigmaUp") == 0) {
-        for (int ii = 0; ii < 4; ++ii) {
-          if ( jet_eta >= SFlight_CSVL_etamin[ii] && jet_eta < SFlight_CSVL_etamax[ii] ) {
-            LightJetSF = (GetSFlmax("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ; 
-          }
-        }
-      }
-      else if (strcmp(mode_.c_str(), "1sigmaDown") == 0) {
-        for (int ii = 0; ii < 4; ++ii) {
-          if ( jet_eta >= SFlight_CSVL_etamin[ii] && jet_eta < SFlight_CSVL_etamax[ii] ) {
-            LightJetSF = (GetSFlmin("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ; 
-          }
-        }
-      }
-      else {
-        edm::LogError("ApplyBTagSF") << " Wrong b-tagging mode_ chosen: " << mode_  << ". Choose between Mean, 1sigmaUp, or 1sigmaDown." ; 
-        return btaggedJetsWithSF_ ; 
       }
     }
     else if (strcmp(algo_.c_str(), "CSVM") == 0) {
-      if (strcmp(mode_.c_str(), "Mean") == 0) {
-        for (int ii = 0; ii < 4; ++ii) {
-          if ( jet_eta >= SFlight_CSVM_etamin[ii] && jet_eta < SFlight_CSVM_etamax[ii] ) {
-            LightJetSF = (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ; 
-          }
+      for (int ii = 0; ii < 4; ++ii) {
+        if ( jet_eta >= SFlight_CSVM_etamin[ii] && jet_eta < SFlight_CSVM_etamax[ii] ) {
+          LightJetSF = (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) + 
+            SFlShift_ > 0 ? 
+            SFlShift_*( (GetSFlmax("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) - 
+                (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ) : 
+            SFlShift_*( (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) - 
+                (GetSFlmin("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ) ; 
         }
-      }
-      else if (strcmp(mode_.c_str(), "1sigmaUp") == 0) {
-        for (int ii = 0; ii < 4; ++ii) {
-          if ( jet_eta >= SFlight_CSVM_etamin[ii] && jet_eta < SFlight_CSVM_etamax[ii] ) {
-            LightJetSF = (GetSFlmax("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ; 
-          }
-        }
-      }
-      else if (strcmp(mode_.c_str(), "1sigmaDown") == 0) {
-        for (int ii = 0; ii < 4; ++ii) {
-          if ( jet_eta >= SFlight_CSVM_etamin[ii] && jet_eta < SFlight_CSVM_etamax[ii] ) {
-            LightJetSF = (GetSFlmin("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ; 
-          }
-        }
-      }
-      else {
-        edm::LogError("ApplyBTagSF") << " Wrong b-tagging mode_ chosen: " << mode_  << ". Choose between Mean, 1sigmaUp, or 1sigmaDown." ; 
-        return btaggedJetsWithSF_ ; 
       }
     }
     else if (algo_== "CSVT") {
-      if (strcmp(mode_.c_str(), "Mean") == 0) {
-        LightJetSF = (GetSFlmean("CSV","T", 0., 2.4, "ABCD"))->Eval(jet_et) ; 
-      }
-      else if (strcmp(mode_.c_str(), "1sigmaUp") == 0) {
-        LightJetSF = (GetSFlmax("CSV","T", 0., 2.4, "ABCD"))->Eval(jet_et) ; 
-      }
-      else if (strcmp(mode_.c_str(), "1sigmaDown") == 0) {
-        LightJetSF = (GetSFlmin("CSV","T", 0., 2.4, "ABCD"))->Eval(jet_et) ; 
-      }
-      else {
-        edm::LogError("ApplyBTagSF") << " Wrong b-tagging mode_ chosen: " << mode_  << ". Choose between Mean, 1sigmaUp, or 1sigmaDown." ; 
-        return btaggedJetsWithSF_ ; 
-      }
+      LightJetSF = (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) + 
+        SFlShift_ > 0 ? 
+        SFlShift_*( (GetSFlmax("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) - 
+            (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) ) : 
+        SFlShift_*( (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) - 
+            (GetSFlmin("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) ) ; 
     }
     else {
       edm::LogError("ApplyBTagSF") << " Wrong b-tagging algo_ chosen: " << algo_ << ". Choose between CSVL, CSVM, or CSVT." ; 

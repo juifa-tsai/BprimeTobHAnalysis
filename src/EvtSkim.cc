@@ -61,6 +61,7 @@ Implementation:
 #include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
 #include "BpbH/BprimeTobHAnalysis/interface/reRegistGen.hh"
 #include "BpbH/BprimeTobHAnalysis/interface/reRegistJet.hh"
+#include "BpbH/BprimeTobHAnalysis/interface/JMEUncertUtil.h"
 #include "BpbH/BprimeTobHAnalysis/interface/ApplyBTagSF.h"
 
 //
@@ -97,6 +98,7 @@ class EvtSkim : public edm::EDAnalyzer{
     const std::string               hist_PUDistData_;
 
     const edm::ParameterSet         evtSelParams_; 
+    const edm::ParameterSet         jmeParams_; 
 
     TChain*            chain_;
     TTree*		         newtree;	
@@ -151,6 +153,7 @@ EvtSkim::EvtSkim(const edm::ParameterSet& iConfig) :
   hist_PUDistMC_(iConfig.getParameter<std::string>("Hist_PUDistMC")),
   hist_PUDistData_(iConfig.getParameter<std::string>("Hist_PUDistData")),
   evtSelParams_(iConfig.getParameter<edm::ParameterSet>("EvtSelParams")),
+  jmeParams_(iConfig.getParameter<edm::ParameterSet>("JMEParams")),
   isData_(0),
   evtwt_(1), 
   puweight_(1)  
@@ -241,18 +244,45 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
         myjets.push_back(thisjet) ; 
       }
 
-      ApplyBTagSF * btagsf =  new ApplyBTagSF(myjets, 0.679, "CSVM", "Mean") ;  
+      JMEUncertUtil* jmeUtil_jesUp = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JES", 1.0) ; 
+      JetCollection myjets_jesUp = jmeUtil_jesUp->GetModifiedJetColl() ; 
+      delete jmeUtil_jesUp ; 
+
+      JMEUncertUtil* jmeUtil_jesDown = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JES", -1.0) ; 
+      JetCollection myjets_jesDown = jmeUtil_jesDown->GetModifiedJetColl() ; 
+      delete jmeUtil_jesDown ; 
+
+      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", 0.0) ; 
+      JetCollection myjets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
+      delete jmeUtil_jer ; 
+
+      JMEUncertUtil* jmeUtil_jerUp = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", 1.0) ; 
+      JetCollection myjets_jerUp = jmeUtil_jerUp->GetModifiedJetColl() ; 
+      delete jmeUtil_jerUp ; 
+
+      JMEUncertUtil* jmeUtil_jerDown = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", -1.0) ; 
+      JetCollection myjets_jerDown = jmeUtil_jerDown->GetModifiedJetColl() ; 
+      delete jmeUtil_jerDown ; 
+
+      ApplyBTagSF * btagsf =  new ApplyBTagSF(myjets, 0.679, "CSVM", 0.0, 0.0) ;  
       JetCollection mybtaggedjets =  btagsf->getBtaggedJetsWithSF () ; 
       delete btagsf ; 
 
-      ApplyBTagSF * btagsf_sfUp =  new ApplyBTagSF(myjets, 0.679, "CSVM", "1sigmaUp") ;  
-      JetCollection mybtaggedjets_sfUp =  btagsf_sfUp->getBtaggedJetsWithSF () ; 
-      delete btagsf_sfUp ; 
+      ApplyBTagSF * btagsf_sfbUp =  new ApplyBTagSF(myjets, 0.679, "CSVM", 1.0, 0.0) ;  
+      JetCollection mybtaggedjets_sfbUp =  btagsf_sfbUp->getBtaggedJetsWithSF () ; 
+      delete btagsf_sfbUp ; 
 
-      ApplyBTagSF * btagsf_sfDown =  new ApplyBTagSF(myjets, 0.679, "CSVM", "1sigmaDown") ;  
-      JetCollection mybtaggedjets_sfDown =  btagsf_sfDown->getBtaggedJetsWithSF () ; 
-      delete btagsf_sfDown ; 
+      ApplyBTagSF * btagsf_sfbDown =  new ApplyBTagSF(myjets, 0.679, "CSVM", -1.0, 0.0) ;  
+      JetCollection mybtaggedjets_sfbDown =  btagsf_sfbDown->getBtaggedJetsWithSF () ; 
+      delete btagsf_sfbDown ; 
 
+      ApplyBTagSF * btagsfsflUp =  new ApplyBTagSF(myjets, 0.679, "CSVM", 0.0, 1.0) ;  
+      JetCollection mybtaggedjets_sflUp =  btagsfsflUp->getBtaggedJetsWithSF () ; 
+      delete btagsfsflUp ; 
+
+      ApplyBTagSF * btagsfsflDown =  new ApplyBTagSF(myjets, 0.679, "CSVM", 0.0, -1.0) ;  
+      JetCollection mybtaggedjets_sflDown =  btagsfsflDown->getBtaggedJetsWithSF () ; 
+      delete btagsfsflDown ; 
 
       if ( isData_ ) {
         McFlag_=0;
@@ -265,9 +295,16 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       reRegistJet(JetInfo,newJetInfo);	
       reRegistJet(FatJetInfo,newFatJetInfo);	
       reRegistJet(SubJetInfo,newSubJetInfo);	
+      MakeJetInfoBranches jetinfo_jesUp(myjets_jesUp, newtree, "JetInfo_JESUp") ; 
+      MakeJetInfoBranches jetinfo_jesDown(myjets_jesDown, newtree, "JetInfo_JESDown") ; 
+      MakeJetInfoBranches jetinfo_jer(myjets_jer, newtree, "JetInfo_JER") ; 
+      MakeJetInfoBranches jetinfo_jerUp(myjets_jerUp, newtree, "JetInfo_JERUp") ; 
+      MakeJetInfoBranches jetinfo_jerDown(myjets_jerDown, newtree, "JetInfo_JERDown") ; 
       MakeJetInfoBranches bjetinfo(mybtaggedjets, newtree, "BJetInfo") ; 
-      MakeJetInfoBranches bjetinfo_sfUp(mybtaggedjets_sfUp, newtree, "BJetInfo_SFUp") ; 
-      MakeJetInfoBranches bjetinfo_sfDown(mybtaggedjets_sfDown, newtree, "BJetInfo_SFDown") ; 
+      MakeJetInfoBranches bjetinfo_sfbUp(mybtaggedjets_sfbUp, newtree, "BJetInfo_SFbUp") ; 
+      MakeJetInfoBranches bjetinfo_sfbDown(mybtaggedjets_sfbDown, newtree, "BJetInfo_SFbDown") ; 
+      MakeJetInfoBranches bjetinfo_sflUp(mybtaggedjets_sflUp, newtree, "BJetInfo_SFlUp") ; 
+      MakeJetInfoBranches bjetinfo_sflDown(mybtaggedjets_sflDown, newtree, "BJetInfo_SFlDown") ; 
       newtree->Fill();
 
     }

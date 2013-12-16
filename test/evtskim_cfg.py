@@ -124,6 +124,11 @@ process.TFileService = cms.Service("TFileService",
     )
 
 from BpbH.BprimeTobHAnalysis.EventSelector_cfi import * 
+skimmedEvtSelParams = defaultEventSelectionParameters.clone(
+
+    )
+
+from BpbH.BprimeTobHAnalysis.JMEUncertUntilParameters_cfi import * 
 
 process.EvtSkim = cms.EDAnalyzer('EvtSkim',
     MaxEvents            = cms.int32(options.maxEvents),
@@ -136,7 +141,8 @@ process.EvtSkim = cms.EDAnalyzer('EvtSkim',
     File_PUDistData      = cms.string('pileup_Data_Summer12_53X_S10.root'),
     Hist_PUDistMC        = cms.string('pileup_mc'),
     Hist_PUDistData      = cms.string('pileup_data'),
-    EvtSelParams         = defaultEventSelectionParameters.clone(),
+    EvtSelParams         = skimmedEvtSelParams.clone(), 
+    JMEParams            = defaultJMEUncertUntilParameters.clone(), 
     ) 
 
 process.p = cms.Path(process.EvtSkim)
