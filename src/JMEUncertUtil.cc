@@ -14,19 +14,18 @@ JMEUncertUtil::JMEUncertUtil (const edm::ParameterSet& iConfig, EvtInfoBranches 
   jets_(jets) 
 {
 
-  for (JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet) {
-    modifiedJets_.push_back(*ijet) ; 
-  }  
-
   setType(stype_); 
 
   if (jecType_ == NOSYS) {
     edm::LogWarning("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Returning same jet collection."; 
+    for (JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet) {
+      modifiedJets_.push_back(*ijet) ; 
+    }  
     return ;  
   }
 
   if (jecType_ == JES) {
-    edm::LogInfo("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
+    LogDebug("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
     std::string filenameJEC = iConfig.getUntrackedParameter<std::string>("FilenameJEC") ;
     ifstream fileJEC(filenameJEC.c_str());
     if ( fileJEC ) {
@@ -39,7 +38,7 @@ JMEUncertUtil::JMEUncertUtil (const edm::ParameterSet& iConfig, EvtInfoBranches 
     jesUncert () ; 
   }
   else if (jecType_ == JER) {
-    edm::LogInfo("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
+    LogDebug("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
     jerScale() ; 
   }
 
@@ -80,18 +79,18 @@ void JMEUncertUtil::jesUncert () {
     jecUncert_ -> setJetEta(ijet -> Eta()); 
     double uncert = jecUncert_ -> getUncertainty ( jecShift_ > 0. ); 
     double rescaled = ( jecShift_ > 0. ) ? ( 1. + uncert ) : ( 1. - uncert ) ;
-    edm::LogInfo("JMEUncertUtil::JMEUncertUtil") << stype_ << " " << jecShift_ << " rescaled = " << rescaled  ; 
+    LogDebug("JMEUncertUtil::jesUncert") << stype_ << " " << jecShift_ << " rescaled = " << rescaled  ; 
     Jet thisjet(*ijet) ;
-    thisjet.Set_Pt(ijet -> Pt() * rescaled) ; 
-    thisjet.Set_Et(ijet -> Et() * rescaled) ; 
-    thisjet.Set_PtCorrRaw ( ijet -> PtCorrRaw() * rescaled ) ; 
-    thisjet.Set_PtCorrL2  ( ijet -> PtCorrL2 () * rescaled ) ; 
-    thisjet.Set_PtCorrL7g ( ijet -> PtCorrL7g() * rescaled ) ; 
-    thisjet.Set_PtCorrL7c ( ijet -> PtCorrL7c() * rescaled ) ; 
-    thisjet.Set_Px        ( ijet -> Px       () * rescaled ) ; 
-    thisjet.Set_Py        ( ijet -> Py       () * rescaled ) ; 
-    thisjet.Set_Pz        ( ijet -> Pz       () * rescaled ) ; 
-    thisjet.Set_Energy    ( ijet -> Energy   () * rescaled ) ; 
+    thisjet.Set_Pt        ( thisjet.Pt()        * rescaled ) ; 
+    thisjet.Set_Et        ( thisjet.Et()        * rescaled ) ; 
+    thisjet.Set_PtCorrRaw ( thisjet.PtCorrRaw() * rescaled ) ; 
+    thisjet.Set_PtCorrL2  ( thisjet.PtCorrL2 () * rescaled ) ; 
+    thisjet.Set_PtCorrL7g ( thisjet.PtCorrL7g() * rescaled ) ; 
+    thisjet.Set_PtCorrL7c ( thisjet.PtCorrL7c() * rescaled ) ; 
+    thisjet.Set_Px        ( thisjet.Px       () * rescaled ) ; 
+    thisjet.Set_Py        ( thisjet.Py       () * rescaled ) ; 
+    thisjet.Set_Pz        ( thisjet.Pz       () * rescaled ) ; 
+    thisjet.Set_Energy    ( thisjet.Energy   () * rescaled ) ; 
     modifiedJets_.push_back(thisjet) ; 
   }
 
@@ -130,21 +129,21 @@ void JMEUncertUtil::jerScale() {
     double sf = jerNominal_[etaB]; 
     if( jecShift_ < 0.) sf -= sqrt( pow(jerSigmaSym_[etaB], 2) + pow (jerSigmaNeg_[etaB], 2) ) ; 
     else if ( jecShift_ > 0. ) sf += sqrt( pow(jerSigmaSym_[etaB], 2)+pow(jerSigmaPos_[etaB], 2) ) ; 
-    edm::LogInfo("JMEUncertUtil::JMEUncertUtil") << stype_ << " " << jecShift_ << " sf = " << sf ;
+    LogDebug("JMEUncertUtil::jerScale") << stype_ << " " << jecShift_ << " sf = " << sf ;
     double deltaPt = ( ijet -> Pt() - ijet ->GenJetPt() ) * sf ; 
     rescaled = std::max(0.0, ( ijet ->GenJetPt() + deltaPt ))/ijet -> Pt() ; 
     if ( rescaled <= 0. ) rescaled =  1. ; 
     Jet thisjet(*ijet) ;
-    thisjet.Set_Pt(ijet -> Pt() * rescaled) ; 
-    thisjet.Set_Et(ijet -> Et() * rescaled) ; 
-    thisjet.Set_PtCorrRaw ( ijet -> PtCorrRaw() * rescaled ) ; 
-    thisjet.Set_PtCorrL2  ( ijet -> PtCorrL2 () * rescaled ) ; 
-    thisjet.Set_PtCorrL7g ( ijet -> PtCorrL7g() * rescaled ) ; 
-    thisjet.Set_PtCorrL7c ( ijet -> PtCorrL7c() * rescaled ) ; 
-    thisjet.Set_Px        ( ijet -> Px       () * rescaled ) ; 
-    thisjet.Set_Py        ( ijet -> Py       () * rescaled ) ; 
-    thisjet.Set_Pz        ( ijet -> Pz       () * rescaled ) ; 
-    thisjet.Set_Energy    ( ijet -> Energy   () * rescaled ) ; 
+    thisjet.Set_Pt        ( thisjet.Pt()        * rescaled ) ; 
+    thisjet.Set_Et        ( thisjet.Et()        * rescaled ) ; 
+    thisjet.Set_PtCorrRaw ( thisjet.PtCorrRaw() * rescaled ) ; 
+    thisjet.Set_PtCorrL2  ( thisjet.PtCorrL2 () * rescaled ) ; 
+    thisjet.Set_PtCorrL7g ( thisjet.PtCorrL7g() * rescaled ) ; 
+    thisjet.Set_PtCorrL7c ( thisjet.PtCorrL7c() * rescaled ) ; 
+    thisjet.Set_Px        ( thisjet.Px       () * rescaled ) ; 
+    thisjet.Set_Py        ( thisjet.Py       () * rescaled ) ; 
+    thisjet.Set_Pz        ( thisjet.Pz       () * rescaled ) ; 
+    thisjet.Set_Energy    ( thisjet.Energy   () * rescaled ) ; 
     modifiedJets_.push_back(thisjet) ; 
   }
 

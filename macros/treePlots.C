@@ -6,6 +6,8 @@
 #include <TCanvas.h> 
 #include <TLegend.h> 
 
+#include <iostream>
+
 void treePlots (TString file="/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/evtSkim.root") {
 
   TFile* fin = TFile::Open(file) ;
@@ -111,6 +113,13 @@ void treePlots (TString file="/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_p
   tleg0 -> AddEntry(jetpt_JERUp   ,"jetpt_JERUp  " , "l") ;  
   tleg0 -> AddEntry(jetpt_JERDown ,"jetpt_JERDown" , "l") ;  
   tleg0->Draw();
+
+  std::cout << " jetpt         Entries = " <<  jetpt          -> GetEntries() << " | integral = "  << jetpt          -> Integral() << std::endl ; 
+  std::cout << " jetpt_JESUp   Entries = " <<  jetpt_JESUp    -> GetEntries() << " | integral = "  << jetpt_JESUp    -> Integral() << std::endl ; 
+  std::cout << " jetpt_JESDown Entries = " <<  jetpt_JESDown  -> GetEntries() << " | integral = "  << jetpt_JESDown  -> Integral() << std::endl ; 
+  std::cout << " jetpt_JER     Entries = " <<  jetpt_JER      -> GetEntries() << " | integral = "  << jetpt_JER      -> Integral() << std::endl ; 
+  std::cout << " jetpt_JERUp   Entries = " <<  jetpt_JERUp    -> GetEntries() << " | integral = "  << jetpt_JERUp    -> Integral() << std::endl ; 
+  std::cout << " jetpt_JERDown Entries = " <<  jetpt_JERDown  -> GetEntries() << " | integral = "  << jetpt_JERDown  -> Integral() << std::endl ; 
 
   TCanvas *c1 = new TCanvas("c1_BJetInfo") ; 
   c1->cd(); 
