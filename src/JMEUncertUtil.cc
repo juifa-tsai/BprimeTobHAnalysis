@@ -119,7 +119,7 @@ void JMEUncertUtil::jerScale() {
   for (JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet) {
     double rescaled(0.) ; 
     if( ijet -> Pt() <= 0.) rescaled = 1. ; // Not sure how this could happen, but just in case
-    if( ijet -> GenJetPt () < 15. ) rescaled = 1.; // Attn: hard-coded 
+    if( ijet -> GenJetPt () < 15. ) rescaled = 1.; //// Attn: hard-coded 
     int etaB = -1; 
     for(int ieta = 0; ieta < (int)jerEta_.size(); ++ieta) {
       if( etaB >= 0 ) break ;
