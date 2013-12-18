@@ -104,10 +104,34 @@ options.register('doPUReweighting', True,
     VarParsing.varType.bool,
     "Do pileup reweighting"
 )
+options.register('JESShift', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "JES shift in unit of sigmas" 
+    )
+options.register('JERShift', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "JER shift in unit of sigmas" 
+    )
+options.register('SFbShift', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "SFb shift in unit of sigmas" 
+    )
+options.register('SFlShift', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "SFl shift in unit of sigmas" 
+    )
 
 options.setDefault('maxEvents', -1000) 
 
 options.parseArguments()
+
+if options.SFbShift != 0.0 and options.SFlShift != 0.0: 
+  print "SFbshift = ",  options.SFbShift, " and SFlshift = ", options.SFlShift
+  print "Warning: must be varied independently."
 
 process = cms.Process("BprimebH")
 
@@ -129,6 +153,7 @@ from BpbH.BprimeTobH.TriggerSelector_cfi import *
 from BpbH.BprimeTobH.HiggsJetSelector_cfi import * 
 from BpbH.BprimeTobH.HTSelector_cfi import * 
 from BpbH.BprimeTobHAnalysis.EventSelector_cfi import * 
+from BpbH.BprimeTobHAnalysis.JMEUncertUntilParameters_cfi import * 
 
 process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
@@ -165,6 +190,13 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(), 
     HTSelParams         = defaultHTSelectionParameters.clone(),
     EvtSelParams        = defaultEventSelectionParameters.clone(),
+    JMEParams           = defaultJMEUncertUntilParameters.clone(
+      FilenameJEC = cms.untracked.string('Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt'), 
+      ), 
+    JESShift            = cms.double(options.JESShift), 
+    JERShift            = cms.double(options.JERShift), 
+    SFbShift            = cms.double(options.SFbShift), 
+    SFlShift            = cms.double(options.SFlShift), 
     ) 
 
 process.p = cms.Path(process.BprimebH)

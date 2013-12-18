@@ -16,9 +16,11 @@
 #include <TStyle.h>
 #include <TMath.h>
 #include <TPaveText.h>
+#include <TGraphAsymmErrors.h>
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <iomanip>
 #include <stdlib.h>
 
@@ -27,20 +29,30 @@
 
 using namespace std;
 
-TString filename = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_09Dec_00/Final_histograms_BprimebH.root" ; 
+TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr/Final_histograms_BprimebH.root" ;  
+TString filename_JESUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESUp/Final_histograms_BprimebH.root" ; 
+TString filename_JESDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESDown/Final_histograms_BprimebH.root" ; 
+TString filename_JERUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JERUp/Final_histograms_BprimebH.root" ; 
+TString filename_JERDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JERDown/Final_histograms_BprimebH.root" ; 
+TString filename_SFbUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_SFbUp/Final_histograms_BprimebH.root" ; 
+TString filename_SFbDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_SFbDown/Final_histograms_BprimebH.root" ; 
+TString filename_SFlUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_SFlUp/Final_histograms_BprimebH.root" ; 
+TString filename_SFlDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_SFlDown/Final_histograms_BprimebH.root" ; 
 
 Double_t Lint = 19700.0 ; 
 TString title1 = "CMS Preliminary, 19.7/fb at #sqrt{s} = 8 TeV";
 TString datacaption = "Data"; 
 
-TString dir4plots ="BprimeTobH_04Dec_00" ; 
+TString dir4plots ="BprimeTobH_18Dec_JetCorr" ; 
 
 TString formata = ".pdf";
 TString formatb = ".png";
 TString formatc = ".C";
 
+//// Common switches  
 bool web = 0;
 bool setSampleName = 1;
+bool systUnc = 1 ; 
 
 void DrawAll () ; 
 void DrawStacked(TString name, TString histotitle, bool log, bool doData, bool fExtNorm=false, int nRebin=1, bool setXRange=false, double rangeXLow=0., double rangeXHigh=0.);
@@ -96,6 +108,9 @@ void DrawAll () {
    DrawStacked("FatJetSel_BJet_Pt" ,"p_{T}(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
    DrawStacked("FatJetSel_BJet_Eta" ,"#eta(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 , -3, 3); 
 
+   DrawStacked("FatJetSel_HiggsJet_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
+   DrawStacked("FatJetSel_HiggsJet_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
+
    DrawStacked("FatJetSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("FatJetSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("FatJetSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
@@ -106,12 +121,20 @@ void DrawAll () {
    DrawStacked("HiggsJetSel_BJet_Pt" ,"p_{T}(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
    DrawStacked("HiggsJetSel_BJet_Eta" ,"#eta(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 , -3, 3); 
 
+   DrawStacked("HiggsJetSel_HiggsJet_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
+   DrawStacked("HiggsJetSel_HiggsJet_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
+
    DrawStacked("HiggsJetSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HiggsJetSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HiggsJetSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HiggsJetSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
    DrawStacked("BJetsSel_nJets" ,"N(AK5 jets)" ,0 ,1 ,0 ,1 ,1 ,0 ,10); 
+   DrawStacked("BJetsSel_BJet_Pt" ,"p_{T}(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
+   DrawStacked("BJetsSel_BJet_Eta" ,"#eta(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 , -3, 3); 
+
+   DrawStacked("BJetsSel_HiggsJet_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
+   DrawStacked("BJetsSel_HiggsJet_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
 
    DrawStacked("BJetsSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("BJetsSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
@@ -138,6 +161,7 @@ void DrawStacked(TString name,
     double rangeXLow,
     double rangeXHigh) {
 
+  TH1D* hist_bkg    ; 
   TH1D* hist_ttjets ;
   TH1D* hist_qcd    ;
   TH1D* hist_sig0   ;
@@ -170,16 +194,286 @@ void DrawStacked(TString name,
     hist_sig0   -> Rebin(nRebin) ;
     hist_sig1   -> Rebin(nRebin) ;
     hist_sig2   -> Rebin(nRebin) ;
-    if (doData) hist_data   -> Rebin(nRebin) ;
+    if (doData) hist_data -> Rebin(nRebin) ;
   }
 
-  TH1D* hist_bkg = (TH1D*) hist_ttjets->Clone();
+  hist_bkg = (TH1D*) hist_ttjets->Clone("hist_bkg");
   hist_bkg->Add(hist_qcd) ; 
 
   if ( name.Contains("nPVtx") ) { 
     double scalef = hist_data->Integral()/hist_bkg->Integral() ; 
     hist_bkg->Scale(scalef) ; 
   }
+
+  //// Syst. unc. ////
+  TH1D *hist_bkg_JESUp   , *hist_bkg_JESDown   , *hist_bkg_JERUp   , *hist_bkg_JERDown    ;
+  TH1D *hist_ttjets_JESUp, *hist_ttjets_JESDown, *hist_ttjets_JERUp, *hist_ttjets_JERDown ;
+  TH1D *hist_qcd_JESUp   , *hist_qcd_JESDown   , *hist_qcd_JERUp   , *hist_qcd_JERDown    ;
+  TH1D *hist_sig0_JESUp  , *hist_sig0_JESDown  , *hist_sig0_JERUp  , *hist_sig0_JERDown   ;
+  TH1D *hist_sig1_JESUp  , *hist_sig1_JESDown  , *hist_sig1_JERUp  , *hist_sig1_JERDown   ;
+  TH1D *hist_sig2_JESUp  , *hist_sig2_JESDown  , *hist_sig2_JERUp  , *hist_sig2_JERDown   ;
+  TH1D *hist_data_JESUp  , *hist_data_JESDown  , *hist_data_JERUp  , *hist_data_JERDown   ;
+
+  TH1D *hist_bkg_SFbUp   , *hist_bkg_SFbDown   , *hist_bkg_SFlUp   , *hist_bkg_SFlDown    ;
+  TH1D *hist_ttjets_SFbUp, *hist_ttjets_SFbDown, *hist_ttjets_SFlUp, *hist_ttjets_SFlDown ;
+  TH1D *hist_qcd_SFbUp   , *hist_qcd_SFbDown   , *hist_qcd_SFlUp   , *hist_qcd_SFlDown    ;
+  TH1D *hist_sig0_SFbUp  , *hist_sig0_SFbDown  , *hist_sig0_SFlUp  , *hist_sig0_SFlDown   ;
+  TH1D *hist_sig1_SFbUp  , *hist_sig1_SFbDown  , *hist_sig1_SFlUp  , *hist_sig1_SFlDown   ;
+  TH1D *hist_sig2_SFbUp  , *hist_sig2_SFbDown  , *hist_sig2_SFlUp  , *hist_sig2_SFlDown   ;
+  TH1D *hist_data_SFbUp  , *hist_data_SFbDown  , *hist_data_SFlUp  , *hist_data_SFlDown   ;
+
+  TFile *myFile_JESUp, *myFile_JESDown, *myFile_JERUp, *myFile_JERDown, 
+        *myFile_SFbUp, *myFile_SFbDown, *myFile_SFlUp, *myFile_SFlDown ; 
+
+  const int nbins(hist_bkg->GetNbinsX()) ; 
+  double binCentre[nbins] ; 
+  double binLow[nbins] ; 
+  double binHigh[nbins] ; 
+  double bkg[nbins] ; 
+  double bkgLow[nbins] ; 
+  double bkgHigh[nbins] ; 
+  double norm[nbins] ; 
+  double bkgProportionalUncLow [nbins] ; 
+  double bkgProportionalUncHigh[nbins] ; 
+  TGraphAsymmErrors* gr_bkg_uncUp_uncDown ; 
+  TGraphAsymmErrors* gr_uncUp_uncDown ; 
+
+  if ( systUnc ) {
+    myFile_JESUp = TFile::Open(filename_JESUp, "READ") ; 
+    myFile_JESUp->cd();
+    hist_ttjets_JESUp = (TH1D*)myFile_JESUp->Get("TTJets__"+name);                         
+    hist_qcd_JESUp    = (TH1D*)myFile_JESUp->Get("QCD__"+name);                      
+    hist_sig0_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_JESUp   = (TH1D*)myFile_JESUp->Get("DATA__"+name);                        
+
+    myFile_JERUp = TFile::Open(filename_JERUp, "READ") ; 
+    myFile_JERUp->cd();
+    hist_ttjets_JERUp = (TH1D*)myFile_JERUp->Get("TTJets__"+name);                         
+    hist_qcd_JERUp    = (TH1D*)myFile_JERUp->Get("QCD__"+name);                      
+    hist_sig0_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_JERUp   = (TH1D*)myFile_JERUp->Get("DATA__"+name);                        
+
+    myFile_SFbUp = TFile::Open(filename_SFbUp, "READ") ; 
+    myFile_SFbUp->cd();
+    hist_ttjets_SFbUp = (TH1D*)myFile_SFbUp->Get("TTJets__"+name);                         
+    hist_qcd_SFbUp    = (TH1D*)myFile_SFbUp->Get("QCD__"+name);                      
+    hist_sig0_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_SFbUp   = (TH1D*)myFile_SFbUp->Get("DATA__"+name);                        
+
+    myFile_SFlUp = TFile::Open(filename_SFlUp, "READ") ; 
+    myFile_SFlUp->cd();
+    hist_ttjets_SFlUp = (TH1D*)myFile_SFlUp->Get("TTJets__"+name);                         
+    hist_qcd_SFlUp    = (TH1D*)myFile_SFlUp->Get("QCD__"+name);                      
+    hist_sig0_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_SFlUp   = (TH1D*)myFile_SFlUp->Get("DATA__"+name);                        
+
+    myFile_JESDown = TFile::Open(filename_JESDown, "READ") ; 
+    myFile_JESDown->cd();
+    hist_ttjets_JESDown = (TH1D*)myFile_JESDown->Get("TTJets__"+name);                         
+    hist_qcd_JESDown    = (TH1D*)myFile_JESDown->Get("QCD__"+name);                      
+    hist_sig0_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_JESDown   = (TH1D*)myFile_JESDown->Get("DATA__"+name);                        
+
+    myFile_JERDown = TFile::Open(filename_JERDown, "READ") ; 
+    myFile_JERDown->cd();
+    hist_ttjets_JERDown = (TH1D*)myFile_JERDown->Get("TTJets__"+name);                         
+    hist_qcd_JERDown    = (TH1D*)myFile_JERDown->Get("QCD__"+name);                      
+    hist_sig0_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_JERDown   = (TH1D*)myFile_JERDown->Get("DATA__"+name);                        
+
+    myFile_SFbDown = TFile::Open(filename_SFbDown, "READ") ; 
+    myFile_SFbDown->cd();
+    hist_ttjets_SFbDown = (TH1D*)myFile_SFbDown->Get("TTJets__"+name);                         
+    hist_qcd_SFbDown    = (TH1D*)myFile_SFbDown->Get("QCD__"+name);                      
+    hist_sig0_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_SFbDown   = (TH1D*)myFile_SFbDown->Get("DATA__"+name);                        
+
+    myFile_SFlDown = TFile::Open(filename_SFlDown, "READ") ; 
+    myFile_SFlDown->cd();
+    hist_ttjets_SFlDown = (TH1D*)myFile_SFlDown->Get("TTJets__"+name);                         
+    hist_qcd_SFlDown    = (TH1D*)myFile_SFlDown->Get("QCD__"+name);                      
+    hist_sig0_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
+    hist_sig1_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
+    hist_sig2_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_data_SFlDown   = (TH1D*)myFile_SFlDown->Get("DATA__"+name);                        
+
+    fix(hist_ttjets_JESUp) ; fix(hist_ttjets_JESDown); fix(hist_ttjets_JERUp); fix(hist_ttjets_JERDown) ;
+    fix(hist_qcd_JESUp   ) ; fix(hist_qcd_JESDown   ); fix(hist_qcd_JERUp   ); fix(hist_qcd_JERDown   ) ;
+    fix(hist_sig0_JESUp  ) ; fix(hist_sig0_JESDown  ); fix(hist_sig0_JERUp  ); fix(hist_sig0_JERDown  ) ;
+    fix(hist_sig1_JESUp  ) ; fix(hist_sig1_JESDown  ); fix(hist_sig1_JERUp  ); fix(hist_sig1_JERDown  ) ;
+    fix(hist_sig2_JESUp  ) ; fix(hist_sig2_JESDown  ); fix(hist_sig2_JERUp  ); fix(hist_sig2_JERDown  ) ;
+    fix(hist_data_JESUp  ) ; fix(hist_data_JESDown  ); fix(hist_data_JERUp  ); fix(hist_data_JERDown  ) ;
+
+    fix(hist_ttjets_SFbUp) ; fix(hist_ttjets_SFbDown); fix(hist_ttjets_SFlUp); fix(hist_ttjets_SFlDown) ;
+    fix(hist_qcd_SFbUp   ) ; fix(hist_qcd_SFbDown   ); fix(hist_qcd_SFlUp   ); fix(hist_qcd_SFlDown   ) ;
+    fix(hist_sig0_SFbUp  ) ; fix(hist_sig0_SFbDown  ); fix(hist_sig0_SFlUp  ); fix(hist_sig0_SFlDown  ) ;
+    fix(hist_sig1_SFbUp  ) ; fix(hist_sig1_SFbDown  ); fix(hist_sig1_SFlUp  ); fix(hist_sig1_SFlDown  ) ;
+    fix(hist_sig2_SFbUp  ) ; fix(hist_sig2_SFbDown  ); fix(hist_sig2_SFlUp  ); fix(hist_sig2_SFlDown  ) ;
+    fix(hist_data_SFbUp  ) ; fix(hist_data_SFbDown  ); fix(hist_data_SFlUp  ); fix(hist_data_SFlDown  ) ;
+
+    if (nRebin > 1) {
+      hist_ttjets_JESUp->Rebin(nRebin) ; hist_ttjets_JESDown->Rebin(nRebin) ; hist_ttjets_JERUp->Rebin(nRebin) ; hist_ttjets_JERDown->Rebin(nRebin) ;
+      hist_qcd_JESUp   ->Rebin(nRebin) ; hist_qcd_JESDown   ->Rebin(nRebin) ; hist_qcd_JERUp   ->Rebin(nRebin) ; hist_qcd_JERDown   ->Rebin(nRebin) ;
+      hist_sig0_JESUp  ->Rebin(nRebin) ; hist_sig0_JESDown  ->Rebin(nRebin) ; hist_sig0_JERUp  ->Rebin(nRebin) ; hist_sig0_JERDown  ->Rebin(nRebin) ;
+      hist_sig1_JESUp  ->Rebin(nRebin) ; hist_sig1_JESDown  ->Rebin(nRebin) ; hist_sig1_JERUp  ->Rebin(nRebin) ; hist_sig1_JERDown  ->Rebin(nRebin) ;
+      hist_sig2_JESUp  ->Rebin(nRebin) ; hist_sig2_JESDown  ->Rebin(nRebin) ; hist_sig2_JERUp  ->Rebin(nRebin) ; hist_sig2_JERDown  ->Rebin(nRebin) ;
+      hist_data_JESUp  ->Rebin(nRebin) ; hist_data_JESDown  ->Rebin(nRebin) ; hist_data_JERUp  ->Rebin(nRebin) ; hist_data_JERDown  ->Rebin(nRebin) ;
+
+      hist_ttjets_SFbUp->Rebin(nRebin) ; hist_ttjets_SFbDown->Rebin(nRebin) ; hist_ttjets_SFlUp->Rebin(nRebin) ; hist_ttjets_SFlDown->Rebin(nRebin) ;
+      hist_qcd_SFbUp   ->Rebin(nRebin) ; hist_qcd_SFbDown   ->Rebin(nRebin) ; hist_qcd_SFlUp   ->Rebin(nRebin) ; hist_qcd_SFlDown   ->Rebin(nRebin) ;
+      hist_sig0_SFbUp  ->Rebin(nRebin) ; hist_sig0_SFbDown  ->Rebin(nRebin) ; hist_sig0_SFlUp  ->Rebin(nRebin) ; hist_sig0_SFlDown  ->Rebin(nRebin) ;
+      hist_sig1_SFbUp  ->Rebin(nRebin) ; hist_sig1_SFbDown  ->Rebin(nRebin) ; hist_sig1_SFlUp  ->Rebin(nRebin) ; hist_sig1_SFlDown  ->Rebin(nRebin) ;
+      hist_sig2_SFbUp  ->Rebin(nRebin) ; hist_sig2_SFbDown  ->Rebin(nRebin) ; hist_sig2_SFlUp  ->Rebin(nRebin) ; hist_sig2_SFlDown  ->Rebin(nRebin) ;
+      hist_data_SFbUp  ->Rebin(nRebin) ; hist_data_SFbDown  ->Rebin(nRebin) ; hist_data_SFlUp  ->Rebin(nRebin) ; hist_data_SFlDown  ->Rebin(nRebin) ;
+    }
+
+    hist_bkg_JESUp = (TH1D*) hist_ttjets_JESUp->Clone("hist_bkg_JESUp"); 
+    hist_bkg_JESUp -> Add(hist_qcd_JESUp) ; 
+    hist_bkg_JERUp = (TH1D*) hist_ttjets_JERUp->Clone("hist_bkg_JERUp"); 
+    hist_bkg_JERUp -> Add(hist_qcd_JERUp) ; 
+    hist_bkg_SFbUp = (TH1D*) hist_ttjets_SFbUp->Clone("hist_bkg_SFbUp"); 
+    hist_bkg_SFbUp -> Add(hist_qcd_SFbUp) ; 
+    hist_bkg_SFlUp = (TH1D*) hist_ttjets_SFlUp->Clone("hist_bkg_SFlUp"); 
+    hist_bkg_SFlUp -> Add(hist_qcd_SFlUp) ; 
+    hist_bkg_JESDown = (TH1D*) hist_ttjets_JESDown->Clone("hist_bkg_JESDown"); 
+    hist_bkg_JESDown -> Add(hist_qcd_JESDown) ; 
+    hist_bkg_JERDown = (TH1D*) hist_ttjets_JERDown->Clone("hist_bkg_JERDown"); 
+    hist_bkg_JERDown -> Add(hist_qcd_JERDown) ; 
+    hist_bkg_SFbDown = (TH1D*) hist_ttjets_SFbDown->Clone("hist_bkg_SFbDown"); 
+    hist_bkg_SFbDown -> Add(hist_qcd_SFbDown) ; 
+    hist_bkg_SFlDown = (TH1D*) hist_ttjets_SFlDown->Clone("hist_bkg_SFlDown"); 
+    hist_bkg_SFlDown -> Add(hist_qcd_SFlDown) ; 
+
+    for (int ii = 1; ii <= hist_bkg->GetNbinsX(); ++ii) {
+      double statUnc = hist_bkg->GetBinError(ii) ; 
+      double jesUp = hist_bkg->GetBinContent(ii) - hist_bkg_JESUp->GetBinContent(ii) ; 
+      double jerUp = hist_bkg->GetBinContent(ii) - hist_bkg_JERUp->GetBinContent(ii) ; 
+      double sfbUp = hist_bkg->GetBinContent(ii) - hist_bkg_SFbUp->GetBinContent(ii) ; 
+      double sflUp = hist_bkg->GetBinContent(ii) - hist_bkg_SFlUp->GetBinContent(ii) ; 
+      double uncUp = TMath::Sqrt( (jesUp*jesUp) + (jerUp*jerUp) + (sfbUp*sfbUp) + (sflUp*sflUp) + (statUnc*statUnc) ) ; 
+      double jesDown = hist_bkg->GetBinContent(ii) - hist_bkg_JESDown->GetBinContent(ii) ; 
+      double jerDown = hist_bkg->GetBinContent(ii) - hist_bkg_JERDown->GetBinContent(ii) ; 
+      double sfbDown = hist_bkg->GetBinContent(ii) - hist_bkg_SFbDown->GetBinContent(ii) ; 
+      double sflDown = hist_bkg->GetBinContent(ii) - hist_bkg_SFlDown->GetBinContent(ii) ; 
+      double uncDown = TMath::Sqrt( (jesDown*jesDown) + (jerDown*jerDown) + (sfbDown*sfbDown) + (sflDown*sflDown) + (statUnc*statUnc) ) ; 
+
+      binCentre[ii-1] = hist_bkg->GetBinCenter(ii) ; 
+      binLow[ii-1] = hist_bkg->GetBinWidth(ii)/2.0 ; 
+      binHigh[ii-1] = hist_bkg->GetBinWidth(ii)/2.0 ; 
+
+      bkg[ii-1] = hist_bkg->GetBinContent(ii) ; 
+      bkgLow[ii-1] =  uncUp ;
+      bkgHigh[ii-1] = uncDown ; 
+
+      norm[ii-1] = 1.0 ; 
+      bkgProportionalUncLow [ii-1] = bkg[ii-1] > 0 ? bkgLow[ii-1]/bkg[ii-1] : 0. ; 
+      bkgProportionalUncHigh[ii-1] = bkg[ii-1] > 0 ? bkgHigh[ii-1]/bkg[ii-1] : 0. ; 
+    }
+    gr_bkg_uncUp_uncDown = new TGraphAsymmErrors(nbins, binCentre, bkg, binLow, binHigh, bkgLow, bkgHigh) ; 
+    gr_bkg_uncUp_uncDown -> SetName("gr_bkg_uncUp_uncDown ") ; 
+    gr_uncUp_uncDown = new TGraphAsymmErrors(nbins, binCentre, norm, binLow, binHigh, bkgProportionalUncLow, bkgProportionalUncHigh) ; 
+    gr_uncUp_uncDown -> SetName("gr_bkg_uncUp_uncDown ") ; 
+
+    gr_bkg_uncUp_uncDown -> SetFillColor(9) ;
+    gr_bkg_uncUp_uncDown -> SetFillStyle(3005) ; 
+
+    gr_uncUp_uncDown -> SetFillColor(5) ;
+    gr_uncUp_uncDown -> SetFillStyle(1001) ; 
+
+    if ( name.Contains("HTSel_HT") ) {
+      double jesUp = (hist_bkg->Integral() - hist_bkg_JESUp->Integral())/hist_bkg->Integral() ; 
+      double jerUp = (hist_bkg->Integral() - hist_bkg_JERUp->Integral())/hist_bkg->Integral() ; 
+      double sfbUp = (hist_bkg->Integral() - hist_bkg_SFbUp->Integral())/hist_bkg->Integral() ; 
+      double sflUp = (hist_bkg->Integral() - hist_bkg_SFlUp->Integral())/hist_bkg->Integral() ; 
+
+      double jesDown = (hist_bkg->Integral() - hist_bkg_JESDown->Integral())/hist_bkg->Integral() ; 
+      double jerDown = (hist_bkg->Integral() - hist_bkg_JERDown->Integral())/hist_bkg->Integral() ; 
+      double sfbDown = (hist_bkg->Integral() - hist_bkg_SFbDown->Integral())/hist_bkg->Integral() ; 
+      double sflDown = (hist_bkg->Integral() - hist_bkg_SFlDown->Integral())/hist_bkg->Integral() ; 
+
+      double btagUp = TMath::Sqrt( (sfbUp*sfbUp) + (sflUp*sflUp) ) ;
+      double btagDown = TMath::Sqrt( (sfbDown*sfbDown) + (sflDown*sflDown) ) ;
+
+      std::cout << "*******************************BACKGROUND*******************************\n" ; 
+      std::cout << "***" << " JES uncert + = "      << fabs(jesUp) *100. << "% - = " << fabs(jesDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " JER uncert + = "      << fabs(jerUp) *100. << "% - = " << fabs(jerDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " Btagging uncert + = " << fabs(btagUp)*100. << "% - = " << fabs(btagDown)*100. << "% ***\n" ; 
+      std::cout << "************************************************************************\n" ; 
+
+      jesUp = (hist_sig0->Integral() - hist_sig0_JESUp->Integral())/hist_sig0->Integral() ; 
+      jerUp = (hist_sig0->Integral() - hist_sig0_JERUp->Integral())/hist_sig0->Integral() ; 
+      sfbUp = (hist_sig0->Integral() - hist_sig0_SFbUp->Integral())/hist_sig0->Integral() ; 
+      sflUp = (hist_sig0->Integral() - hist_sig0_SFlUp->Integral())/hist_sig0->Integral() ; 
+
+      jesDown = (hist_sig0->Integral() - hist_sig0_JESDown->Integral())/hist_sig0->Integral() ; 
+      jerDown = (hist_sig0->Integral() - hist_sig0_JERDown->Integral())/hist_sig0->Integral() ; 
+      sfbDown = (hist_sig0->Integral() - hist_sig0_SFbDown->Integral())/hist_sig0->Integral() ; 
+      sflDown = (hist_sig0->Integral() - hist_sig0_SFlDown->Integral())/hist_sig0->Integral() ; 
+
+      btagUp = TMath::Sqrt( (sfbUp*sfbUp) + (sflUp*sflUp) ) ;
+      btagDown = TMath::Sqrt( (sfbDown*sfbDown) + (sflDown*sflDown) ) ;
+
+      std::cout << "*********************************SIGNAL Mass 500 GeV************************\n" ; 
+      std::cout << "***" << " JES uncert + = "      << fabs(jesUp) *100. << "% - = " << fabs(jesDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " JER uncert + = "      << fabs(jerUp) *100. << "% - = " << fabs(jerDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " Btagging uncert + = " << fabs(btagUp)*100. << "% - = " << fabs(btagDown)*100. << "% ***\n" ; 
+      std::cout << "************************************************************************\n" ; 
+
+      jesUp = (hist_sig1->Integral() - hist_sig1_JESUp->Integral())/hist_sig1->Integral() ; 
+      jerUp = (hist_sig1->Integral() - hist_sig1_JERUp->Integral())/hist_sig1->Integral() ; 
+      sfbUp = (hist_sig1->Integral() - hist_sig1_SFbUp->Integral())/hist_sig1->Integral() ; 
+      sflUp = (hist_sig1->Integral() - hist_sig1_SFlUp->Integral())/hist_sig1->Integral() ; 
+
+      jesDown = (hist_sig1->Integral() - hist_sig1_JESDown->Integral())/hist_sig1->Integral() ; 
+      jerDown = (hist_sig1->Integral() - hist_sig1_JERDown->Integral())/hist_sig1->Integral() ; 
+      sfbDown = (hist_sig1->Integral() - hist_sig1_SFbDown->Integral())/hist_sig1->Integral() ; 
+      sflDown = (hist_sig1->Integral() - hist_sig1_SFlDown->Integral())/hist_sig1->Integral() ; 
+
+      btagUp = TMath::Sqrt( (sfbUp*sfbUp) + (sflUp*sflUp) ) ;
+      btagDown = TMath::Sqrt( (sfbDown*sfbDown) + (sflDown*sflDown) ) ;
+
+      std::cout << "*********************************SIGNAL Mass 800 GeV************************\n" ; 
+      std::cout << "***" << " JES uncert + = "      << fabs(jesUp) *100. << "% - = " << fabs(jesDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " JER uncert + = "      << fabs(jerUp) *100. << "% - = " << fabs(jerDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " Btagging uncert + = " << fabs(btagUp)*100. << "% - = " << fabs(btagDown)*100. << "% ***\n" ; 
+      std::cout << "************************************************************************\n" ; 
+
+      jesUp = (hist_sig2->Integral() - hist_sig2_JESUp->Integral())/hist_sig2->Integral() ; 
+      jerUp = (hist_sig2->Integral() - hist_sig2_JERUp->Integral())/hist_sig2->Integral() ; 
+      sfbUp = (hist_sig2->Integral() - hist_sig2_SFbUp->Integral())/hist_sig2->Integral() ; 
+      sflUp = (hist_sig2->Integral() - hist_sig2_SFlUp->Integral())/hist_sig2->Integral() ; 
+
+      jesDown = (hist_sig2->Integral() - hist_sig2_JESDown->Integral())/hist_sig2->Integral() ; 
+      jerDown = (hist_sig2->Integral() - hist_sig2_JERDown->Integral())/hist_sig2->Integral() ; 
+      sfbDown = (hist_sig2->Integral() - hist_sig2_SFbDown->Integral())/hist_sig2->Integral() ; 
+      sflDown = (hist_sig2->Integral() - hist_sig2_SFlDown->Integral())/hist_sig2->Integral() ; 
+
+      btagUp = TMath::Sqrt( (sfbUp*sfbUp) + (sflUp*sflUp) ) ;
+      btagDown = TMath::Sqrt( (sfbDown*sfbDown) + (sflDown*sflDown) ) ;
+
+      std::cout << "*********************************SIGNAL Mass 1000 GeV***********************\n" ; 
+      std::cout << "***" << " JES uncert + = "      << fabs(jesUp) *100. << "% - = " << fabs(jesDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " JER uncert + = "      << fabs(jerUp) *100. << "% - = " << fabs(jerDown) *100. << "% ***\n" ; 
+      std::cout << "***" << " Btagging uncert + = " << fabs(btagUp)*100. << "% - = " << fabs(btagDown)*100. << "% ***\n" ; 
+      std::cout << "************************************************************************\n" ; 
+    }
+
+  }
+  //// Syst. unc. ////
 
   beautify(hist_qcd   ,42 ,1001 ,1 ,2) ; 
   beautify(hist_ttjets,38 ,1001 ,1 ,2) ; 
@@ -277,6 +571,7 @@ void DrawStacked(TString name,
   else {
     hist_bkg->Draw("hist");
     stack->Draw("histSAME");
+    if ( systUnc ) gr_bkg_uncUp_uncDown -> Draw("2Z") ; 
     if (doData) hist_data->Draw("SAMEE1");
     hist_bkg->Draw("samee2");
     if (name.Contains("HTSel")) { 
@@ -301,6 +596,7 @@ void DrawStacked(TString name,
   }
 
   int move_legend=0;
+  if (name.Contains("HiggsJet_Mass")) move_legend = 1 ;
   TLegend *leg ;
   if (move_legend==1) {
     leg =  new TLegend(0.1,0.53,0.40,.92,NULL,"brNDC");
@@ -384,6 +680,7 @@ void DrawStacked(TString name,
     hist_mcUnc->SetMinimum(0.0);
     hist_mcUnc->SetMaximum(2.6);
     hist_mcUnc->Draw("E2");
+    if ( systUnc ) gr_uncUp_uncDown->Draw("2Z") ; 
     hist_ratio->Draw("SAMEE1");
 
     pad1->Modified();
