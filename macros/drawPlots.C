@@ -146,6 +146,12 @@ void DrawAll () {
    DrawStacked("HTSel_nHJets" ,"N(Higgs-tagged CA8 jets)" ,0 ,0 ,0 ,1 ,1 ,0 ,5); 
    DrawStacked("HTSel_HT" ,"HT [GeV]" ,0 ,0 ,0 ,4 ,1 ,750 ,2050); 
    DrawStacked("HTSel_HT" ,"HT [GeV]" ,1 ,0 ,0 ,4 ,1 ,750 ,2050); 
+   DrawStacked("HTSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HTSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HTSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HTSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,0 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HTSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,0 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HTSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,0 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
    return ; 
 
@@ -388,9 +394,11 @@ void DrawStacked(TString name,
     gr_uncUp_uncDown = new TGraphAsymmErrors(nbins, binCentre, norm, binLow, binHigh, bkgProportionalUncLow, bkgProportionalUncHigh) ; 
     gr_uncUp_uncDown -> SetName("gr_bkg_uncUp_uncDown ") ; 
 
+    gr_bkg_uncUp_uncDown -> SetLineColor(0) ;
     gr_bkg_uncUp_uncDown -> SetFillColor(9) ;
     gr_bkg_uncUp_uncDown -> SetFillStyle(3005) ; 
 
+    gr_uncUp_uncDown -> SetLineColor(5) ;
     gr_uncUp_uncDown -> SetFillColor(5) ;
     gr_uncUp_uncDown -> SetFillStyle(1001) ; 
 
@@ -572,8 +580,8 @@ void DrawStacked(TString name,
     hist_bkg->Draw("hist");
     stack->Draw("histSAME");
     if ( systUnc ) gr_bkg_uncUp_uncDown -> Draw("2Z") ; 
+    else hist_bkg->Draw("samee2");
     if (doData) hist_data->Draw("SAMEE1");
-    hist_bkg->Draw("samee2");
     if (name.Contains("HTSel")) { 
       hist_sig0->Draw("HISTSAME") ; 
       hist_sig1->Draw("HISTSAME") ; 
@@ -632,7 +640,8 @@ void DrawStacked(TString name,
   if ( !name.Contains("nPVtx") && !name.Contains("h_cutflow") ) {
     leg->AddEntry(hist_ttjets   , "t#bar{t}+jets"          ,"f");
     leg->AddEntry(hist_qcd      , "Non-t#bar{t} multijets" ,"f");
-    leg->AddEntry(hist_bkg      , "Bkg. error (stat.)"     ,"f");
+    if ( systUnc ) leg->AddEntry(gr_bkg_uncUp_uncDown, "Total bkg. error", "f") ; 
+    else leg->AddEntry(hist_bkg      , "Bkg. error (stat.)"     ,"f");
   }
   if (doData) leg->AddEntry(hist_data, datacaption              ,"pl");
 
