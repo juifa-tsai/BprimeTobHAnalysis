@@ -59,6 +59,7 @@ Implementation:
 #include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
 #include "BpbH/BprimeTobHAnalysis/interface/JMEUncertUtil.h"
 #include "BpbH/BprimeTobHAnalysis/interface/ApplyBTagSF.h"
+#include "BpbH/BprimeTobHAnalysis/interface/ApplyHiggsTagSF.h"
 
 #include "BpbH/BprimeTobHAnalysis/interface/HiggsBRscaleFactors.h" 
 
@@ -565,6 +566,15 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
           higgsjets.push_back(thisjet) ; 
 
           p4_higgsJets.push_back(fatjet_p4) ; 
+
+          if ( !isData_ ) { //// Apply Higgs-tagging scale factor 
+            ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(SubJetInfo.Pt[iSubJet1]), double(SubJetInfo.Pt[iSubJet2]), 
+                double(SubJetInfo.Eta[iSubJet1]), double(SubJetInfo.Eta[iSubJet2]),
+                SubJetInfo.GenFlavor[iSubJet1], SubJetInfo.GenFlavor[iSubJet2], 
+                SubJetInfo.CombinedSVBJetTags[iSubJet1], SubJetInfo.CombinedSVBJetTags[iSubJet2]) ; 
+            evtwt_ *= higgsTagSF->GetHiggsTagSF() ;
+            delete higgsTagSF ; 
+          }
 
         } //// Higgs tagging 
 
