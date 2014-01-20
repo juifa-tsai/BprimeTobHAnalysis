@@ -29,7 +29,7 @@
 
 using namespace std;
 
-TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr/Final_histograms_BprimebH.root" ;  
+TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_17Jan_/Final_histograms_BprimebH.root" ;  
 TString filename_JESUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESUp/Final_histograms_BprimebH.root" ; 
 TString filename_JESDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESDown/Final_histograms_BprimebH.root" ; 
 TString filename_JERUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch2_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JERUp/Final_histograms_BprimebH.root" ; 
@@ -43,7 +43,7 @@ Double_t Lint = 19700.0 ;
 TString title1 = "CMS Preliminary, 19.7/fb at #sqrt{s} = 8 TeV";
 TString datacaption = "Data"; 
 
-TString dir4plots ="BprimeTobH_18Dec_JetCorr" ; 
+TString dir4plots ="BprimeTobH_17Jan" ; 
 
 TString formata = ".pdf";
 TString formatb = ".png";
@@ -52,7 +52,7 @@ TString formatc = ".C";
 //// Common switches  
 bool web = 0;
 bool setSampleName = 1;
-bool systUnc = 1 ; 
+bool systUnc = 0 ; 
 
 void DrawAll () ; 
 void DrawStacked(TString name, TString histotitle, bool log, bool doData, bool fExtNorm=false, int nRebin=1, bool setXRange=false, double rangeXLow=0., double rangeXHigh=0.);
@@ -100,6 +100,7 @@ void DrawAll () {
 
    DrawStacked("TriggerSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("TriggerSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("TriggerSel_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("TriggerSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("TriggerSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
@@ -113,6 +114,7 @@ void DrawAll () {
 
    DrawStacked("FatJetSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("FatJetSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("FatJetSel_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("FatJetSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("FatJetSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
@@ -126,6 +128,7 @@ void DrawAll () {
 
    DrawStacked("HiggsJetSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HiggsJetSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HiggsJetSel_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HiggsJetSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HiggsJetSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
@@ -138,6 +141,7 @@ void DrawAll () {
 
    DrawStacked("BJetsSel_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("BJetsSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("BJetsSel_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("BJetsSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("BJetsSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
@@ -147,6 +151,7 @@ void DrawAll () {
    DrawStacked("HTSel_HT" ,"HT [GeV]" ,0 ,0 ,0 ,4 ,1 ,750 ,2050); 
    DrawStacked("HTSel_HT" ,"HT [GeV]" ,1 ,0 ,0 ,4 ,1 ,750 ,2050); 
    DrawStacked("HTSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+   DrawStacked("HTSel_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HTSel_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HTSel_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
    DrawStacked("HTSel_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,0 ,1 ,0 ,5 ,1 ,0 ,4000); 

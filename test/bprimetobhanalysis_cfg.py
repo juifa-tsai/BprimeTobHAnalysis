@@ -188,7 +188,9 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     JetSelParams        = defaultJetSelectionParameters.clone(), 
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(), 
-    HTSelParams         = defaultHTSelectionParameters.clone(),
+    HTSelParams         = defaultHTSelectionParameters.clone(
+      HTMin = cms.double(900), 
+      ),
     EvtSelParams        = defaultEventSelectionParameters.clone(),
     JMEParams           = defaultJMEUncertUntilParameters.clone(
       FilenameJEC = cms.untracked.string('Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt'), 
