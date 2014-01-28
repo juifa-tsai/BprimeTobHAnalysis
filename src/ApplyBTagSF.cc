@@ -57,9 +57,9 @@ JetCollection ApplyBTagSF::getBtaggedJetsWithSF () {
     if (strcmp(algo_.c_str(), "CSVL") == 0) 
       BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVL_error[ptbin]) ) ; 
     else if (strcmp(algo_.c_str(), "CSVM") == 0) 
-      BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVM_error[ptbin]) ) ; 
+      BTagSF = SFb_CSVM->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVM_error[ptbin]) ) ;  // Alpha 28/Jun. : debug SFb_CSVL -> SFb_CSVM
     else if (strcmp(algo_.c_str(), "CSVT") == 0) 
-      BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVT_error[ptbin]) ) ; 
+      BTagSF = SFb_CSVT->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVT_error[ptbin]) ) ;  // Alpha 28/Jun. : debug SFb_CSVL -> SFb_CSVT
     else {
       edm::LogError("ApplyBTagSF") << " Wrong b-tagging algo_ chosen: " << algo_ << ". Choose between CSVL, CSVM, or CSVT." ; 
       return btaggedJetsWithSF_ ; 
