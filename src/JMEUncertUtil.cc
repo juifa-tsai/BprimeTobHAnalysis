@@ -24,9 +24,48 @@ JMEUncertUtil::JMEUncertUtil (const edm::ParameterSet& iConfig, EvtInfoBranches 
     return ;  
   }
 
-  if (jecType_ == JES) {
+  if (jecType_ == JESAK5DATA) {
     LogDebug("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
-    std::string filenameJEC = iConfig.getUntrackedParameter<std::string>("FilenameJEC") ;
+    std::string filenameJEC = iConfig.getUntrackedParameter<std::string>("FilenameJECAK5Data") ;
+    ifstream fileJEC(filenameJEC.c_str());
+    if ( fileJEC ) {
+      jecUncert_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filenameJEC, "Total"))); 
+    }
+    else {
+      edm::LogError("JMEUncertUtil") << "ERROR: Couldn't open JES File, can't continue." ; 
+      assert(false);
+    } 
+    jesUncert () ; 
+  }
+  else if (jecType_ == JESCA8DATA) {
+    LogDebug("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
+    std::string filenameJEC = iConfig.getUntrackedParameter<std::string>("FilenameJECCA8Data") ;
+    ifstream fileJEC(filenameJEC.c_str());
+    if ( fileJEC ) {
+      jecUncert_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filenameJEC, "Total"))); 
+    }
+    else {
+      edm::LogError("JMEUncertUtil") << "ERROR: Couldn't open JES File, can't continue." ; 
+      assert(false);
+    } 
+    jesUncert () ; 
+  }
+  if (jecType_ == JESAK5MC) {
+    LogDebug("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
+    std::string filenameJEC = iConfig.getUntrackedParameter<std::string>("FilenameJECAK5MC") ;
+    ifstream fileJEC(filenameJEC.c_str());
+    if ( fileJEC ) {
+      jecUncert_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filenameJEC, "Total"))); 
+    }
+    else {
+      edm::LogError("JMEUncertUtil") << "ERROR: Couldn't open JES File, can't continue." ; 
+      assert(false);
+    } 
+    jesUncert () ; 
+  }
+  else if (jecType_ == JESCA8MC) {
+    LogDebug("JMEUncertUtil::JMEUncertUtil") << " jecType_ = " << jecType_ << ". Doing " << stype_ << " " << jecShift_ ; 
+    std::string filenameJEC = iConfig.getUntrackedParameter<std::string>("FilenameJECCA8MC") ;
     ifstream fileJEC(filenameJEC.c_str());
     if ( fileJEC ) {
       jecUncert_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filenameJEC, "Total"))); 
@@ -54,7 +93,7 @@ JetCollection JMEUncertUtil::GetModifiedJetColl () const {
   return modifiedJets_ ; 
 }
 
-const string JMEUncertUtil::JEC_Types [] = {"None", "JES", "JER"} ;  
+const string JMEUncertUtil::JEC_Types [] = {"None", "JESAK5DATA", "JESAK5MC", "JESCA8DATA", "JESCA8MC", "JER"} ; 
 
 void JMEUncertUtil::setType(std::string type) {
   jecType_ = NOSYS;

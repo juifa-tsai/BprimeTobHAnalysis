@@ -439,11 +439,12 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     for (int ifatjet=0; ifatjet < FatJetInfo.Size; ++ifatjet) {
 
 
-      if ( FatJetInfo.Pt[ifatjet] < fatJetPtMin_ 
-          || FatJetInfo.Pt[ifatjet] > fatJetPtMax_ ) continue; //// apply jet pT cut
-      if ( fabs(FatJetInfo.Eta[ifatjet]) > fatJetAbsEtaMax_ ) continue; //// apply jet eta cut
-      retca8.set(false);
-      if ( fatjetIDLoose(FatJetInfo, ifatjet,retca8) == 0 ) continue; //// apply loose jet ID
+      //DM 31Jan if ( FatJetInfo.Pt[ifatjet] < fatJetPtMin_ 
+      //DM 31Jan     || FatJetInfo.Pt[ifatjet] > fatJetPtMax_ ) continue; //// apply jet pT cut
+      //DM 31Jan if ( fabs(FatJetInfo.Eta[ifatjet]) > fatJetAbsEtaMax_ ) continue; //// apply jet eta cut
+      //DM 31Jan retca8.set(false);
+      //DM 31Jan if ( fatjetIDLoose(FatJetInfo, ifatjet,retca8) == 0 ) continue; //// apply loose jet ID
+      if (jetSelCA8(FatJetInfo, ifatjet, SubJetInfo, retjetidca8) == 0) continue ; 
 
       TLorentzVector fatjet_p4;
       fatjet_p4.SetPtEtaPhiM(FatJetInfo.Pt[ifatjet], FatJetInfo.Eta[ifatjet], 
@@ -477,8 +478,8 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
       double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
 
-      if( subjet_dyphi < (FatJetInfo.Mass[ifatjet]/FatJetInfo.Pt[ifatjet]) ) 
-        continue; //// skip infrared unsafe configurations
+      //if( subjet_dyphi < max(double(FatJetInfo.Mass[ifatjet]/FatJetInfo.Pt[ifatjet]), 0.4) ) 
+      //  continue; //// skip infrared unsafe configurations and overlap between the subjets 
 
       FillHisto(TString("TriggerSel")+TString("_SubJet1_Pt") ,subjet1_p4.Pt() ,evtwt_)  ;  
       FillHisto(TString("TriggerSel")+TString("_SubJet1_Eta") ,subjet1_p4.Eta() ,evtwt_)  ; 
@@ -553,61 +554,67 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       if (isJetNotHiggs) myjets.push_back(thisjet) ; 
     }
 
-    JetCollection ak5jets_tmp, allAK5jets_tmp ; 
+    JetCollection ak5jets_jec, allAK5jets_jec ; 
     if ( !isData_) {
       //// Only AK5 jets not overlapping with Higgs jets 
       JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", jerShift_) ; 
       JetCollection ak5jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
       delete jmeUtil_jer ; 
 
-      JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, ak5jets_jer, "JES", jesShift_) ; 
-      JetCollection ak5jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
+      JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, ak5jets_jer, "JESAK5MC", jesShift_) ; 
+      JetCollection ak5jets_jec = jmeUtil_jes->GetModifiedJetColl() ; 
       delete jmeUtil_jes ; 
-
-      ApplyBTagSF * btagsf =  new ApplyBTagSF(ak5jets_jes, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
-      ak5jets_tmp =  btagsf->getBtaggedJetsWithSF () ; 
-      delete btagsf ; 
 
       //// All AK5 jets 
       jmeUtil_jer = new JMEUncertUtil(jmeParams_, EvtInfo, allMyJets, "JER", jerShift_) ; 
       JetCollection allAK5jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
       delete jmeUtil_jer ; 
 
-      jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, allAK5jets_jer, "JES", jesShift_) ; 
-      JetCollection allAK5jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
+      jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, allAK5jets_jer, "JESAK5MC", jesShift_) ; 
+      JetCollection allAK5jets_jec = jmeUtil_jes->GetModifiedJetColl() ; 
       delete jmeUtil_jes ; 
 
-      btagsf =  new ApplyBTagSF(allAK5jets_jes, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
-      allAK5jets_tmp =  btagsf->getBtaggedJetsWithSF () ; 
-      delete btagsf ; 
     }
     else {
       //// Only AK5 jets not overlapping with Higgs jets 
-      JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JES", jesShift_) ; 
-      ak5jets_tmp = jmeUtil_jes->GetModifiedJetColl() ; 
+      JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JESAK5DATA", jesShift_) ; 
+      ak5jets_jec = jmeUtil_jes->GetModifiedJetColl() ; 
       delete jmeUtil_jes ; 
 
       //// All AK5 jets 
-      jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, allMyJets, "JES", jesShift_) ; 
-      allAK5jets_tmp = jmeUtil_jes->GetModifiedJetColl() ; 
+      jmeUtil_jes = new JMEUncertUtil(jmeParams_, EvtInfo, allMyJets, "JESAK5DATA", jesShift_) ; 
+      allAK5jets_jec = jmeUtil_jes->GetModifiedJetColl() ; 
       delete jmeUtil_jes ; 
     }
 
-    for (JetCollection::const_iterator ijet = ak5jets_tmp.begin(); ijet != ak5jets_tmp.end(); ++ijet) {
+    for (JetCollection::const_iterator ijet = ak5jets_jec.begin(); ijet != ak5jets_jec.end(); ++ijet) {
       if (ijet->Pt() < jetPtMin_ || ijet->Pt() > jetPtMax_) continue ; 
       ak5jets_corr.push_back(*ijet) ; 
-    }
-
-    for (JetCollection::const_iterator ijet = allAK5jets_tmp.begin(); ijet != allAK5jets_tmp.end(); ++ijet) {
-      if (ijet->Pt() < jetPtMin_ || ijet->Pt() > jetPtMax_) continue ; 
-      allAK5jets_corr.push_back(*ijet) ; 
-    }
-
-    for (JetCollection::const_iterator ijet = ak5jets_corr.begin(); ijet != ak5jets_corr.end(); ++ijet) {
 
       if (njets < 4) ak5jets_leading4.push_back(*ijet) ; 
       if (njets < 2) jets_CA8_leading2_AK5_leading2.push_back(*ijet) ;  
       ++njets ; 
+
+    }
+
+    for (JetCollection::const_iterator ijet = allAK5jets_jec.begin(); ijet != allAK5jets_jec.end(); ++ijet) {
+      if (ijet->Pt() < jetPtMin_ || ijet->Pt() > jetPtMax_) continue ; 
+      allAK5jets_corr.push_back(*ijet) ; 
+    }
+
+    JetCollection ak5jets_btag ; 
+    if ( !isData_ ) {
+      ApplyBTagSF * btagsf =  new ApplyBTagSF(ak5jets_corr, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
+      ak5jets_btag =  btagsf->getBtaggedJetsWithSF () ; 
+      delete btagsf ; 
+    }
+    else {
+      for (JetCollection::const_iterator ijet = allAK5jets_jec.begin(); ijet != allAK5jets_jec.end(); ++ijet) {
+        ak5jets_btag.push_back(*ijet) ; 
+      }
+    }
+
+    for (JetCollection::const_iterator ijet = ak5jets_btag.begin(); ijet != ak5jets_btag.end(); ++ijet) { 
 
       if (ijet->Pt() > bjetPtMin_ && ijet->CombinedSVBJetTags() > 0.679) { //// Select b-tagged AK5 jets  
         bjets.push_back(*ijet) ; 

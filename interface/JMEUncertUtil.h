@@ -23,7 +23,7 @@ class JMEUncertUtil {
     JetCollection GetModifiedJetColl() const ;  
 
     static const string JEC_Types[];
-    enum JEC_TYPE {NOSYS, JES, JER, NTYPES}  ; 
+    enum JEC_TYPE {NOSYS, JESAK5DATA, JESAK5MC, JESCA8DATA, JESCA8MC, JER, NTYPES}  ; 
 
   private:
 
