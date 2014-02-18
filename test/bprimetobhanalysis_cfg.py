@@ -36,12 +36,12 @@ options.register('bJetPtMin', 80.,
 options.register('fatJetPtMin', 300.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
-    "Minimum fat jet Pt"
+    "Minimum fat jet pt"
     )
 options.register('fatJetPtMax', 1.E6,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
-    "Maximum fat jet Pt"
+    "Maximum fat jet pt"
     )
 options.register('fatJetMassMin', 100.,
     VarParsing.multiplicity.singleton,
@@ -63,10 +63,15 @@ options.register('fatJetPrunedMassMax', 1.E6,
     VarParsing.varType.float,
     "Maximum fat jet pruned mass"
     )
-options.register('fatJetTau2ByTau1Max', 0.5,
+options.register('dRSubjetsMin', 0.4,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
-    "Maximum fat jet tau2/tau1"
+    "Minimum dR(subjet1, subjet2)"
+    )
+options.register('dRSubjetsMax', 0.8,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum dR(subjet1, subjet2)"
     )
 options.register('subjet1CSVDiscMin', 0.679,
     VarParsing.multiplicity.singleton,
@@ -88,7 +93,7 @@ options.register('subjet2CSVDiscMax', 1.000,
     VarParsing.varType.float,
     "Maximum subjet2 b discriminator"
     )
-options.register('hTMin', 1000,
+options.register('hTMin', 900,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum HT"
@@ -104,6 +109,16 @@ options.register('doPUReweighting', True,
     VarParsing.varType.bool,
     "Do pileup reweighting"
 )
+options.register('ApplyJEC', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply JEC" 
+    )
+options.register('ApplyBTagSF', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply b-tagging scale factors" 
+    )
 options.register('JESShift', 0.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -159,8 +174,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string('ntuple/tree'),
-    InputFiles          = cms.vstring(FileNames), 
-    #HLTPaths            = cms.vint32(3225,4136,4137,5089,5537,5538), 
+    #InputFiles          = cms.vstring(FileNames), 
+    InputFiles          = cms.vstring(FileNamesTTbar), 
     HLTPaths            = defaultTriggerSelectionParameters.clone(), 
     DoPUReweighting     = cms.bool(options.doPUReweighting),
     File_PUDistMC       = cms.string('pileup_Data_Summer12_53X_S10.root'),
@@ -173,12 +188,12 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     BJetPtMin           = cms.double(options.bJetPtMin),
     FatJetPtMin         = cms.double(options.fatJetPtMin),
     FatJetPtMax         = cms.double(options.fatJetPtMax),
-    FatJetAbsEtaMax     = cms.double(2.4),
     FatJetMassMin       = cms.double(options.fatJetMassMin),
     FatJetMassMax       = cms.double(options.fatJetMassMax),
     FatJetPrunedMassMin = cms.double(options.fatJetPrunedMassMin),
     FatJetPrunedMassMax = cms.double(options.fatJetPrunedMassMax),
-    FatJetTau2ByTau1Max = cms.double(options.fatJetTau2ByTau1Max),
+    DRSubjetsMin        = cms.double(options.dRSubjetsMin),
+    DRSubjetsMax        = cms.double(options.dRSubjetsMax),
     Subjet1CSVDiscMin   = cms.double(options.subjet1CSVDiscMin),
     Subjet1CSVDiscMax   = cms.double(options.subjet1CSVDiscMax),
     Subjet2CSVDiscMin   = cms.double(options.subjet2CSVDiscMin),
@@ -186,13 +201,17 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     HTMin               = cms.double(options.hTMin),
     HTMax               = cms.double(options.hTMax), 
     JetSelParams        = defaultJetSelectionParameters.clone(), 
-    FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
+    FatJetSelParams     = defaultFatJetSelectionParameters.clone(
+      fatJetTau2ByTau1Max = cms.double(1.1), 
+      ), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(), 
     HTSelParams         = defaultHTSelectionParameters.clone(
       HTMin = cms.double(900), 
       ),
     EvtSelParams        = defaultEventSelectionParameters.clone(),
     JMEParams           = defaultJMEUncertUntilParameters.clone(), 
+    ApplyJEC            = cms.bool(options.ApplyJEC), 
+    ApplyBTagSF         = cms.bool(options.ApplyBTagSF), 
     JESShift            = cms.double(options.JESShift), 
     JERShift            = cms.double(options.JERShift), 
     SFbShift            = cms.double(options.SFbShift), 

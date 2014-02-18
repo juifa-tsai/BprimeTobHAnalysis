@@ -9,7 +9,6 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include "BpbH/BprimeTobH/interface/JetCollection.h"
 
-class EvtInfoBranches;
 class JetInfoBranches;
 
 using std::string;
@@ -17,13 +16,13 @@ using std::string;
 class JMEUncertUtil {
 
   public: 
-    JMEUncertUtil (const edm::ParameterSet& iConfig, EvtInfoBranches &evt, JetCollection &jets, std::string stype, double jecShift) ; 
+    JMEUncertUtil (const edm::ParameterSet& iConfig, JetCollection &jets, std::string stype, double jecShift) ; 
     ~JMEUncertUtil () ; 
 
     JetCollection GetModifiedJetColl() const ;  
 
     static const string JEC_Types[];
-    enum JEC_TYPE {NOSYS, JESAK5DATA, JESAK5MC, JESCA8DATA, JESCA8MC, JER, NTYPES}  ; 
+    enum JEC_TYPE {NOSYS, JESAK5MC, JESCA8MC, JERAK5MC, JERCA8MC, NTYPES}  ; 
 
   private:
 
@@ -38,7 +37,6 @@ class JMEUncertUtil {
     std::vector<double> jerSigmaPos_ ; 
     std::string stype_ ; 
     double jecShift_ ; 
-    EvtInfoBranches* evt_ ;  
     const JetCollection jets_ ; 
 
     JEC_TYPE jecType_ ; 

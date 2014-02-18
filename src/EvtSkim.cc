@@ -244,23 +244,23 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
         myjets.push_back(thisjet) ; 
       }
 
-      JMEUncertUtil* jmeUtil_jesUp = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JES", 1.0) ; 
+      JMEUncertUtil* jmeUtil_jesUp = new JMEUncertUtil(jmeParams_, myjets, "JES", 1.0) ; 
       JetCollection myjets_jesUp = jmeUtil_jesUp->GetModifiedJetColl() ; 
       delete jmeUtil_jesUp ; 
 
-      JMEUncertUtil* jmeUtil_jesDown = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JES", -1.0) ; 
+      JMEUncertUtil* jmeUtil_jesDown = new JMEUncertUtil(jmeParams_, myjets, "JES", -1.0) ; 
       JetCollection myjets_jesDown = jmeUtil_jesDown->GetModifiedJetColl() ; 
       delete jmeUtil_jesDown ; 
 
-      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", 0.0) ; 
+      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, myjets, "JER", 0.0) ; 
       JetCollection myjets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
       delete jmeUtil_jer ; 
 
-      JMEUncertUtil* jmeUtil_jerUp = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", 1.0) ; 
+      JMEUncertUtil* jmeUtil_jerUp = new JMEUncertUtil(jmeParams_, myjets, "JER", 1.0) ; 
       JetCollection myjets_jerUp = jmeUtil_jerUp->GetModifiedJetColl() ; 
       delete jmeUtil_jerUp ; 
 
-      JMEUncertUtil* jmeUtil_jerDown = new JMEUncertUtil(jmeParams_, EvtInfo, myjets, "JER", -1.0) ; 
+      JMEUncertUtil* jmeUtil_jerDown = new JMEUncertUtil(jmeParams_, myjets, "JER", -1.0) ; 
       JetCollection myjets_jerDown = jmeUtil_jerDown->GetModifiedJetColl() ; 
       delete jmeUtil_jerDown ; 
 
