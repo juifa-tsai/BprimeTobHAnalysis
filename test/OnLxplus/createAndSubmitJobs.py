@@ -81,7 +81,6 @@ cmsRun CMSSW_cfg.py CFG_PARAMETERS
 exitcode=$?
 
 cp -v OUTPUT_FILENAME.root DATASET_WORKDIR/output/OUTPUT_FILENAME_JOB_NUMBER.root
-cp -v Evt_NoJets.txt DATASET_WORKDIR/output/Evt_NoJets_JOB_NUMBER.txt
 
 exit $exitcode
 

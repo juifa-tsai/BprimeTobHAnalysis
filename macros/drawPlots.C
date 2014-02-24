@@ -29,7 +29,7 @@
 
 using namespace std;
 
-TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_16Feb/Final_histograms_BprimebH.root" ;  
+TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_19Feb/Final_histograms_BprimebH.root" ;  
 TString filename_JESUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESUp/Final_histograms_BprimebH.root" ; 
 TString filename_JESDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESDown/Final_histograms_BprimebH.root" ; 
 TString filename_JERUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JERUp/Final_histograms_BprimebH.root" ; 
@@ -43,7 +43,7 @@ Double_t Lint = 19700.0 ;
 TString title1 = "CMS Preliminary, 19.7/fb at #sqrt{s} = 8 TeV";
 TString datacaption = "Data"; 
 
-TString dir4plots ="LXBATCH_Jobs_16Feb" ; 
+TString dir4plots ="BprimeTobH_19Feb_SingleBprimes" ; 
 
 TString formata = ".pdf";
 TString formatb = ".png";
@@ -80,12 +80,12 @@ void drawPlots () {
 
 void DrawAll () {
 
-  DrawStacked("h_cutflow" ,"" ,1 ,1 ,0 ,1 ,1 ,0 ,7); 
+  DrawStacked("h_cutflow" ,"" ,1 ,1 ,0 ,1 ,1 ,0 ,9); 
 
   DrawStacked("TriggerSel_nPVtx_NoPUWt" ,"N(PV), No PU weight" ,0 ,1 ,0 ,1 ,1 ,0 ,50); 
   DrawStacked("TriggerSel_nPVtx_PUWt" ,"N(PV)" ,0 ,1 ,0 ,1 ,1 ,0 ,50); 
 
-  TString cuts[5] = {"TriggerSel", "FatJetSel", "HiggsJetSel", "BJetsSel", "HTSel"} ; 
+  TString cuts[7] = {"TriggerSel", "FatJetSel", "HiggsJetSel", "BJetsSel", "HTSel", "HTSel_1H_1b", "HTSel_1H_2b"} ; 
 
   for (int ii = 0; ii < 5; ++ii) {
     TString cut = cuts[ii] ; 
@@ -125,6 +125,12 @@ void DrawAll () {
     DrawStacked(cut+"_HiggsJet_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
     DrawStacked(cut+"_HiggsJet_Eta" ,"#eta (Higgs jet)" ,1 ,1 ,0 ,4 ,10, -4., 4.); 
     DrawStacked(cut+"_HiggsJet_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
+
+    DrawStacked(cut+"_nHJetsNoMDyCut" ,"N(Higgs jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,5); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_Eta" ,"#eta (Higgs jet)" ,1 ,1 ,0 ,4 ,10, -4., 4.); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_DRsubjets" ,"#DeltaR_{y,#phi}(subjets)" ,1 ,1 ,0 ,1 ,5 ,0 ,2); 
 
     DrawStacked(cut+"_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
     DrawStacked(cut+"_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
@@ -201,9 +207,9 @@ void DrawStacked(TString name,
 
   hist_qcd              = (TH1D*)myFile->Get("QCD__"+name);
   hist_ttjets           = (TH1D*)myFile->Get("TTJets__"+name);
-  hist_sig0             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-500__"+name);
-  hist_sig1             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-800__"+name);
-  hist_sig2             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+  hist_sig0             = (TH1D*)myFile->Get("BprimeToBHinc_M-500_8TeV-madgraph__"+name);
+  hist_sig1             = (TH1D*)myFile->Get("BprimeToBHinc_M-800_8TeV-madgraph__"+name);
+  hist_sig2             = (TH1D*)myFile->Get("BprimeToBHinc_M-1000_8TeV-madgraph__"+name);
   if (doData) hist_data = (TH1D*)myFile->Get("DATA__"+name);
 
   hist_sig2->Scale(10.) ; 
@@ -270,72 +276,72 @@ void DrawStacked(TString name,
     myFile_JESUp->cd();
     hist_ttjets_JESUp = (TH1D*)myFile_JESUp->Get("TTJets__"+name);                         
     hist_qcd_JESUp    = (TH1D*)myFile_JESUp->Get("QCD__"+name);                      
-    hist_sig0_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_JESUp   = (TH1D*)myFile_JESUp->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_JESUp   = (TH1D*)myFile_JESUp->Get("DATA__"+name);                        
 
     myFile_JERUp = TFile::Open(filename_JERUp, "READ") ; 
     myFile_JERUp->cd();
     hist_ttjets_JERUp = (TH1D*)myFile_JERUp->Get("TTJets__"+name);                         
     hist_qcd_JERUp    = (TH1D*)myFile_JERUp->Get("QCD__"+name);                      
-    hist_sig0_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_JERUp   = (TH1D*)myFile_JERUp->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_JERUp   = (TH1D*)myFile_JERUp->Get("DATA__"+name);                        
 
     myFile_SFbUp = TFile::Open(filename_SFbUp, "READ") ; 
     myFile_SFbUp->cd();
     hist_ttjets_SFbUp = (TH1D*)myFile_SFbUp->Get("TTJets__"+name);                         
     hist_qcd_SFbUp    = (TH1D*)myFile_SFbUp->Get("QCD__"+name);                      
-    hist_sig0_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_SFbUp   = (TH1D*)myFile_SFbUp->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_SFbUp   = (TH1D*)myFile_SFbUp->Get("DATA__"+name);                        
 
     myFile_SFlUp = TFile::Open(filename_SFlUp, "READ") ; 
     myFile_SFlUp->cd();
     hist_ttjets_SFlUp = (TH1D*)myFile_SFlUp->Get("TTJets__"+name);                         
     hist_qcd_SFlUp    = (TH1D*)myFile_SFlUp->Get("QCD__"+name);                      
-    hist_sig0_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_SFlUp   = (TH1D*)myFile_SFlUp->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_SFlUp   = (TH1D*)myFile_SFlUp->Get("DATA__"+name);                        
 
     myFile_JESDown = TFile::Open(filename_JESDown, "READ") ; 
     myFile_JESDown->cd();
     hist_ttjets_JESDown = (TH1D*)myFile_JESDown->Get("TTJets__"+name);                         
     hist_qcd_JESDown    = (TH1D*)myFile_JESDown->Get("QCD__"+name);                      
-    hist_sig0_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_JESDown   = (TH1D*)myFile_JESDown->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_JESDown   = (TH1D*)myFile_JESDown->Get("DATA__"+name);                        
 
     myFile_JERDown = TFile::Open(filename_JERDown, "READ") ; 
     myFile_JERDown->cd();
     hist_ttjets_JERDown = (TH1D*)myFile_JERDown->Get("TTJets__"+name);                         
     hist_qcd_JERDown    = (TH1D*)myFile_JERDown->Get("QCD__"+name);                      
-    hist_sig0_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_JERDown   = (TH1D*)myFile_JERDown->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_JERDown   = (TH1D*)myFile_JERDown->Get("DATA__"+name);                        
 
     myFile_SFbDown = TFile::Open(filename_SFbDown, "READ") ; 
     myFile_SFbDown->cd();
     hist_ttjets_SFbDown = (TH1D*)myFile_SFbDown->Get("TTJets__"+name);                         
     hist_qcd_SFbDown    = (TH1D*)myFile_SFbDown->Get("QCD__"+name);                      
-    hist_sig0_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_SFbDown   = (TH1D*)myFile_SFbDown->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_SFbDown   = (TH1D*)myFile_SFbDown->Get("DATA__"+name);                        
 
     myFile_SFlDown = TFile::Open(filename_SFlDown, "READ") ; 
     myFile_SFlDown->cd();
     hist_ttjets_SFlDown = (TH1D*)myFile_SFlDown->Get("TTJets__"+name);                         
     hist_qcd_SFlDown    = (TH1D*)myFile_SFlDown->Get("QCD__"+name);                      
-    hist_sig0_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeBprimeToBHBHinc_M-500__"+name); 
-    hist_sig1_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeBprimeToBHBHinc_M-800__"+name); 
-    hist_sig2_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+    hist_sig0_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeToBHinc_M-500__"+name); 
+    hist_sig1_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeToBHinc_M-800__"+name); 
+    hist_sig2_SFlDown   = (TH1D*)myFile_SFlDown->Get("BprimeToBHinc_M-1000__"+name);
     hist_data_SFlDown   = (TH1D*)myFile_SFlDown->Get("DATA__"+name);                        
 
     fix(hist_ttjets_JESUp) ; fix(hist_ttjets_JESDown); fix(hist_ttjets_JERUp); fix(hist_ttjets_JERDown) ;
