@@ -131,6 +131,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double jerShift_; 
     const double SFbShift_;
     const double SFlShift_;
+    const bool   doTrigEff_;
 
     TChain*            chain_;
 
@@ -200,6 +201,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   jerShift_(iConfig.getParameter<double>("JERShift")),
   SFbShift_(iConfig.getParameter<double>("SFbShift")),
   SFlShift_(iConfig.getParameter<double>("SFlShift")),
+  doTrigEff_(iConfig.getParameter<double>("DoTrigEff")),
   isData_(0),
   evtwt_(1), 
   puweight_(1)  
@@ -382,7 +384,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     if((entry%reportEvery_) == 0) edm::LogInfo("Event") << entry << " of " << maxEvents_ ; 
 
     //// Event variables 
-    bool passHLT(false) ; 
+    bool passHLT(false), passBSel(false) ; 
     int nGoodVtxs(0) ;
     JetCollection fatjets_corr, HjetsNoMassDyCuts_corr, Hjets_corr, ak5jets_corr, allAK5jets_corr, ak5jets_leading4, bjets, jets_CA8_leading2_AK5_leading2 ; 
     HT HTAK5, HTAllAK5, HTAK5_leading4, HTCA8_leading2_AK5_leading2, MyHT ; 
@@ -447,10 +449,12 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     TriggerSelector trigSel(hltPaths_) ; 
     passHLT = trigSel.getTrigDecision(EvtInfo) ; 
-    if ( !passHLT ) continue ; 
-    h_cutflow -> Fill("TriggerSel", 1) ; 
-    FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt_*puweight_) ; 
+    if ( !doTrigEff_ && !passHLT ) continue ; 
+    if ( !doTrigEff_ ) {
+      h_cutflow -> Fill("TriggerSel", 1) ; 
+      FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt_*puweight_) ; 
+    }
 
     evtwt_ *= puweight_ ; 
 
@@ -695,31 +699,34 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     MyHT.setJetCollection(bjets) ; 
     MyHT.buildHT() ; 
 
-    FillHisto(TString("TriggerSel")+TString("_nJets"), ak5jets_corr.size(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_nFatJets"), fatjets_corr.size(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_nAllAK5"), allAK5jets_corr.size() , evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_nBJets"), bjets.size(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_nHJets"), Hjets_corr.size(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt_) ; 
-    FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt_) ; 
-    for (JetCollection::const_iterator ib = bjets.begin(); ib != bjets.end(); ++ib) { 
-      FillHisto(TString("TriggerSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
-      FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
+    if ( !doTrigEff_ ) {
+      FillHisto(TString("TriggerSel")+TString("_nJets"), ak5jets_corr.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nFatJets"), fatjets_corr.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nAllAK5"), allAK5jets_corr.size() , evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nBJets"), bjets.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nHJets"), Hjets_corr.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt_) ; 
+      for (JetCollection::const_iterator ib = bjets.begin(); ib != bjets.end(); ++ib) { 
+        FillHisto(TString("TriggerSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
+        FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
+      }
+
+      if (allAK5jets_corr.size() > 0) FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), (allAK5jets_corr.at(0)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), 0., evtwt_) ; 
+      if (allAK5jets_corr.size() > 1) FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), (allAK5jets_corr.at(1)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), 0., evtwt_) ; 
+      if (allAK5jets_corr.size() > 2) FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), (allAK5jets_corr.at(2)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), 0., evtwt_) ; 
+      if (allAK5jets_corr.size() > 3) FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), (allAK5jets_corr.at(3)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), 0., evtwt_) ; 
     }
 
-    if (allAK5jets_corr.size() > 0) FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), (allAK5jets_corr.at(0)).Pt(), evtwt_) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), 0., evtwt_) ; 
-    if (allAK5jets_corr.size() > 1) FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), (allAK5jets_corr.at(1)).Pt(), evtwt_) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), 0., evtwt_) ; 
-    if (allAK5jets_corr.size() > 2) FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), (allAK5jets_corr.at(2)).Pt(), evtwt_) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), 0., evtwt_) ; 
-    if (allAK5jets_corr.size() > 3) FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), (allAK5jets_corr.at(3)).Pt(), evtwt_) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), 0., evtwt_) ; 
-
     //// Event selection  
+    passBSel = false ; 
     if (fatjets_corr.size() >= 1) {
       h_cutflow -> Fill("FatJetSel", 1) ; 
       FillHisto(TString("FatJetSel")+TString("_nJets"), ak5jets_corr.size(), evtwt_) ; 
@@ -1108,10 +1115,40 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
                 } //// Fill all bprime candidates 
               } //// >= 2 HJet and >=2 bjet  
             } //// If event passes HT 
+            passBSel = true ; 
           } //// If at least one b-jets 
         } //// If at least one AK5 jet 
       } //// If at least one Higgs jet 
     } //// If at least one fat jet 
+
+    if ( doTrigEff_ && passBSel && passHLT) { 
+      h_cutflow -> Fill("TriggerSel", 1) ; 
+      FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt_*puweight_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nJets"), ak5jets_corr.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nFatJets"), fatjets_corr.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nAllAK5"), allAK5jets_corr.size() , evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nBJets"), bjets.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_nHJets"), Hjets_corr.size(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt_) ; 
+      FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt_) ; 
+      for (JetCollection::const_iterator ib = bjets.begin(); ib != bjets.end(); ++ib) { 
+        FillHisto(TString("TriggerSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
+        FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
+      }
+
+      if (allAK5jets_corr.size() > 0) FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), (allAK5jets_corr.at(0)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), 0., evtwt_) ; 
+      if (allAK5jets_corr.size() > 1) FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), (allAK5jets_corr.at(1)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), 0., evtwt_) ; 
+      if (allAK5jets_corr.size() > 2) FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), (allAK5jets_corr.at(2)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), 0., evtwt_) ; 
+      if (allAK5jets_corr.size() > 3) FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), (allAK5jets_corr.at(3)).Pt(), evtwt_) ; 
+      else FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), 0., evtwt_) ; 
+    }
 
   } //// entry loop 
 
