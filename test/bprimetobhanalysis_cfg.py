@@ -103,7 +103,6 @@ options.register('hTMax', 1.E6,
     VarParsing.varType.float,
     "Maximum HT"
     )
-
 options.register('doPUReweighting', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
@@ -138,6 +137,11 @@ options.register('SFlShift', 0.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "SFl shift in unit of sigmas" 
+    )
+options.register('DoTrigEff', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Do trigger efficiency" 
     )
 
 options.setDefault('maxEvents', -1000) 
@@ -174,9 +178,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string('ntuple/tree'),
-    InputFiles          = cms.vstring(FileNames), 
-    #InputFiles          = cms.vstring(FileNames_Bp500), 
-    #InputFiles          = cms.vstring(FileNames_Bp800), 
+    InputFiles          = cms.vstring(FileNames_Bp500), 
+    #InputFiles          = cms.vstring(FileNames_BpBp800), 
     #InputFiles          = cms.vstring(FileNames_TTbar), 
     #InputFiles          = cms.vstring(FileNames_QCD1800), 
     HLTPaths            = defaultTriggerSelectionParameters.clone(), 
@@ -219,6 +222,7 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     JERShift            = cms.double(options.JERShift), 
     SFbShift            = cms.double(options.SFbShift), 
     SFlShift            = cms.double(options.SFlShift), 
+    DoTrigEff           = cms.double(options.DoTrigEff),
     ) 
 
 process.p = cms.Path(process.BprimebH)

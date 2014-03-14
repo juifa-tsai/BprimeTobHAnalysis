@@ -43,7 +43,7 @@ Double_t Lint = 19700.0 ;
 TString title1 = "CMS Preliminary, 19.7/fb at #sqrt{s} = 8 TeV";
 TString datacaption = "Data"; 
 
-TString dir4plots ="BprimeTobH_19Feb_SingleBprimes" ; 
+TString dir4plots = "BprimeTobH_19Feb_SingleBprimes_NoData" ; 
 
 TString formata = ".pdf";
 TString formatb = ".png";
@@ -53,7 +53,8 @@ TString formatc = ".C";
 bool web = 0;
 bool setSampleName = 1;
 bool systUnc = 0 ; 
-bool blindSigRegion = 0; 
+bool blindSigRegion = 1; 
+bool dodata = 0; 
 
 void DrawAll () ; 
 void DrawStacked(TString name, TString histotitle, bool log, bool doData, bool fExtNorm=false, int nRebin=1, bool setXRange=false, double rangeXLow=0., double rangeXHigh=0.);
@@ -80,105 +81,88 @@ void drawPlots () {
 
 void DrawAll () {
 
-  DrawStacked("h_cutflow" ,"" ,1 ,1 ,0 ,1 ,1 ,0 ,9); 
+  DrawStacked("h_cutflow" ,"" ,1 ,dodata ,0 ,1 ,1 ,0 ,9); 
 
-  DrawStacked("TriggerSel_nPVtx_NoPUWt" ,"N(PV), No PU weight" ,0 ,1 ,0 ,1 ,1 ,0 ,50); 
-  DrawStacked("TriggerSel_nPVtx_PUWt" ,"N(PV)" ,0 ,1 ,0 ,1 ,1 ,0 ,50); 
+  DrawStacked("TriggerSel_nPVtx_NoPUWt" ,"N(PV), No PU weight" ,0 ,dodata ,0 ,1 ,1 ,0 ,50); 
+  DrawStacked("TriggerSel_nPVtx_PUWt" ,"N(PV)" ,0 ,dodata ,0 ,1 ,1 ,0 ,50); 
 
   TString cuts[7] = {"TriggerSel", "FatJetSel", "HiggsJetSel", "BJetsSel", "HTSel", "HTSel_1H_1b", "HTSel_1H_2b"} ; 
 
   for (int ii = 0; ii < 5; ++ii) {
     TString cut = cuts[ii] ; 
 
-    DrawStacked(cut+"_nJets" ,"N(AK5 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,10); 
+    DrawStacked(cut+"_nJets"        ,"N(AK5 jets)"                  ,1 ,dodata ,0 ,1 ,1 ,0   ,10); 
 
-    DrawStacked(cut+"_nAllAK5" ,"N(All AK5 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,10); 
-    DrawStacked(cut+"_AK5Jet_1_Pt" ,"p_{T} (leading AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,2000); 
-    DrawStacked(cut+"_AK5Jet_2_Pt" ,"p_{T} (2nd AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,2000); 
-    DrawStacked(cut+"_AK5Jet_3_Pt" ,"p_{T} (3rd AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,2000); 
-    DrawStacked(cut+"_AK5Jet_4_Pt" ,"p_{T} (4th AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,2000); 
-    DrawStacked(cut+"_AK5Jet_1_Eta" ,"#eta (leading AK5 jet)[GeV]" ,1 ,1 ,0 ,2 ,1 ,-4. ,4.); 
-    DrawStacked(cut+"_AK5Jet_2_Eta" ,"#eta (2nd AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,2 ,-4. ,4.); 
-    DrawStacked(cut+"_AK5Jet_3_Eta" ,"#eta (3rd AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,2 ,-4. ,4.); 
-    DrawStacked(cut+"_AK5Jet_4_Eta" ,"#eta (4th AK5 jet)[GeV]" ,1 ,1 ,0 ,1 ,2 ,-4. ,4.); 
+    DrawStacked(cut+"_nAllAK5"      ,"N(All AK5 jets)"              ,1 ,dodata ,0 ,1 ,1 ,0   ,10); 
+    DrawStacked(cut+"_AK5Jet_1_Pt"  ,"p_{T} (leading AK5 jet)[GeV]" ,1 ,dodata ,0 ,1 ,1 ,0   ,2000); 
+    DrawStacked(cut+"_AK5Jet_2_Pt"  ,"p_{T} (2nd AK5 jet)[GeV]"     ,1 ,dodata ,0 ,1 ,1 ,0   ,2000); 
+    DrawStacked(cut+"_AK5Jet_3_Pt"  ,"p_{T} (3rd AK5 jet)[GeV]"     ,1 ,dodata ,0 ,1 ,1 ,0   ,2000); 
+    DrawStacked(cut+"_AK5Jet_4_Pt"  ,"p_{T} (4th AK5 jet)[GeV]"     ,1 ,dodata ,0 ,1 ,1 ,0   ,2000); 
+    DrawStacked(cut+"_AK5Jet_1_Eta" ,"#eta (leading AK5 jet)[GeV]"  ,1 ,dodata ,0 ,2 ,1 ,-4. ,4.); 
+    DrawStacked(cut+"_AK5Jet_2_Eta" ,"#eta (2nd AK5 jet)[GeV]"      ,1 ,dodata ,0 ,1 ,2 ,-4. ,4.); 
+    DrawStacked(cut+"_AK5Jet_3_Eta" ,"#eta (3rd AK5 jet)[GeV]"      ,1 ,dodata ,0 ,1 ,2 ,-4. ,4.); 
+    DrawStacked(cut+"_AK5Jet_4_Eta" ,"#eta (4th AK5 jet)[GeV]"      ,1 ,dodata ,0 ,1 ,2 ,-4. ,4.); 
 
-    DrawStacked(cut+"_nFatJets" ,"N(CA8 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,5); 
-    DrawStacked(cut+"_FatJets_Pt" ,"p_{T}(CA8 jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,1000); 
-    DrawStacked(cut+"_FatJets_Mass" ,"M(CA8 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
-    DrawStacked(cut+"_FatJets_MassPruned" ,"pruned mass(CA8 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
-    DrawStacked(cut+"_FatJets_tau2ByTau1" ,"#tau_{2}/#tau_{1}(Pruned CA8 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,1); 
-    DrawStacked(cut+"_FatJets_tau3ByTau1" ,"#tau_{3}/#tau_{1}(Pruned CA8 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,1); 
-    DrawStacked(cut+"_FatJets_tau3ByTau2" ,"#tau_{3}/#tau_{2}(Pruned CA8 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,1); 
+    DrawStacked(cut+"_nFatJets"           ,"N(CA8 jets)"                        ,1 ,dodata ,0 ,1 ,1 ,0 ,5); 
+    DrawStacked(cut+"_FatJets_Pt"         ,"p_{T}(CA8 jets) [GeV]"              ,1 ,dodata ,0 ,4 ,1 ,0 ,1000); 
+    DrawStacked(cut+"_FatJets_Mass"       ,"M(CA8 jets) [GeV]"                  ,1 ,dodata ,0 ,1 ,1 ,0 ,1000); 
+    DrawStacked(cut+"_FatJets_MassPruned" ,"pruned mass(CA8 jets) [GeV]"        ,1 ,dodata ,0 ,1 ,1 ,0 ,1000); 
+    DrawStacked(cut+"_FatJets_tau2ByTau1" ,"#tau_{2}/#tau_{1}(Pruned CA8 jets)" ,1 ,dodata ,0 ,1 ,1 ,0 ,1); 
+    DrawStacked(cut+"_FatJets_tau3ByTau1" ,"#tau_{3}/#tau_{1}(Pruned CA8 jets)" ,1 ,dodata ,0 ,1 ,1 ,0 ,1); 
+    DrawStacked(cut+"_FatJets_tau3ByTau2" ,"#tau_{3}/#tau_{2}(Pruned CA8 jets)" ,1 ,dodata ,0 ,1 ,1 ,0 ,1); 
 
-    DrawStacked(cut+"_SubJet1_Pt" ,"p_{T}(leading subjet) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
-    DrawStacked(cut+"_SubJet2_Pt" ,"p_{T}(subleading subjet) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
-    DrawStacked(cut+"_SubJet1_Mass" ,"M(leading subjet) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,600); 
-    DrawStacked(cut+"_SubJet2_Mass" ,"M(subleading subjet) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,300); 
-    DrawStacked(cut+"_SubJet1_CombinedSVBJetTags" ,"CSV discriminator(leading subjet)" ,1 ,1 ,0 ,1 ,1 ,0 ,1); 
-    DrawStacked(cut+"_SubJet2_CombinedSVBJetTags" ,"CSV discriminator(subleading subjet)" ,1 ,1 ,0 ,1 ,1 ,0 ,1); 
+    DrawStacked(cut+"_SubJet1_Pt"                 ,"p_{T}(leading subjet) [GeV]"          ,1 ,dodata ,0 ,1 ,1 ,0 ,1000); 
+    DrawStacked(cut+"_SubJet2_Pt"                 ,"p_{T}(subleading subjet) [GeV]"       ,1 ,dodata ,0 ,1 ,1 ,0 ,1000); 
+    DrawStacked(cut+"_SubJet1_Mass"               ,"M(leading subjet) [GeV]"              ,1 ,dodata ,0 ,1 ,1 ,0 ,600); 
+    DrawStacked(cut+"_SubJet2_Mass"               ,"M(subleading subjet) [GeV]"           ,1 ,dodata ,0 ,1 ,1 ,0 ,300); 
+    DrawStacked(cut+"_SubJet1_CombinedSVBJetTags" ,"CSV discriminator(leading subjet)"    ,1 ,dodata ,0 ,1 ,1 ,0 ,1); 
+    DrawStacked(cut+"_SubJet2_CombinedSVBJetTags" ,"CSV discriminator(subleading subjet)" ,1 ,dodata ,0 ,1 ,1 ,0 ,1); 
 
-    DrawStacked(cut+"_nBJets" ,"N(b-tagged AK5 jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,5); 
-    DrawStacked(cut+"_BJet_Pt" ,"p_{T}(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,1000); 
-    DrawStacked(cut+"_BJet_Eta" ,"#eta(b-tagged AK5 jets) [GeV]" ,1 ,1 ,0 ,1 ,1 , -3, 3); 
+    DrawStacked(cut+"_nBJets"   ,"N(b-tagged AK5 jets)"           ,1 ,dodata ,0 ,1 ,1 ,0  ,5); 
+    DrawStacked(cut+"_BJet_Pt"  ,"p_{T}(b-tagged AK5 jets) [GeV]" ,1 ,dodata ,0 ,1 ,1 ,0  ,1000); 
+    DrawStacked(cut+"_BJet_Eta" ,"#eta(b-tagged AK5 jets) [GeV]"  ,1 ,dodata ,0 ,1 ,1 ,-3 , 3); 
 
-    DrawStacked(cut+"_nHJets" ,"N(Higgs jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,5); 
-    DrawStacked(cut+"_HiggsJet_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
-    DrawStacked(cut+"_HiggsJet_Eta" ,"#eta (Higgs jet)" ,1 ,1 ,0 ,4 ,10, -4., 4.); 
-    DrawStacked(cut+"_HiggsJet_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
+    DrawStacked(cut+"_nHJets"        ,"N(Higgs jets)"            ,1 ,dodata ,0 ,1 ,1  ,0   ,5); 
+    DrawStacked(cut+"_HiggsJet_Pt"   ,"p_{T} (Higgs jets) [GeV]" ,1 ,dodata ,0 ,4 ,1  ,0   ,2000); 
+    DrawStacked(cut+"_HiggsJet_Eta"  ,"#eta (Higgs jet)"         ,1 ,dodata ,0 ,4 ,10 , -4., 4.); 
+    DrawStacked(cut+"_HiggsJet_Mass" ,"M(Higgs jets) [GeV]"      ,1 ,dodata ,0 ,1 ,1  ,0   ,200); 
 
-    DrawStacked(cut+"_nHJetsNoMDyCut" ,"N(Higgs jets)" ,1 ,1 ,0 ,1 ,1 ,0 ,5); 
-    DrawStacked(cut+"_HiggsJetNoMDyCut_Pt" ,"p_{T} (Higgs jets) [GeV]" ,1 ,1 ,0 ,4 ,1 ,0 ,2000); 
-    DrawStacked(cut+"_HiggsJetNoMDyCut_Eta" ,"#eta (Higgs jet)" ,1 ,1 ,0 ,4 ,10, -4., 4.); 
-    DrawStacked(cut+"_HiggsJetNoMDyCut_Mass" ,"M(Higgs jets) [GeV]" ,1 ,1 ,0 ,1 ,1 ,0 ,200); 
-    DrawStacked(cut+"_HiggsJetNoMDyCut_DRsubjets" ,"#DeltaR_{y,#phi}(subjets)" ,1 ,1 ,0 ,1 ,5 ,0 ,2); 
+    DrawStacked(cut+"_nHJetsNoMDyCut"             ,"N(Higgs jets)"             ,1 ,dodata ,0 ,1 ,1  ,0   ,5); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_Pt"        ,"p_{T} (Higgs jets) [GeV]"  ,1 ,dodata ,0 ,4 ,1  ,0   ,2000); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_Eta"       ,"#eta (Higgs jet)"          ,1 ,dodata ,0 ,4 ,10 , -4., 4.); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_Mass"      ,"M(Higgs jets) [GeV]"       ,1 ,dodata ,0 ,1 ,1  ,0   ,200); 
+    DrawStacked(cut+"_HiggsJetNoMDyCut_DRsubjets" ,"#DeltaR_{y,#phi}(subjets)" ,1 ,dodata ,0 ,1 ,5  ,0   ,2); 
 
-    DrawStacked(cut+"_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-    DrawStacked(cut+"_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-    DrawStacked(cut+"_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-    DrawStacked(cut+"_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-    DrawStacked(cut+"_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+    DrawStacked(cut+"_HT"                          ,"H_{T} (Higgs + b jets) [GeV]"               ,1 ,dodata ,0 ,5 ,1 ,0 ,4000); 
+    DrawStacked(cut+"_HTAK5"                       ,"H_{T} (AK5 jets) [GeV]"                     ,1 ,dodata ,0 ,5 ,1 ,0 ,4000); 
+    DrawStacked(cut+"_HTAK5_leading4"              ,"H_{T} (leading four AK5 jets) [GeV]"        ,1 ,dodata ,0 ,5 ,1 ,0 ,4000); 
+    DrawStacked(cut+"_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,dodata ,0 ,5 ,1 ,0 ,4000); 
+    DrawStacked(cut+"_HTAllAK5"                    ,"H_{T} (All AK5 jets) [GeV]"                 ,1 ,dodata ,0 ,5 ,1 ,0 ,4000); 
 
   }
 
-  DrawStacked("HTSel_Nbprimes" ,"N (b' candidates)" ,1 ,1 ,0 ,5 ,1 ,-.5 ,4.5); 
-  DrawStacked("HTSel_bprimePt" ,"b' p_{T} [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_bprimeMass" ,"b' mass [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
+  DrawStacked("HTSel_Nbprimes"   ,"N (b' candidates)" ,1 ,dodata ,0 ,5 ,1 ,-.5  ,4.5); 
+  DrawStacked("HTSel_bprimePt"   ,"b' p_{T} [GeV]"    ,1 ,dodata ,0 ,5 ,1 ,  0. ,2000); 
+  DrawStacked("HTSel_bprimeMass" ,"b' mass [GeV]"     ,1 ,dodata ,0 ,5 ,1 ,  0. ,2000); 
 
-  DrawStacked("HTSel_1H_1b_Nbprimes" ,"N (b' candidates)" ,1 ,1 ,0 ,5 ,1 ,-.5 ,4.5); 
-  DrawStacked("HTSel_1H_1b_bprimePt" ,"b' p_{T} [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_1H_1b_bprimeMass" ,"b' mass [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_1H_1b_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_1b_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_1b_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_1b_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_1b_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+  DrawStacked("HTSel_1H_1b_Nbprimes"                    ,"N (b' candidates)"                          ,1 ,dodata ,0 ,5 ,1 ,-.5 ,4.5); 
+  DrawStacked("HTSel_1H_1b_bprimePt"                    ,"b' p_{T} [GeV]"                             ,1 ,dodata ,0 ,5 ,1, 0.  ,2000); 
+  DrawStacked("HTSel_1H_1b_bprimeMass"                  ,"b' mass [GeV]"                              ,1 ,dodata ,0 ,5 ,1, 0.  ,2000); 
+  DrawStacked("HTSel_1H_1b_HT"                          ,"H_{T} (Higgs + b jets) [GeV]"               ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_1b_HTAK5"                       ,"H_{T} (AK5 jets) [GeV]"                     ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_1b_HTAK5_leading4"              ,"H_{T} (leading four AK5 jets) [GeV]"        ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_1b_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_1b_HTAllAK5"                    ,"H_{T} (All AK5 jets) [GeV]"                 ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
 
-  DrawStacked("HTSel_1H_2b_Nbprimes" ,"N (b' candidates)" ,1 ,1 ,0 ,5 ,1 ,-.5 ,4.5); 
-  DrawStacked("HTSel_1H_2b_bprimePt" ,"b' p_{T} [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_1H_2b_bprimeMass" ,"b' mass [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_1H_2b_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_2b_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_2b_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_2b_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_1H_2b_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
 
-  DrawStacked("HTSel_2H_1b_Nbprimes" ,"N (b' candidates)" ,1 ,1 ,0 ,5 ,1 ,-.5 ,4.5); 
-  DrawStacked("HTSel_2H_1b_bprimePt" ,"b' p_{T} [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_2H_1b_bprimeMass" ,"b' mass [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_2H_1b_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_1b_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_1b_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_1b_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_1b_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-
-  DrawStacked("HTSel_2H_2b_Nbprimes" ,"N (b' candidates)" ,1 ,1 ,0 ,5 ,1 ,-.5 ,4.5); 
-  DrawStacked("HTSel_2H_2b_bprimePt" ,"b' p_{T} [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_2H_2b_bprimeMass" ,"b' mass [GeV]" ,1 ,1 ,0 ,5 ,1,  0. ,2000); 
-  DrawStacked("HTSel_2H_2b_HT" ,"H_{T} (Higgs + b jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_2b_HTAK5" ,"H_{T} (AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_2b_HTAK5_leading4" ,"H_{T} (leading four AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_2b_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
-  DrawStacked("HTSel_2H_2b_HTAllAK5" ,"H_{T} (All AK5 jets) [GeV]" ,1 ,1 ,0 ,5 ,1 ,0 ,4000); 
+  DrawStacked("HTSel_1H_2b_Nbprimes"                    ,"N (b' candidates)"                          ,1 ,dodata ,0 ,5 ,1 ,-.5 ,4.5); 
+  DrawStacked("HTSel_1H_2b_bprimePt"                    ,"b' p_{T} [GeV]"                             ,1 ,dodata ,0 ,5 ,1, 0.  ,2000); 
+  DrawStacked("HTSel_1H_2b_bprimeMass"                  ,"b' mass [GeV]"                              ,1 ,dodata ,0 ,5 ,1, 0.  ,2000); 
+  DrawStacked("HTSel_1H_2b_HT"                          ,"H_{T} (Higgs + b jets) [GeV]"               ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_2b_HTAK5"                       ,"H_{T} (AK5 jets) [GeV]"                     ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_2b_HTAK5_leading4"              ,"H_{T} (leading four AK5 jets) [GeV]"        ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_2b_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading two AK5 and CA8 jets) [GeV]" ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
+  DrawStacked("HTSel_1H_2b_HTAllAK5"                    ,"H_{T} (All AK5 jets) [GeV]"                 ,1 ,dodata ,0 ,5 ,1 ,0   ,4000); 
 
   return ; 
 
@@ -233,7 +217,7 @@ void DrawStacked(TString name,
   hist_bkg = (TH1D*) hist_ttjets->Clone("hist_bkg");
   hist_bkg->Add(hist_qcd) ; 
 
-  if ( name.Contains("nPVtx") ) { 
+  if (doData &&  name.Contains("nPVtx") ) { 
     double scalef = hist_data->Integral()/hist_bkg->Integral() ; 
     hist_bkg->Scale(scalef) ; 
   }
@@ -536,12 +520,12 @@ void DrawStacked(TString name,
   stack->Add(hist_qcd) ; 
 
   TH1D *hist_mcUnc, *hist_ratio, *hist_ratioSigBlind ; 
-  if (doData) {
-    hist_mcUnc = (TH1D*)hist_bkg->Clone("hist_mcUnc") ; 
-    hist_mcUnc->Sumw2() ; 
-    hist_mcUnc->SetTitle("Stat. uncertainty on MC yield");
-    hist_mcUnc->Divide(hist_bkg);
+  hist_mcUnc = (TH1D*)hist_bkg->Clone("hist_mcUnc") ; 
+  hist_mcUnc->Sumw2() ; 
+  hist_mcUnc->SetTitle("Stat. uncertainty on MC yield");
+  hist_mcUnc->Divide(hist_bkg);
 
+  if (doData) {
     hist_ratio = (TH1D*) hist_data->Clone("hist_ratio");
     hist_ratio->Sumw2() ; 
     hist_ratio->SetTitle("Data/MC");
@@ -610,8 +594,7 @@ void DrawStacked(TString name,
     hist_bkg->Draw("HIST");
     TH1D* hist_dataSigBlind ; 
     if (doData) {
-      if (!blindSigRegion)  hist_data->Draw("SAMEE");
-      else {
+      if (blindSigRegion)  {
         hist_dataSigBlind = (TH1D*)hist_data->Clone("hist_dataSigBlind") ; 
         hist_dataSigBlind->Reset() ; 
         for (int ii = 1; ii <= hist_data->GetNbinsX(); ++ii) {
@@ -622,14 +605,18 @@ void DrawStacked(TString name,
         }
         hist_dataSigBlind->Draw("SAMEE"); 
       }
+      else  hist_data->Draw("SAMEE"); 
     }
     if ( name.Contains("h_cutflow") ) {
       hist_sig0->Draw("HISTSAME") ; 
       hist_sig1->Draw("HISTSAME") ; 
       hist_sig2->Draw("HISTSAME") ; 
-      for (int ii = 1; ii <= hist_data->GetNbinsX(); ++ii) {
-        std::cout << " Data: " << hist_data->GetXaxis()->GetBinLabel(ii) << " Event: " << hist_data->GetBinContent(ii) << " +/- " << hist_data->GetBinError(ii) << std::endl ; 
+      for (int ii = 1; ii <= hist_bkg->GetNbinsX(); ++ii) {
+        if (doData) std::cout << " Data: " << hist_data->GetXaxis()->GetBinLabel(ii) << " Event: " << hist_data->GetBinContent(ii) << " +/- " << hist_data->GetBinError(ii) << std::endl ; 
         std::cout << " Bkg: " << hist_bkg->GetXaxis()->GetBinLabel(ii) << " Event: " << hist_bkg->GetBinContent(ii) << " +/- " << hist_bkg->GetBinError(ii) << std::endl ; 
+        std::cout << " Sig0: " << hist_sig0->GetXaxis()->GetBinLabel(ii) << " Event: " << hist_sig0->GetBinContent(ii) << " +/- " << hist_sig0->GetBinError(ii) << std::endl ; 
+        std::cout << " Sig1: " << hist_sig1->GetXaxis()->GetBinLabel(ii) << " Event: " << hist_sig1->GetBinContent(ii) << " +/- " << hist_sig1->GetBinError(ii) << std::endl ; 
+        std::cout << " Sig2: " << hist_sig2->GetXaxis()->GetBinLabel(ii) << " Event: " << hist_sig2->GetBinContent(ii) << " +/- " << hist_sig2->GetBinError(ii) << std::endl ; 
       }
     }
   }
@@ -639,11 +626,9 @@ void DrawStacked(TString name,
     if ( systUnc ) gr_bkg_uncUp_uncDown -> Draw("2Z") ; 
     else hist_bkg->Draw("samee2");
     if (doData) hist_data->Draw("SAMEE1");
-    //DM if (name.Contains("HTSel")) { 
     hist_sig0->Draw("HISTSAME") ; 
     hist_sig1->Draw("HISTSAME") ; 
     hist_sig2->Draw("HISTSAME") ; 
-    // } 
   }
 
   pad0->RedrawAxis();
