@@ -9,21 +9,21 @@ DATA:
 /JetHT/Run2012D_missingPart-22Jan2013-v1/AOD -1
 
 # Dataset_name xs (in pb, for data set to -1)
-#BprimeToBHinc_M-500_8TeV-madgraph: L=19707
-#/BprimeToBHinc_M-500_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.026800000000000001 # MCM x-sec (LO)
-#BprimeToBHinc_M-600_8TeV-madgraph: L=19707
-#/BprimeToBHinc_M-600_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.013100000000000001 # MCM x-sec (LO) 
-#BprimeToBHinc_M-800_8TeV-madgraph: L=19707
-#/BprimeToBHinc_M-800_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.00365 # MCM x-sec (LO)  
-#BprimeToBHinc_M-1000_8TeV-madgraph: L=19707
-#/BprimeToBHinc_M-1000_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.00116 # MCM x-sec (LO) 
+BprimeToBHinc_M-500_8TeV-madgraph: L=19707
+/BprimeToBHinc_M-500_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.026800000000000001 # MCM x-sec (LO)
+BprimeToBHinc_M-600_8TeV-madgraph: L=19707
+/BprimeToBHinc_M-600_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.013100000000000001 # MCM x-sec (LO) 
+BprimeToBHinc_M-800_8TeV-madgraph: L=19707
+/BprimeToBHinc_M-800_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.00365 # MCM x-sec (LO)  
+BprimeToBHinc_M-1000_8TeV-madgraph: L=19707
+/BprimeToBHinc_M-1000_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.00116 # MCM x-sec (LO) 
 
-### Obtainling "NLO" cross section for single bprimes ###
-### (1) s-channel single top quark NNLO x-sec =  5.55 pb. 
-### (2) t-channel single top quark NNLO x-sec = 87.1 pb.
-### (3) k-factor = (87.1+5.55)/5.55 = 16.93.
-### Multiply Madgraph LO cross section by above k-factor. 
-### Source: https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV ### 
+## Obtainling "NLO" cross section for single bprimes ###
+## (1) s-channel single top quark NNLO x-sec =  5.55 pb. 
+## (2) t-channel single top quark NNLO x-sec = 87.1 pb.
+## (3) k-factor = (87.1+5.55)/5.55 = 16.93.
+## Multiply Madgraph LO cross section by above k-factor. 
+## Source: https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV ### 
 
 BprimeToBHinc_M-500_8TeV-madgraph: L=19707
 /BprimeToBHinc_M-500_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.447390991
@@ -34,7 +34,7 @@ BprimeToBHinc_M-800_8TeV-madgraph: L=19707
 BprimeToBHinc_M-1000_8TeV-madgraph: L=19707
 /BprimeToBHinc_M-1000_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 0.019364685 
 
-# Dataset_name xs (in pb, for data set to -1)
+ Dataset_name xs (in pb, for data set to -1)
 BprimeBprimeToBHBHinc_M-1000: L=19707
 /BprimeBprimeToBHBHinc_M-1000_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM 0.00328
 BprimeBprimeToBHBHinc_M-1200: L=19707
