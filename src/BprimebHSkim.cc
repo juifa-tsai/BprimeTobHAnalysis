@@ -113,7 +113,7 @@ void BprimebHSkim::beginJob(){
   h_cutflow->GetXaxis()->SetBinLabel(3, "BeforeSkim") ; 
   h_cutflow->GetXaxis()->SetBinLabel(4, "AfterSkim") ; 
 
-  for(unsigned i=0; i<inputFiles_.size(); ++i){
+  for(unsigned i=0; i<inputFiles_.size(); ++i) {
     chain_->Add(inputFiles_.at(i).c_str());
     TFile *f = TFile::Open(inputFiles_.at(i).c_str(),"READ");
     TH1F* h_events = (TH1F*)f->Get("ntuple/h_events") ; 
@@ -122,12 +122,12 @@ void BprimebHSkim::beginJob(){
     if ( i == 0 ) FatJetInfo.Register(chain_,"FatJetInfo");
     f->Close();
     if ( maxEvents_ < 0 || maxEvents_ >= chain_->GetEntries() ) {
-      h_cutflow->AddBinContent(1, h_events->GetBinContent(1)) ; 
-      h_cutflow->AddBinContent(2, h_events->GetBinContent(2)) ; 
+      h_cutflow->Fill("BeforeNtuplizer", h_events->GetBinContent(1)) ; 
+      h_cutflow->Fill("AfterNtuplizer", h_events->GetBinContent(2)) ; 
     } 
   }
 
-  if(  maxEvents_<0 || maxEvents_>chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
+  if(  maxEvents_ < 0 || maxEvents_ > chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
 
   fs->cd() ;
   newtree = chain_->CloneTree(0) ; 

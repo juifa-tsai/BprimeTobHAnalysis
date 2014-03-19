@@ -29,28 +29,44 @@ def process_input_dir(input_dir, match, filelist):
             continue
         if ( match!=None and not re.search(match, filename) ):
             continue
-        m1 = re.search('_\d+_\d+_\w+.root', filename)
+        if re.search('_\d+_\d+_\w+.root', filename):
+          m1 = re.search('_\d+_\d+_\w+.root', filename)
+        elif re.search('_\d+.root', filename):
+          m1 = re.search('_\d+.root', filename)
         if name=='':
+          if re.split('_\d+_\d+_\w+.root', filename)[0]:
             name = re.split('_\d+_\d+_\w+.root', filename)[0]
+          elif re.split('_\d+.root', filename)[0]: 
+            name = re.split('_\d+.root', filename)[0]
         jobstring = filename[m1.start():].lstrip('_').replace('.root','').split('_')
         job = int(jobstring[0])
-        if job not in jobdict.keys():
-            jobdict[job] = []
-            jobdict[job].append([int(jobstring[1])])
-            jobdict[job].append([jobstring[2]])
+        print 'job', job
+        if len(jobstring)>1:
+          if job not in jobdict.keys():
+              jobdict[job] = []
+              jobdict[job].append([int(jobstring[1])])
+              jobdict[job].append([jobstring[2]])
+          else:
+              jobdict[job][0].append(int(jobstring[1]))
+              jobdict[job][1].append(jobstring[2])
         else:
-            jobdict[job][0].append(int(jobstring[1]))
-            jobdict[job][1].append(jobstring[2])
+          if job not in jobdict.keys():
+            jobdict[job] = []
 
     jobs = jobdict.keys()
+    print 'jobs', jobs
     if( len(jobs)==0 ):
         print 'No matching .root files found'
         sys.exit()
 
     jobs.sort()
     for job in jobs:
-        maxsub = max(jobdict[job][0])
-        filename = (path+name+'_%i_%i_%s.root')%(job, maxsub, jobdict[job][1][jobdict[job][0].index(maxsub)])
+        if len(jobdict[job])>1:
+          maxsub = max(jobdict[job][0])
+          filename = (path+name+'_%i_%i_%s.root')%(job, maxsub, jobdict[job][1][jobdict[job][0].index(maxsub)])
+        else:
+          filename = (path+name)
+        print 'filename', filename
         filelist.append(filename)
 
     return
@@ -65,6 +81,7 @@ INPUT_FILES
 bash_template = """#!/bin/bash
 
 BATCHDIR=${PWD}
+EOSPATH="EOS_PATH"
 
 export SCRAM_ARCH=slc5_amd64_gcc462
 cd MAIN_WORKDIR
@@ -80,7 +97,13 @@ echo "Running CMSSW job"
 cmsRun CMSSW_cfg.py CFG_PARAMETERS
 exitcode=$?
 
+if [ ! -z "$EOSPATH" -a "$EOSPATH"!=" " ]
+then
+source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh 
+/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp OUTPUT_FILENAME.root ${EOSPATH}/OUTPUT_FILENAME_JOB_NUMBER.root
+else 
 cp -v OUTPUT_FILENAME.root DATASET_WORKDIR/output/OUTPUT_FILENAME_JOB_NUMBER.root
+fi
 
 exit $exitcode
 
@@ -99,6 +122,8 @@ def main():
 
   parser.add_option("-w", "--main_workdir", dest="main_workdir", action='store', help="Main working directory", metavar="MAIN_WORKDIR")
   parser.add_option("-d", "--dataset_list", dest="dataset_list", action='store', help="Text file containing a list of datasets to be processed", metavar="DATASET_LIST")
+  parser.add_option("-o", "--output_filename", dest="output_filename", action='store', default='bprimeTobH', help="Output ROOT filename (Default set to bprimeTobH)", metavar="OUTPUT_FILENAME")
+  parser.add_option("-E", "--eos_path", dest="eos_path", action='store', help="EOS path to copy output files to (This parameter is optional)", metavar="EOS_PATH")
   parser.add_option('-m', '--match', dest="match", action='store', help='Only files containing the MATCH string in their names will be considered (This parameter is optional)', metavar='MATCH')
   parser.add_option("-c", "--cmssw_cfg", dest="cmssw_cfg", action='store', help="CMSSW configuration file", metavar="CMSSW_CFG")
   parser.add_option('-f', '--fraction', dest='fraction', action='store', default='1.0', help='Fraction of files to be processed. Default value is 1 (This parameter is optional)', metavar='FRACTION')
@@ -153,7 +178,7 @@ def main():
     line_elements = line.split()
     if (len(line_elements)==0 or line_elements[0][0]=='#'): continue
 
-    output_filename = 'bprimeTobH'
+    output_filename = options.output_filename
     cfg_parameters = ''
     if( len(line_elements)>3 ):
       cfg_parameters = line_elements[3]
@@ -171,6 +196,13 @@ def main():
     os.mkdir(dataset_workdir)
     os.mkdir(os.path.join(dataset_workdir,'input'))
     os.mkdir(os.path.join(dataset_workdir,'output'))
+
+    eos_path = ' '
+    if ( options.eos_path ):
+      eos_path = ''.join([options.eos_path,"/",dataset]) 
+      proc = subprocess.Popen( [ '/afs/cern.ch/project/eos/installation/cms/bin/eos.select', 'mkdir', eos_path ], stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+      proc = subprocess.Popen( [ '/afs/cern.ch/project/eos/installation/cms/bin/eos.select', 'chmod 775', eos_path ], stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+    print "EOS_PATH", eos_path
 
     filelist = []
     process_input_dir(line_elements[2], options.match, filelist)
@@ -214,6 +246,7 @@ def main():
        bash_script_content = re.sub('JOB_NUMBER',str(ijob),bash_script_content)
        bash_script_content = re.sub('CFG_PARAMETERS',cfg_parameters,bash_script_content)
        bash_script_content = re.sub('OUTPUT_FILENAME',output_filename,bash_script_content)
+       bash_script_content = re.sub('EOS_PATH',eos_path,bash_script_content)
        bash_script.write(bash_script_content)
        bash_script.close()
 

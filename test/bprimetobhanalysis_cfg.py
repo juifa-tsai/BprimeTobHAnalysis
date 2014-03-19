@@ -18,6 +18,11 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "Report every N events (default is N=1000)"
     )
+options.register('ttreedir', 'ntuple',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "Name of ROOT TTree dir: Either 'ntuple' or 'skim'"
+    )
 options.register('jetPtMin', 50.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -143,6 +148,16 @@ options.register('DoTrigEff', False,
     VarParsing.varType.bool,
     "Do trigger efficiency" 
     )
+options.register('DoABCDPlots', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Do ACD variable plots" 
+    )
+options.register('FillBDTTrees', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Fill BDT training trees" 
+    )
 
 options.setDefault('maxEvents', -1000) 
 
@@ -177,10 +192,14 @@ from BpbH.BprimeTobHAnalysis.JMEUncertUntilParameters_cfi import *
 process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
-    InputTTree          = cms.string('ntuple/tree'),
-    InputFiles          = cms.vstring(FileNames_Bp500), 
-    #InputFiles          = cms.vstring(FileNames_BpBp800), 
+    InputTTree          = cms.string(options.ttreedir+'/tree'),
+    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames_Bp500), 
+    #InputFiles          = cms.vstring(FileNames_BpBp500), 
+    #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
     #InputFiles          = cms.vstring(FileNames_TTbar), 
+    #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
+    #InputFiles          = cms.vstring(SkimmedFileNames_QCD1800), 
     #InputFiles          = cms.vstring(FileNames_QCD1800), 
     HLTPaths            = defaultTriggerSelectionParameters.clone(), 
     DoPUReweighting     = cms.bool(options.doPUReweighting),
@@ -223,6 +242,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     SFbShift            = cms.double(options.SFbShift), 
     SFlShift            = cms.double(options.SFlShift), 
     DoTrigEff           = cms.double(options.DoTrigEff),
+    DoABCDPlots         = cms.double(options.DoABCDPlots),
+    FillBDTTrees        = cms.double(options.FillBDTTrees), 
     ) 
 
 process.p = cms.Path(process.BprimebH)
