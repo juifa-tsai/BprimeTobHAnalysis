@@ -29,7 +29,7 @@
 
 using namespace std;
 
-TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_19Feb/Final_histograms_BprimebH.root" ;  
+TString filename         = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_SkimmedJobs_ABCD_25Mar2014/Final_histograms_BprimebH.root" ; 
 TString filename_JESUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESUp/Final_histograms_BprimebH.root" ; 
 TString filename_JESDown = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JESDown/Final_histograms_BprimebH.root" ; 
 TString filename_JERUp   = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/LXBATCH_Jobs_18Dec_JetCorr_JERUp/Final_histograms_BprimebH.root" ; 
@@ -43,7 +43,7 @@ Double_t Lint = 19700.0 ;
 TString title1 = "CMS Preliminary, 19.7/fb at #sqrt{s} = 8 TeV";
 TString datacaption = "Data"; 
 
-TString dir4plots = "BprimeTobH_19Feb_SingleBprimes_NoData" ; 
+TString dir4plots = "LXBATCH_SkimmedJobs_ABCD_25Mar2014" ;  
 
 TString formata = ".pdf";
 TString formatb = ".png";
@@ -191,9 +191,9 @@ void DrawStacked(TString name,
 
   hist_qcd              = (TH1D*)myFile->Get("QCD__"+name);
   hist_ttjets           = (TH1D*)myFile->Get("TTJets__"+name);
-  hist_sig0             = (TH1D*)myFile->Get("BprimeToBHinc_M-500_8TeV-madgraph__"+name);
-  hist_sig1             = (TH1D*)myFile->Get("BprimeToBHinc_M-800_8TeV-madgraph__"+name);
-  hist_sig2             = (TH1D*)myFile->Get("BprimeToBHinc_M-1000_8TeV-madgraph__"+name);
+  hist_sig0             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-500__"+name);
+  hist_sig1             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-800__"+name);
+  hist_sig2             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
   if (doData) hist_data = (TH1D*)myFile->Get("DATA__"+name);
 
   hist_sig2->Scale(10.) ; 
