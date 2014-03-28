@@ -58,9 +58,9 @@ void abcdVal () {
 
   hist2_qcd    = (TH2D*)myFile->Get("QCD__"+name);
   hist2_ttjets = (TH2D*)myFile->Get("TTJets__"+name);
-  hist2_sig0   = (TH2D*)myFile->Get("BprimeBprimeToBHBHinc_M-500__"+name);
-  hist2_sig1   = (TH2D*)myFile->Get("BprimeBprimeToBHBHinc_M-800__"+name);
-  hist2_sig2   = (TH2D*)myFile->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+  hist2_sig0   = (TH2D*)myFile->Get("BpBpbHbH_M500__"+name);
+  hist2_sig1   = (TH2D*)myFile->Get("BpBpbHbH_M800__"+name);
+  hist2_sig2   = (TH2D*)myFile->Get("BpBpbHbH_M1000__"+name);
   if (doData) hist2_data = (TH2D*)myFile->Get("DATA__"+name);
   hist2_bkg = (TH2D*) hist2_ttjets->Clone("hist2_bkg");
   hist2_bkg->Add(hist2_qcd) ; 
@@ -79,14 +79,14 @@ void abcdVal () {
   hist2_sig2->SetMarkerColor(kBlue) ; 
 
   TH1D* histxlow_bkg   = hist2_bkg ->ProjectionX("BKG__"+name+"_HT_antiH", 1, 1, "e") ; 
-  TH1D* histxlow_sig0  = hist2_sig0->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_antiH", 1, 1, "e") ;
-  TH1D* histxlow_sig1  = hist2_sig1->ProjectionX("BprimeBprimeToBHBHinc_M-800__"+name+"_HT_antiH", 1, 1, "e") ;
-  TH1D* histxlow_sig2  = hist2_sig2->ProjectionX("BprimeBprimeToBHBHinc_M-1000__"+name+"_HT_antiH", 1, 1, "e") ;
+  TH1D* histxlow_sig0  = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HT_antiH", 1, 1, "e") ;
+  TH1D* histxlow_sig1  = hist2_sig1->ProjectionX("BpBpbHbH_M800__"+name+"_HT_antiH", 1, 1, "e") ;
+  TH1D* histxlow_sig2  = hist2_sig2->ProjectionX("BpBpbHbH_M1000__"+name+"_HT_antiH", 1, 1, "e") ;
 
   TH1D* histxhigh_bkg  = hist2_bkg ->ProjectionX("BKG__"+name+"_HT_H", 2, -1, "e") ; 
-  TH1D* histxhigh_sig0 = hist2_sig0->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_H", 2, 2, "e") ;
-  TH1D* histxhigh_sig1 = hist2_sig1->ProjectionX("BprimeBprimeToBHBHinc_M-800__"+name+"_HT_H", 2, 2, "e") ;
-  TH1D* histxhigh_sig2 = hist2_sig2->ProjectionX("BprimeBprimeToBHBHinc_M-1000__"+name+"_HT_H", 2, 2, "e") ;
+  TH1D* histxhigh_sig0 = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HT_H", 2, 2, "e") ;
+  TH1D* histxhigh_sig1 = hist2_sig1->ProjectionX("BpBpbHbH_M800__"+name+"_HT_H", 2, 2, "e") ;
+  TH1D* histxhigh_sig2 = hist2_sig2->ProjectionX("BpBpbHbH_M1000__"+name+"_HT_H", 2, 2, "e") ;
 
   std::cout << " BKG NA = " << histxhigh_bkg->Integral(0,89)  << std::endl ; 
   std::cout << " BKG NB = " << histxhigh_bkg->Integral(90,200) << std::endl ; 
@@ -131,16 +131,16 @@ void abcdVal () {
     cutsig->SetLineWidth(4) ; 
     cutsig->SetLineStyle(2) ; 
     TH1D *h_bkg_sb  = hist2_bkg ->ProjectionX("BKG__"+name+"_HT_sb", 0, -1, "e[-cutsig]") ; 
-    TH1D *h_sig0_sig = hist2_sig0->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_sig", 0, -1, "e[cutsig]") ; 
-    TH1D *h_sig0_sb = hist2_sig0->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_sb",   0, -1, "e[-cutsig]") ; 
+    TH1D *h_sig0_sig = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HT_sig", 0, -1, "e[cutsig]") ; 
+    TH1D *h_sig0_sb = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HT_sb",   0, -1, "e[-cutsig]") ; 
     if ( h_bkg_sb->Integral() > 0. ) h_cont_sig0 -> Fill(iht, h_sig0_sb->Integral()/h_bkg_sb->Integral()) ; 
     h_leak_sig0 -> Fill(iht, h_sig0_sb->Integral()/(h_sig0_sig->Integral()+h_sig0_sb->Integral())) ; 
-    TH1D *h_sig1_sig = hist2_sig1->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_sig", 0, -1, "e[cutsig]") ; 
-    TH1D *h_sig1_sb = hist2_sig1->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_sb",   0, -1, "e[-cutsig]") ; 
+    TH1D *h_sig1_sig = hist2_sig1->ProjectionX("BpBpbHbH_M500__"+name+"_HT_sig", 0, -1, "e[cutsig]") ; 
+    TH1D *h_sig1_sb = hist2_sig1->ProjectionX("BpBpbHbH_M500__"+name+"_HT_sb",   0, -1, "e[-cutsig]") ; 
     if ( h_bkg_sb->Integral() > 0. ) h_cont_sig1 -> Fill(iht, h_sig1_sb->Integral()/h_bkg_sb->Integral()) ; 
     h_leak_sig1 -> Fill(iht, h_sig1_sb->Integral()/(h_sig1_sig->Integral()+h_sig1_sb->Integral())) ; 
-    TH1D *h_sig2_sig = hist2_sig2->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_sig", 0, -1, "e[cutsig]") ; 
-    TH1D *h_sig2_sb = hist2_sig2->ProjectionX("BprimeBprimeToBHBHinc_M-500__"+name+"_HT_sb",   0, -1, "e[-cutsig]") ; 
+    TH1D *h_sig2_sig = hist2_sig2->ProjectionX("BpBpbHbH_M500__"+name+"_HT_sig", 0, -1, "e[cutsig]") ; 
+    TH1D *h_sig2_sb = hist2_sig2->ProjectionX("BpBpbHbH_M500__"+name+"_HT_sb",   0, -1, "e[-cutsig]") ; 
     if ( h_bkg_sb->Integral() > 0. ) h_cont_sig2 -> Fill(iht, h_sig2_sb->Integral()/h_bkg_sb->Integral()) ; 
     h_leak_sig2 -> Fill(iht, h_sig2_sb->Integral()/(h_sig2_sig->Integral()+h_sig2_sb->Integral())) ; 
   }

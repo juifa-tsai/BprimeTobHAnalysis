@@ -191,9 +191,9 @@ void DrawStacked(TString name,
 
   hist_qcd              = (TH1D*)myFile->Get("QCD__"+name);
   hist_ttjets           = (TH1D*)myFile->Get("TTJets__"+name);
-  hist_sig0             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-500__"+name);
-  hist_sig1             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-800__"+name);
-  hist_sig2             = (TH1D*)myFile->Get("BprimeBprimeToBHBHinc_M-1000__"+name);
+  hist_sig0             = (TH1D*)myFile->Get("BpBpbHbH_M500__"+name);
+  hist_sig1             = (TH1D*)myFile->Get("BpBpbHbH_M800__"+name);
+  hist_sig2             = (TH1D*)myFile->Get("BpBpbHbH_M1000__"+name);
   if (doData) hist_data = (TH1D*)myFile->Get("DATA__"+name);
 
   hist_sig2->Scale(10.) ; 
@@ -769,6 +769,7 @@ void DrawStacked(TString name,
   c1->SaveAs(dir4plots+"/"+name_plot);
   name_plot=name+"_Linear"+formatc;
   if(log) name_plot=name+"_Log"+formatc;
+  c1->SaveAs(dir4plots+"/"+name_plot);
 
   if (log && web) {  
     pad0 ->cd();

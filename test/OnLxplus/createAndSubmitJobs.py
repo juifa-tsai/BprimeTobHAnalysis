@@ -40,7 +40,6 @@ def process_input_dir(input_dir, match, filelist):
             name = re.split('_\d+.root', filename)[0]
         jobstring = filename[m1.start():].lstrip('_').replace('.root','').split('_')
         job = int(jobstring[0])
-        print 'job', job
         if len(jobstring)>1:
           if job not in jobdict.keys():
               jobdict[job] = []
@@ -54,7 +53,6 @@ def process_input_dir(input_dir, match, filelist):
             jobdict[job] = []
 
     jobs = jobdict.keys()
-    print 'jobs', jobs
     if( len(jobs)==0 ):
         print 'No matching .root files found'
         sys.exit()
@@ -66,7 +64,6 @@ def process_input_dir(input_dir, match, filelist):
           filename = (path+name+'_%i_%i_%s.root')%(job, maxsub, jobdict[job][1][jobdict[job][0].index(maxsub)])
         else:
           filename = (path+name)
-        print 'filename', filename
         filelist.append(filename)
 
     return
@@ -97,12 +94,14 @@ echo "Running CMSSW job"
 cmsRun CMSSW_cfg.py CFG_PARAMETERS
 exitcode=$?
 
-if [ ! -z "$EOSPATH" -a "$EOSPATH"!=" " ]
+if [ ! -z $EOSPATH -a $EOSPATH!=" " ]
 then
-source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh 
-/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp OUTPUT_FILENAME.root ${EOSPATH}/OUTPUT_FILENAME_JOB_NUMBER.root
+  echo "Copying file  OUTPUT_FILENAME.root to " ${EOSPATH}
+  source /afs/cern.ch/project/eos/installation/cms/etc/setup.sh 
+  /afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp OUTPUT_FILENAME.root ${EOSPATH}/OUTPUT_FILENAME_JOB_NUMBER.root
 else 
-cp -v OUTPUT_FILENAME.root DATASET_WORKDIR/output/OUTPUT_FILENAME_JOB_NUMBER.root
+  echo "Copying file  OUTPUT_FILENAME.root to DATASET_WORKDIR/output/OUTPUT_FILENAME_JOB_NUMBER.root"
+  cp -v OUTPUT_FILENAME.root DATASET_WORKDIR/output/OUTPUT_FILENAME_JOB_NUMBER.root
 fi
 
 exit $exitcode
@@ -202,7 +201,6 @@ def main():
       eos_path = ''.join([options.eos_path,"/",dataset]) 
       proc = subprocess.Popen( [ '/afs/cern.ch/project/eos/installation/cms/bin/eos.select', 'mkdir', eos_path ], stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
       proc = subprocess.Popen( [ '/afs/cern.ch/project/eos/installation/cms/bin/eos.select', 'chmod 775', eos_path ], stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
-    print "EOS_PATH", eos_path
 
     filelist = []
     process_input_dir(line_elements[2], options.match, filelist)

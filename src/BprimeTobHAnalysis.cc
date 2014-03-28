@@ -116,10 +116,10 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double fatJetPrunedMassMax_ ; 
     const double dRSubjetsMin_ ; 
     const double dRSubjetsMax_ ; 
-    const double subjet1CSVDiscMin_ ; 
-    const double subjet1CSVDiscMax_ ; 
-    const double subjet2CSVDiscMin_ ; 
-    const double subjet2CSVDiscMax_ ; 
+    const double subj1CSVDiscMin_ ; 
+    const double subj1CSVDiscMax_ ; 
+    const double subj2CSVDiscMin_ ; 
+    const double subj2CSVDiscMax_ ; 
     const double HTMin_ ; 
     const double HTMax_ ; 
     const edm::ParameterSet jetSelParams_ ; 
@@ -189,10 +189,10 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   fatJetPrunedMassMax_(iConfig.getParameter<double>("FatJetPrunedMassMax")),
   dRSubjetsMin_(iConfig.getParameter<double>("DRSubjetsMin")),
   dRSubjetsMax_(iConfig.getParameter<double>("DRSubjetsMax")),
-  subjet1CSVDiscMin_(iConfig.getParameter<double>("Subjet1CSVDiscMin")),
-  subjet1CSVDiscMax_(iConfig.getParameter<double>("Subjet1CSVDiscMax")),
-  subjet2CSVDiscMin_(iConfig.getParameter<double>("Subjet2CSVDiscMin")),
-  subjet2CSVDiscMax_(iConfig.getParameter<double>("Subjet2CSVDiscMax")),
+  subj1CSVDiscMin_(iConfig.getParameter<double>("Subjet1CSVDiscMin")),
+  subj1CSVDiscMax_(iConfig.getParameter<double>("Subjet1CSVDiscMax")),
+  subj2CSVDiscMin_(iConfig.getParameter<double>("Subjet2CSVDiscMin")),
+  subj2CSVDiscMax_(iConfig.getParameter<double>("Subjet2CSVDiscMax")),
   HTMin_(iConfig.getParameter<double>("HTMin")), 
   HTMax_(iConfig.getParameter<double>("HTMax")),
   jetSelParams_(iConfig.getParameter<edm::ParameterSet>("JetSelParams")), 
@@ -319,8 +319,8 @@ void BprimeTobHAnalysis::CreateHistos(const TString& cutname) {
   AddHisto(cutname ,"_FatJets_CombinedSVBJetTags"  ,"Fat jet CSV discriminator"                    ,20     ,0.       ,1.      ) ; 
   AddHisto(cutname ,"_FatJets_Mass"                ,"Fat jet mass [GeV]"                           ,200    ,0.       ,2000.   ) ; 
   AddHisto(cutname ,"_FatJets_MassPruned"          ,"Fat jet pruned mass [GeV]"                    ,200    ,0.       ,2000.   ) ; 
-  AddHisto(cutname ,"_FatJets_DRSubjets"           ,";#DeltaR_{#eta,#phi}(subjet1, subjet2);"      ,100    ,0.       ,2.      ) ; 
-  AddHisto(cutname ,"_FatJets_DYPhiSubjets"        ,";#DeltaR_{#y,#phi}(subjet1, subjet2);"        ,100    ,0.       ,2.      ) ; 
+  AddHisto(cutname ,"_FatJets_DRSubjets"           ,";#DeltaR_{#eta,#phi}(subj1, subj2);"      ,100    ,0.       ,2.      ) ; 
+  AddHisto(cutname ,"_FatJets_DYPhiSubjets"        ,";#DeltaR_{#y,#phi}(subj1, subj2);"        ,100    ,0.       ,2.      ) ; 
 
   AddHisto(cutname ,"_SubJet1_Pt"                  ,"SubJet1 p_{T} [GeV]"                          ,200    ,0.       ,2000.   ) ;
   AddHisto(cutname ,"_SubJet1_Eta"                 ,"SubJet1 #eta"                                 ,50     ,-4.      ,4.      ) ;
@@ -362,7 +362,10 @@ void BprimeTobHAnalysis::CreateHistos(const TString& cutname) {
     AddHisto(cutname ,"_AntiHjet_Eta"              ,";#eta (Anti Higgs-tagged jet)''"              ,50     ,-4.      ,4.      ) ;
     AddHisto(cutname ,"_AntiHjet_Mass"             ,";Mass (Anti Higgs-tagged jet) [GeV];;"        ,40     ,0.       ,400.    ) ; 
 
+    AddHisto(cutname ,"_Htag_HT"                   ,";HT [GeV];;;"      ,200 ,0. ,2000. ,2 ,-.5, 1.5) ; 
     AddHisto(cutname ,"_Htag_HTAK5"                ,";HT(AK5) [GeV];;;" ,200 ,0. ,2000. ,2 ,-.5, 1.5) ; 
+    AddHisto(cutname ,"_2b_Htag_HT"                ,";HT [GeV];;;"      ,200 ,0. ,2000. ,2 ,-.5, 1.5) ; 
+    AddHisto(cutname ,"_2b_Htag_HTAK5"             ,";HT(AK5) [GeV];;;" ,200 ,0. ,2000. ,2 ,-.5, 1.5) ; 
   }
 
   return ; 
@@ -540,12 +543,12 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       fatjet_p4.SetPtEtaPhiM(ifat->Pt(), ifat->Eta(), ifat->Phi (), ifat->Mass ()); 
       int iSubJet1 = ifat->Jet_SubJet1Idx();
       int iSubJet2 = ifat->Jet_SubJet2Idx();
-      TLorentzVector subjet1_p4, subjet2_p4;
-      subjet1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
-      subjet2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
-      double subjet_dR = subjet1_p4.DeltaR(subjet2_p4);
-      double subjet_dy = subjet1_p4.Rapidity() - subjet2_p4.Rapidity() ;
-      double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
+      TLorentzVector subj1_p4, subj2_p4;
+      subj1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
+      subj2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
+      double subjet_dR = subj1_p4.DeltaR(subj2_p4);
+      double subjet_dy = subj1_p4.Rapidity() - subj2_p4.Rapidity() ;
+      double subjet_dphi = subj1_p4.DeltaPhi(subj2_p4); ;
       double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
 
       FillHisto(TString("TriggerSel")+TString("_FatJets_Pt")                 ,fatjet_p4.Pt() ,evtwt_)  ;  
@@ -559,14 +562,14 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       FillHisto(TString("TriggerSel")+TString("_FatJets_DRSubjets")          ,subjet_dR ,evtwt_)  ; 
       FillHisto(TString("TriggerSel")+TString("_FatJets_DYPhiSubjets")       ,subjet_dyphi ,evtwt_)  ; 
 
-      FillHisto(TString("TriggerSel")+TString("_SubJet1_Pt") ,subjet1_p4.Pt() ,evtwt_)  ;  
-      FillHisto(TString("TriggerSel")+TString("_SubJet1_Eta") ,subjet1_p4.Eta() ,evtwt_)  ; 
-      FillHisto(TString("TriggerSel")+TString("_SubJet1_Mass") ,subjet1_p4.Mag() ,evtwt_)  ; 
+      FillHisto(TString("TriggerSel")+TString("_SubJet1_Pt") ,subj1_p4.Pt() ,evtwt_)  ;  
+      FillHisto(TString("TriggerSel")+TString("_SubJet1_Eta") ,subj1_p4.Eta() ,evtwt_)  ; 
+      FillHisto(TString("TriggerSel")+TString("_SubJet1_Mass") ,subj1_p4.Mag() ,evtwt_)  ; 
       FillHisto(TString("TriggerSel")+TString("_SubJet1_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet1] ,evtwt_)  ; 
 
-      FillHisto(TString("TriggerSel")+TString("_SubJet2_Pt") ,subjet2_p4.Pt() ,evtwt_)  ;  
-      FillHisto(TString("TriggerSel")+TString("_SubJet2_Eta") ,subjet2_p4.Eta() ,evtwt_)  ; 
-      FillHisto(TString("TriggerSel")+TString("_SubJet2_Mass") ,subjet2_p4.Mag() ,evtwt_)  ; 
+      FillHisto(TString("TriggerSel")+TString("_SubJet2_Pt") ,subj2_p4.Pt() ,evtwt_)  ;  
+      FillHisto(TString("TriggerSel")+TString("_SubJet2_Eta") ,subj2_p4.Eta() ,evtwt_)  ; 
+      FillHisto(TString("TriggerSel")+TString("_SubJet2_Mass") ,subj2_p4.Mag() ,evtwt_)  ; 
       FillHisto(TString("TriggerSel")+TString("_SubJet2_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet2] ,evtwt_)  ; 
 
       if ( fatjet_p4.Pt() > fatJetPtMin_ && fatjet_p4.Pt() < fatJetPtMax_ ) {  
@@ -583,10 +586,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         } //// Selecting fat jets with mass and dy cuts 
 
         //// Higgs tagging
-        if ( SubJetInfo.CombinedSVBJetTags[iSubJet1] > subjet1CSVDiscMin_ 
-            && SubJetInfo.CombinedSVBJetTags[iSubJet1] < subjet1CSVDiscMax_ 
-            && SubJetInfo.CombinedSVBJetTags[iSubJet2] > subjet2CSVDiscMin_ 
-            && SubJetInfo.CombinedSVBJetTags[iSubJet2] < subjet2CSVDiscMax_) { 
+        if ( SubJetInfo.CombinedSVBJetTags[iSubJet1] > subj1CSVDiscMin_ 
+            && SubJetInfo.CombinedSVBJetTags[iSubJet1] < subj1CSVDiscMax_ 
+            && SubJetInfo.CombinedSVBJetTags[iSubJet2] > subj2CSVDiscMin_ 
+            && SubJetInfo.CombinedSVBJetTags[iSubJet2] < subj2CSVDiscMax_) { 
 
           HjetsNoMassDyCuts_corr.push_back(thisjet) ; 
 
@@ -610,10 +613,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
           } //// Selecting Higgs jets with mass and dy cuts 
         } //// Higgs tagging 
-        //// Anti-Higgs tagging 
+        //// Anti-Higgs tagging : Attn: Hardcoding anti-Higgs jets to have subjet CSV disc. > CSVL 
         else if ( doABCDPlots_ 
-            && SubJetInfo.CombinedSVBJetTags[iSubJet1] < subjet1CSVDiscMin_ 
-            && SubJetInfo.CombinedSVBJetTags[iSubJet2] < subjet2CSVDiscMin_   
+            && (SubJetInfo.CombinedSVBJetTags[iSubJet1] < subj1CSVDiscMin_ && SubJetInfo.CombinedSVBJetTags[iSubJet1] > 0.244 ) 
+            && (SubJetInfo.CombinedSVBJetTags[iSubJet2] < subj2CSVDiscMin_ && SubJetInfo.CombinedSVBJetTags[iSubJet2] > 0.244 ) 
             && fatjet_p4.Mag() > fatJetMassMin_ && fatjet_p4.Mag() < fatJetMassMax_ 
             && ifat->MassPruned() > fatJetPrunedMassMin_ && ifat->MassPruned() < fatJetPrunedMassMax_ 
             && subjet_dyphi > dRSubjetsMin_ && subjet_dyphi < dRSubjetsMax_ ) {  
@@ -632,11 +635,11 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       FillHisto(TString("TriggerSel")+TString("_HiggsJetNoMDyCut_Eta")  ,ijet->Eta() ,evtwt_)  ;
       FillHisto(TString("TriggerSel")+TString("_HiggsJetNoMDyCut_Mass") ,ijet->Mass() ,evtwt_)  ;
       int iSubJet1(ijet->Jet_SubJet1Idx()), iSubJet2(ijet->Jet_SubJet2Idx()); 
-      TLorentzVector subjet1_p4, subjet2_p4;
-      subjet1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
-      subjet2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
-      double subjet_dy = subjet1_p4.Rapidity() - subjet2_p4.Rapidity() ;
-      double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
+      TLorentzVector subj1_p4, subj2_p4;
+      subj1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
+      subj2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
+      double subjet_dy = subj1_p4.Rapidity() - subj2_p4.Rapidity() ;
+      double subjet_dphi = subj1_p4.DeltaPhi(subj2_p4); ;
       double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
       FillHisto(TString("TriggerSel")+TString("_HiggsJetNoMDyCut_DRsubjets"), subjet_dyphi, evtwt_) ; 
     }
@@ -803,21 +806,34 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       }
       for (JetCollection::const_iterator ijet = fatjets_corr.begin(); ijet != fatjets_corr.end(); ++ijet ) {
         int iSubJet1(ijet->Jet_SubJet1Idx()), iSubJet2(ijet->Jet_SubJet2Idx()); 
-        TLorentzVector subjet1_p4, subjet2_p4;
-        subjet1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
-        subjet2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
-        double subjet_dy = subjet1_p4.Rapidity() - subjet2_p4.Rapidity() ;
-        double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
+        TLorentzVector fatjet_p4, subj1_p4, subj2_p4;
+        fatjet_p4.SetPtEtaPhiM(ijet->Pt(), ijet->Eta(), ijet->Phi (), ijet->Mass ()); 
+        subj1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
+        subj2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
+        double subjet_dR = subj1_p4.DeltaR(subj2_p4);
+        double subjet_dy = subj1_p4.Rapidity() - subj2_p4.Rapidity() ;
+        double subjet_dphi = subj1_p4.DeltaPhi(subj2_p4); ;
         double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
 
-        FillHisto(TString("FatJetSel")+TString("_SubJet1_Pt") ,subjet1_p4.Pt() ,evtwt_)  ;  
-        FillHisto(TString("FatJetSel")+TString("_SubJet1_Eta") ,subjet1_p4.Eta() ,evtwt_)  ; 
-        FillHisto(TString("FatJetSel")+TString("_SubJet1_Mass") ,subjet1_p4.Mag() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_Pt")                 ,fatjet_p4.Pt() ,evtwt_)  ;  
+        FillHisto(TString("FatJetSel")+TString("_FatJets_Eta")                ,fatjet_p4.Eta() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_CombinedSVBJetTags") ,ijet->CombinedSVBJetTags() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_tau2ByTau1")         ,ijet->tau2()/ijet->tau1() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_tau3ByTau2")         ,ijet->tau3()/ijet->tau2() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_tau3ByTau1")         ,ijet->tau3()/ijet->tau1() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_Mass")               ,fatjet_p4.Mag() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_MassPruned")         ,ijet->MassPruned() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_DRSubjets")          ,subjet_dR ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_FatJets_DYPhiSubjets")       ,subjet_dyphi ,evtwt_)  ; 
+
+        FillHisto(TString("FatJetSel")+TString("_SubJet1_Pt") ,subj1_p4.Pt() ,evtwt_)  ;  
+        FillHisto(TString("FatJetSel")+TString("_SubJet1_Eta") ,subj1_p4.Eta() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_SubJet1_Mass") ,subj1_p4.Mag() ,evtwt_)  ; 
         FillHisto(TString("FatJetSel")+TString("_SubJet1_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet1] ,evtwt_)  ; 
 
-        FillHisto(TString("FatJetSel")+TString("_SubJet2_Pt") ,subjet2_p4.Pt() ,evtwt_)  ;  
-        FillHisto(TString("FatJetSel")+TString("_SubJet2_Eta") ,subjet2_p4.Eta() ,evtwt_)  ; 
-        FillHisto(TString("FatJetSel")+TString("_SubJet2_Mass") ,subjet2_p4.Mag() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_SubJet2_Pt") ,subj2_p4.Pt() ,evtwt_)  ;  
+        FillHisto(TString("FatJetSel")+TString("_SubJet2_Eta") ,subj2_p4.Eta() ,evtwt_)  ; 
+        FillHisto(TString("FatJetSel")+TString("_SubJet2_Mass") ,subj2_p4.Mag() ,evtwt_)  ; 
         FillHisto(TString("FatJetSel")+TString("_SubJet2_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet2] ,evtwt_)  ; 
 
         FillHisto(TString("FatJetSel")+TString("_HiggsJetNoMDyCut_DRsubjets"), subjet_dyphi, evtwt_) ; 
@@ -848,21 +864,21 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
           FillHisto(TString("BJetsSel")+TString("_HiggsJetNoMDyCut_Eta")  ,ijet->Eta() ,evtwt_)  ;
           FillHisto(TString("BJetsSel")+TString("_HiggsJetNoMDyCut_Mass") ,ijet->Mass() ,evtwt_)  ;
           int iSubJet1(ijet->Jet_SubJet1Idx()), iSubJet2(ijet->Jet_SubJet2Idx()); 
-          TLorentzVector subjet1_p4, subjet2_p4;
-          subjet1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
-          subjet2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
-          double subjet_dy = subjet1_p4.Rapidity() - subjet2_p4.Rapidity() ;
-          double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
+          TLorentzVector subj1_p4, subj2_p4;
+          subj1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
+          subj2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
+          double subjet_dy = subj1_p4.Rapidity() - subj2_p4.Rapidity() ;
+          double subjet_dphi = subj1_p4.DeltaPhi(subj2_p4); ;
           double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
 
-          FillHisto(TString("BJetsSel")+TString("_SubJet1_Pt") ,subjet1_p4.Pt() ,evtwt_)  ;  
-          FillHisto(TString("BJetsSel")+TString("_SubJet1_Eta") ,subjet1_p4.Eta() ,evtwt_)  ; 
-          FillHisto(TString("BJetsSel")+TString("_SubJet1_Mass") ,subjet1_p4.Mag() ,evtwt_)  ; 
+          FillHisto(TString("BJetsSel")+TString("_SubJet1_Pt") ,subj1_p4.Pt() ,evtwt_)  ;  
+          FillHisto(TString("BJetsSel")+TString("_SubJet1_Eta") ,subj1_p4.Eta() ,evtwt_)  ; 
+          FillHisto(TString("BJetsSel")+TString("_SubJet1_Mass") ,subj1_p4.Mag() ,evtwt_)  ; 
           FillHisto(TString("BJetsSel")+TString("_SubJet1_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet1] ,evtwt_)  ; 
 
-          FillHisto(TString("BJetsSel")+TString("_SubJet2_Pt") ,subjet2_p4.Pt() ,evtwt_)  ;  
-          FillHisto(TString("BJetsSel")+TString("_SubJet2_Eta") ,subjet2_p4.Eta() ,evtwt_)  ; 
-          FillHisto(TString("BJetsSel")+TString("_SubJet2_Mass") ,subjet2_p4.Mag() ,evtwt_)  ; 
+          FillHisto(TString("BJetsSel")+TString("_SubJet2_Pt") ,subj2_p4.Pt() ,evtwt_)  ;  
+          FillHisto(TString("BJetsSel")+TString("_SubJet2_Eta") ,subj2_p4.Eta() ,evtwt_)  ; 
+          FillHisto(TString("BJetsSel")+TString("_SubJet2_Mass") ,subj2_p4.Mag() ,evtwt_)  ; 
           FillHisto(TString("BJetsSel")+TString("_SubJet2_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet2] ,evtwt_)  ; 
 
           FillHisto(TString("BJetsSel")+TString("_HiggsJetNoMDyCut_DRsubjets"), subjet_dyphi, evtwt_) ; 
@@ -874,11 +890,11 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
             FillHisto(TString("HTSel")+TString("_HiggsJetNoMDyCut_Eta")  ,ijet->Eta() ,evtwt_)  ;
             FillHisto(TString("HTSel")+TString("_HiggsJetNoMDyCut_Mass") ,ijet->Mass() ,evtwt_)  ;
             int iSubJet1(ijet->Jet_SubJet1Idx()), iSubJet2(ijet->Jet_SubJet2Idx()); 
-            TLorentzVector subjet1_p4, subjet2_p4;
-            subjet1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
-            subjet2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
-            double subjet_dy = subjet1_p4.Rapidity() - subjet2_p4.Rapidity() ;
-            double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
+            TLorentzVector subj1_p4, subj2_p4;
+            subj1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
+            subj2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
+            double subjet_dy = subj1_p4.Rapidity() - subj2_p4.Rapidity() ;
+            double subjet_dphi = subj1_p4.DeltaPhi(subj2_p4); ;
             double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
             FillHisto(TString("HTSel")+TString("_HiggsJetNoMDyCut_DRsubjets"), subjet_dyphi, evtwt_) ; 
           }
@@ -888,8 +904,25 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       if ( doABCDPlots_ ) {
         if (bjets.size() >= 1 ) { 
           FillHisto(TString("BJetsSel")+TString("_nAntiHjets"), AntiHjets_corr.size(), evtwt_) ; 
-          if ( Hjets_corr.size() >= 1 ) FillHisto(TString("BJetsSel")+TString("_Htag_HTAK5"), HTAK5.getHT(), 1., evtwt_) ; 
-          else if ( AntiHjets_corr.size() > 0 ) FillHisto(TString("BJetsSel")+TString("_Htag_HTAK5"), HTAK5.getHT(), 0., evtwt_) ; 
+          if ( Hjets_corr.size() >= 1 ) {
+            FillHisto(TString("BJetsSel")+TString("_Htag_HTAK5"), HTAK5.getHT(), 1., evtwt_) ; 
+            FillHisto(TString("BJetsSel")+TString("_Htag_HT"), MyHT.getHT(), 1., evtwt_) ; 
+          }
+          else if ( AntiHjets_corr.size() > 0 ) {
+            FillHisto(TString("BJetsSel")+TString("_Htag_HTAK5"), MyHT.getHT(), 0., evtwt_) ; 
+            FillHisto(TString("BJetsSel")+TString("_Htag_HT"), MyHT.getHT(), 0., evtwt_) ; 
+          }
+        }
+        if (bjets.size() >= 2 ) { 
+          FillHisto(TString("BJetsSel")+TString("_nAntiHjets"), AntiHjets_corr.size(), evtwt_) ; 
+          if ( Hjets_corr.size() >= 1 ) {
+            FillHisto(TString("BJetsSel")+TString("_2b_Htag_HTAK5"), HTAK5.getHT(), 1., evtwt_) ; 
+            FillHisto(TString("BJetsSel")+TString("_2b_Htag_HT"), MyHT.getHT(), 1., evtwt_) ; 
+          }
+          else if ( AntiHjets_corr.size() > 0 ) {
+            FillHisto(TString("BJetsSel")+TString("_2b_Htag_HTAK5"), MyHT.getHT(), 0., evtwt_) ; 
+            FillHisto(TString("BJetsSel")+TString("_2b_Htag_HT"), MyHT.getHT(), 0., evtwt_) ; 
+          }
         }
       }
 
@@ -943,11 +976,11 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
             FillHisto(TString("JetSel")+TString("_HiggsJetNoMDyCut_Eta")  ,ijet->Eta() ,evtwt_)  ;
             FillHisto(TString("JetSel")+TString("_HiggsJetNoMDyCut_Mass") ,ijet->Mass() ,evtwt_)  ;
             int iSubJet1(ijet->Jet_SubJet1Idx()), iSubJet2(ijet->Jet_SubJet2Idx()); 
-            TLorentzVector subjet1_p4, subjet2_p4;
-            subjet1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
-            subjet2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
-            double subjet_dy = subjet1_p4.Rapidity() - subjet2_p4.Rapidity() ;
-            double subjet_dphi = subjet1_p4.DeltaPhi(subjet2_p4); ;
+            TLorentzVector subj1_p4, subj2_p4;
+            subj1_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet1], SubJetInfo.Eta[iSubJet1], SubJetInfo.Phi[iSubJet1], SubJetInfo.Mass[iSubJet1]);
+            subj2_p4.SetPtEtaPhiM(SubJetInfo.Pt[iSubJet2], SubJetInfo.Eta[iSubJet2], SubJetInfo.Phi[iSubJet2], SubJetInfo.Mass[iSubJet2]); 
+            double subjet_dy = subj1_p4.Rapidity() - subj2_p4.Rapidity() ;
+            double subjet_dphi = subj1_p4.DeltaPhi(subj2_p4); ;
             double subjet_dyphi = sqrt( subjet_dy*subjet_dy + subjet_dphi*subjet_dphi ) ;
             FillHisto(TString("JetSel")+TString("_HiggsJetNoMDyCut_DRsubjets"), subjet_dyphi, evtwt_) ; 
           }
