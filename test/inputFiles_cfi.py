@@ -1,6 +1,18 @@
 FileNames = [
     ]
 
+FileNames_TTJets_BVeto = [
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_0.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_1.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_2.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_3.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_4.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_6.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_7.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_8.root', 
+    'root://eoscms//eos/cms/store/user/jtsai/bpTobH/backgroundEstimationSkim/bVeto_Official_v1/TTJets_HadronicMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/bVeto_9.root', 
+    ]
+
 FileNames_Bp500 = [
     'root://eoscms//eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-500_8TeV-madgraph/BprimeTobH_v1_0_1_AbC.root'
     ]

@@ -21,7 +21,7 @@ options.register('reportEvery', 1000,
 options.register('ttreedir', 'ntuple',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
-    "Name of ROOT TTree dir: Either 'ntuple' or 'skim'"
+    "Name of ROOT TTree dir: Either 'ntuple' or 'skim' or 'bVeto'"
     )
 options.register('jetPtMin', 50.,
     VarParsing.multiplicity.singleton,
@@ -48,22 +48,22 @@ options.register('fatJetPtMax', 1.E6,
     VarParsing.varType.float,
     "Maximum fat jet pt"
     )
-options.register('fatJetMassMin', 100.,
+options.register('fatJetMassMin', 0.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum fat jet mass"
     )
-options.register('fatJetMassMax', 150.,
+options.register('fatJetMassMax', 1.E6,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum fat jet mass"
     )
-options.register('fatJetPrunedMassMin', 75.,
+options.register('fatJetPrunedMassMin', 90.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum fat jet pruned mass"
     )
-options.register('fatJetPrunedMassMax', 1.E6,
+options.register('fatJetPrunedMassMax', 140.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum fat jet pruned mass"
@@ -193,7 +193,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
-    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames), 
+    InputFiles          = cms.vstring(FileNames_TTJets_BVeto), 
     #InputFiles          = cms.vstring(FileNames_Bp500), 
     #InputFiles          = cms.vstring(FileNames_BpBp500), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
@@ -226,10 +227,11 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     HTMin               = cms.double(options.hTMin),
     HTMax               = cms.double(options.hTMax), 
     JetSelParams        = defaultJetSelectionParameters.clone(), 
-    FatJetSelParams     = defaultFatJetSelectionParameters.clone(
-      fatJetTau2ByTau1Max = cms.double(1.1), 
+    FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
+    HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(
+      subjet1CSVDiscMin = cms.double(0.679),
+      subjet2CSVDiscMin = cms.double(0.679),
       ), 
-    HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(), 
     HTSelParams         = defaultHTSelectionParameters.clone(
       HTMin = cms.double(900), 
       ),

@@ -272,6 +272,15 @@ void BprimeTobHAnalysis::beginJob() {
         h_cutflow->SetBinError(2, h_events->GetBinError(4)) ; 
       }
     }
+    else if ( TString(inputTTree_).Contains("bVeto") ) {
+      TH1F* h_events = (TH1F*)f->Get("bVeto/h_cutflow") ;  
+      if ( maxEvents_ < 0 ) {
+        h_cutflow->Fill("AllEvents", h_events->GetBinContent(1)) ; 
+        h_cutflow->Fill("SkimmedEvents", h_events->GetBinContent(6)) ; 
+        h_cutflow->SetBinError(1, h_events->GetBinError(1)) ; 
+        h_cutflow->SetBinError(2, h_events->GetBinError(6)) ; 
+      }
+    }
     f->Close();
   }
 
@@ -652,7 +661,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       Jet thisjet(JetInfo, ijet) ;
       allAK5jets.push_back(thisjet) ; 
       bool isJetNotHiggs(false) ; 
-      if (Hjets_corr.size() > 1) {
+      if (Hjets_corr.size() > 0) {
         for (JetCollection::const_iterator ihig = Hjets_corr.begin(); ihig != Hjets_corr.end(); ++ihig) {
           if (thisjet.DeltaR(*ihig) < 1.2) { //// Attn. hard-coded 
             isJetNotHiggs = false ; 
@@ -768,6 +777,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt_) ; 
       for (JetCollection::const_iterator ib = bjets.begin(); ib != bjets.end(); ++ib) { 
         FillHisto(TString("TriggerSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
+        std::cout << " bjet pT = " << ib->Pt() << " csv = " << ib->CombinedSVBJetTags() << std::endl ; 
         FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
       }
 
