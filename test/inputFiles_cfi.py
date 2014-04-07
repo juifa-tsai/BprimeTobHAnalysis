@@ -33,6 +33,10 @@ SkimmedFileNames_BpBp500 = [
     'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/BprimeBprimeToBHBHinc_M-500_TuneZ2star_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/evtSkim_0.root'
     ]
 
+SkimmedFileNames_BpBp1000 = [ 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/BprimeToBHinc_M-1000_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V19-v1__AODSIM/evtSkim_0.root'
+    ] 
+
 FileNames_BpBp500 = [
     'root://eoscms//eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-500_TuneZ2star_8TeV-madgraph/BprimeTobH_v1_10_1_wRI.root', 
     'root://eoscms//eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-500_TuneZ2star_8TeV-madgraph/BprimeTobH_v1_1_1_xuA.root', 
