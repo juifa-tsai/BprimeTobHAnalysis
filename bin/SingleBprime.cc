@@ -3,6 +3,8 @@
 #include <TFile.h>
 #include <TH1D.h>
 #include <TLorentzVector.h>
+#include <cstring>
+#include <sstream>
 
 #include "BpbH/BprimeTobHAnalysis/interface/LHEF.h"
 
@@ -10,11 +12,56 @@
 
 using namespace std;
 
+void readerExample(std::string& fname) {
+
+  std::ifstream ifs1(fname.c_str());
+  LHEF::Reader reader1(ifs1);
+  std::cout << reader1.headerBlock;
+  std::cout << reader1.initComments;
+  std::cout << "Beam A: " << reader1.heprup.EBMUP.first << " GeV, Beam B: "
+    << reader1.heprup.EBMUP.second << " GeV." << std::endl;
+  long ieve1(0) ;  
+  unsigned pos = fname.find("_unweighted_events.lhe");  
+  std::string fnamecut = fname.substr (0, pos);
+  std::stringstream fout ;
+  fout << fnamecut << "_8TeV.root"  ; 
+  TFile *rootoutput = new TFile((fout.str()).c_str(),"RECREATE"); 
+  fout.str(std::string());
+  fout.clear() ;
+  fout << fnamecut << ";p_{T} (b') [GeV];" ;
+  TH1D* h_pt_bp = new TH1D("h_pt_bp" ,(fout.str()).c_str() ,200 ,0.  ,1000) ; 
+  fout.str(std::string());
+  fout.clear() ;
+  fout << fnamecut << ";y (b');" ;
+  TH1D* h_y_bp  = new TH1D("h_y_bp"  ,(fout.str()).c_str() ,100 ,-4. ,4.) ; 
+  fout.str(std::string());
+  fout.clear() ;
+
+  while ( reader1.readEvent() ) {
+    ++ieve1;
+    double mbp(0), ptbp(0), ybp(-100) ; 
+    TLorentzVector p4_bp ; 
+    for(int ii=0;ii< reader1.hepeup.NUP;ii++){
+      if ( abs(reader1.hepeup.IDUP[ii]) == 6000007 ) {
+        p4_bp.SetPxPyPzE(reader1.hepeup.PUP[ii][0], reader1.hepeup.PUP[ii][1], reader1.hepeup.PUP[ii][2], reader1.hepeup.PUP[ii][3]) ; 
+        h_pt_bp->Fill(p4_bp.Pt()) ; 
+        h_y_bp -> Fill(p4_bp.Rapidity()) ; 
+      }
+    }
+  }
+
+  rootoutput->Write();
+  rootoutput->Close();
+
+  return ; 
+
+}
+
 void readerExample() {
   // Open a stream connected to an event file:
-  std::ifstream ifs1("/afs/cern.ch/user/d/devdatta/eos/cms/store/lhe/6462/8TeV_bp_500_5_run25389_unweighted_events_qcut0_mgPostv2.lhe");
+  std::ifstream ifs1("singletBp_ppTobpj_test_MBp600_RL0p5_unweighted_events.lhe");
 
-  std::ifstream ifs2("/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/bin/single_bp_t_jGt50_unweighted_events.lhe");
+  std::ifstream ifs2("singletBp_ppTobpt_test_MBp600_RL0p5_unweighted_events.lhe");
 
   // Create the Reader object:
   LHEF::Reader reader1(ifs1);
@@ -98,9 +145,23 @@ void readerExample() {
   return ; 
 }
 
-int main(){
+int main(int argc, char *argv[]) { 
 
-  readerExample();
+  if ( argc != 2 ) // argc should be 2 for correct execution
+    // We print argv[0] assuming it is the program name
+    std::cout << "usage: " << argv[0] << " <filename>\n" ; 
+  else {
+    ifstream infile ( argv[1] );
+    if ( !infile.is_open() ) {
+      std::cout<<"Could not open file\n"; 
+    }
+    else {
+      std::string fname;
+      while ( std::getline ( infile, fname ) && fname[0] != '#' ) { 
+      readerExample(fname); 
+      } 
+    }
+  }
 
   return 0;
 
