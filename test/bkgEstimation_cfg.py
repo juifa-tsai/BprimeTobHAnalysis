@@ -133,8 +133,8 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     bVetoJetCSVDiscMin 	= cms.double(0.244),
     bVetoJetCSVDiscMax 	= cms.double(2),
 
-    numbJet		= cms.int32(1),
-    numHiggsJet		= cms.int32(1),
+    numbJetMin		= cms.int32(1),
+    numHiggsJetMin	= cms.int32(1),
 
   #  HTSelParams         = defaultHTSelectionParameters.clone(),
   #  EvtSelParams        = defaultEventSelectionParameters.clone(),

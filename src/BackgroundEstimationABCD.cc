@@ -97,7 +97,8 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		virtual void analyze(const edm::Event&, const edm::EventSetup&);
 		virtual void endJob();
 
-		int CloseJetIndex( JetCollection jets_, const Jet myJet_ );
+		//int CloseJetIndex( JetCollection jets_, const Jet myJet_ );
+		Jet CloseJetIndex( JetCollection jets_, const Jet myJet_ );
 		void isolateCollection( JetCollection control_, JetCollection input_, JetCollection& output_, double dR_=1.2 );
 		void recoBprime( JetInfoBranches& JetInfo, JetCollection bjets_, const Jet H_, vector<TLorentzVector>& p4_output );
 		template <typename TH1>
@@ -160,8 +161,8 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const double     bVetoJetCSVDiscMin_;
 		const double     bVetoJetCSVDiscMax_;
 
-		const int     numbJet_;
-		const int     numHiggsJet_;
+		const int     numbJetMin_;
+		const int     numHiggsJetMin_;
 
 		//const double jesShift_;
 		//const double jerShift_; 
@@ -262,8 +263,8 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	bVetoJetCSVDiscMin_(iConfig.getParameter<double>("bVetoJetCSVDiscMin")),
 	bVetoJetCSVDiscMax_(iConfig.getParameter<double>("bVetoJetCSVDiscMax")),
 
-	numbJet_(iConfig.getParameter<int>("numbJet")),
-	numHiggsJet_(iConfig.getParameter<int>("numHiggsJet")),
+	numbJetMin_(iConfig.getParameter<int>("numbJetMin")),
+	numHiggsJetMin_(iConfig.getParameter<int>("numHiggsJetMin")),
 
 	BuildMinTree_(iConfig.getParameter<bool>("BuildMinTree")),
 /*	higgsJetSelParame_(iConfig.getParameter<edm::ParameterSet>("HiggsJetSelParams")),
@@ -299,17 +300,32 @@ void BackgroundEstimationABCD::setABCDcutRegion(TH1* h1){
 	h1->GetXaxis()->SetBinLabel(3,"C");
 	h1->GetXaxis()->SetBinLabel(4,"D");
 }
-int BackgroundEstimationABCD::CloseJetIndex( JetCollection jets_, const Jet myJet_ ){
-	int min_index(-1);
+Jet BackgroundEstimationABCD::CloseJetIndex( JetCollection jets_, const Jet myJet_ ){
+	int i_(0), index_(-1);
 	for( JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet ){
 		float DR_min = 100.;
 		if( myJet_.DeltaR(*ijet) < DR_min){
 			DR_min = myJet_.DeltaR(*ijet);
-			min_index = ijet->Index();   
-			//cout<<min_index<<" "<<ijet->Index()<<endl;	 
+			index_ = i_;
 		}
+		i_++;
 	}
-	return min_index;
+	if( index_ != -1 ){
+		return jets_[index_];
+	}else{
+		std::cout<<"ERROR: JetCollection size is 0 !!!"<<std::endl;
+		Jet emptyJet; emptyJet.Set_Index(-1);
+		return emptyJet;
+	}
+}
+void BackgroundEstimationABCD::recoBprime( JetInfoBranches& JetInfo, JetCollection bjets_, const Jet H_, vector<TLorentzVector>& p4_output ){
+	Jet b_ = CloseJetIndex( bjets_, H_ );
+	if( b_.Index() == -1 ) return;
+	TLorentzVector p4_bp, p4_H, p4_b;
+	p4_H.SetPtEtaPhiM(H_.Pt(), H_.Eta(), H_.Phi(), H_.Mass());
+	p4_b.SetPtEtaPhiM(b_.Pt(), b_.Eta(), b_.Phi(), b_.Mass());
+	p4_bp = p4_H + p4_b;
+	p4_output.push_back( p4_bp );
 }
 void BackgroundEstimationABCD::isolateCollection( JetCollection control_, JetCollection input_, JetCollection& output_, double dR_ ){
 	for( JetCollection::const_iterator _i = input_.begin(); _i != input_.end(); ++_i ){
@@ -326,14 +342,6 @@ void BackgroundEstimationABCD::isolateCollection( JetCollection control_, JetCol
 			output_.push_back(*_i);
 		} 
 	}
-}
-void BackgroundEstimationABCD::recoBprime( JetInfoBranches& JetInfo, JetCollection bjets_, const Jet H_, vector<TLorentzVector>& p4_output ){
-	int bi = CloseJetIndex( bjets_, H_ );
-	TLorentzVector p4_bp, p4_H, p4_b;
-	p4_H.SetPtEtaPhiM(H_.Pt(), H_.Eta(), H_.Phi(), H_.Mass());
-	p4_b.SetPtEtaPhiM(JetInfo.Pt[bi], JetInfo.Eta[bi], JetInfo.Phi[bi], JetInfo.Mass[bi]);
-	p4_bp = p4_H + p4_b;
-	p4_output.push_back( p4_bp );
 }
 // ------------ method called once each job just before starting event loop  ------------
 void BackgroundEstimationABCD::beginJob(){ 
@@ -545,13 +553,13 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		}//bVeto's bJet selection end
 
 		// dR(b, H)>1.2 to Isolate bJet and HJet //================================================================================================================
-		JetCollection bJetsNotHiggs;
+		JetCollection bJetsNotHiggs; //Only for HT(Higgs, bjet)
 		JetCollection bJetsNotAllHiggs;
 		JetCollection bJetsNotAllHiggsAllAntiHiggs;
 		JetCollection bJetsNotAllHiggs_Veto;
 		JetCollection bJetsNotAllHiggsAllAntiHiggs_Veto;
 		// isolateCollection( control_collection, input_collection, output_collection, dR(control, input)>1.2 )
-		isolateCollection( HiggsJets, 		bJets, 			bJetsNotHiggs, 			1.2);
+		isolateCollection( HiggsJets, 		bJets, 			bJetsNotHiggs, 			1.2); //Only for HT(Higgs, bjet)
 		isolateCollection( AllHiggsJets, 	bJets, 			bJetsNotAllHiggs, 		1.2);
 		isolateCollection( AllAntiHiggsJets, 	bJetsNotAllHiggs, 	bJetsNotAllHiggsAllAntiHiggs, 	1.2);
 		isolateCollection( AllHiggsJets, 	bJets_Veto, 		bJetsNotAllHiggs_Veto, 			1.2);
@@ -562,10 +570,10 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		}
 
 		///// Fill evt and ABCD plots //==================================================================================================================================================	
-		int A=0, Av=0;
-		int B=0, Bv=0;
-		int C=0, C_all=0, Cv=0;
-		int D=0, D_all=0, Dv=0;
+		int nA=0, nAv=0;
+		int nB=0, nBv=0;
+		int nC=0, nC_all=0, nCv=0;
+		int nD=0, nD_all=0, nDv=0;
 
 		if( HT_AK5 < HTAK5Min_ ) continue;
 		h1.GetTH1("ABCDana_CutFlow")->Fill(double(3),weight_);	
@@ -597,8 +605,8 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
 			//// B region 
 			if( H->MassPruned() > HJetPrunedMassMin_ && H->MassPruned() < HJetPrunedMassMax_ ){
-				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJet_) ){
-					B++; 
+				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJetMin_) ){
+					nB++; 
 					HiggsJets_ABCD.push_back(*H);
 					HiggsSubJet1_ABCD.push_back(SubJet1);
 					HiggsSubJet2_ABCD.push_back(SubJet2);
@@ -629,8 +637,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					cout<<"[Alpha] Sub2CSV "<<SubJetInfo.CombinedSVBJetTags[iSub2]<<endl;*/
 				}
 				if ( bJetsNotAllHiggsAllAntiHiggs_Veto.size() == 0 ){ //b-Veto
-					Bv++; 
-					recoBprime( AK5JetInfo, bJetsNotAllHiggsAllAntiHiggs_Veto, *H, p4_bprimes_B);
+					nBv++; 
 					h1.GetTH1("ABCDval_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDval_HiggsMass_B")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDval_CA8Pt")->Fill( H->Pt(), weight_);
@@ -648,15 +655,15 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}
 			//// D region 
 			if( H->MassPruned() <= HJetPrunedMassMin_ || H->MassPruned() >= HJetPrunedMassMax_ ){
-				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJet_) ){
+				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJetMin_) ){
 					if( H->MassPruned() <= HJetSBMassMax_ && H->MassPruned() > HJetSBMassMin_ ){ 
-						D++; 
+						nD++; 
 						HiggsJets_ABCD.push_back(*H);
 						HiggsSubJet1_ABCD.push_back(SubJet1);
 						HiggsSubJet2_ABCD.push_back(SubJet2);
 						recoBprime( AK5JetInfo, bJetsNotAllHiggsAllAntiHiggs, *H, p4_bprimes_D);
 					}
-					D_all++; 
+					nD_all++; 
 					h1.GetTH1("ABCDana_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDana_HiggsMass_D")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDana_CA8Pt")->Fill( H->Pt(), weight_);
@@ -673,7 +680,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 				}
 				if ( bJetsNotAllHiggsAllAntiHiggs_Veto.size() == 0 ){ //b-Veto
 					if( H->MassPruned() <= HJetSBMassMax_ && H->MassPruned() > HJetSBMassMin_ ){ 
-						Dv++; 
+						nDv++; 
 					} 
 					h1.GetTH1("ABCDval_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDval_HiggsMass_D")->Fill( H->MassPruned(), weight_);
@@ -714,8 +721,8 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
 			//// A region	
 			if( H->MassPruned() > HJetPrunedMassMin_ && H->MassPruned() < HJetPrunedMassMax_ ){
-				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJet_) ){
-					A++;
+				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJetMin_) ){
+					nA++;
 					AntiHiggsJets_ABCD.push_back(*H); 
 					AntiHiggsSubJet1_ABCD.push_back(SubJet1);
 					AntiHiggsSubJet2_ABCD.push_back(SubJet2);
@@ -735,7 +742,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					h2.GetTH2("ABCDana_2D")->Fill( 0., H->MassPruned(), weight_);
 				}
 				if ( bJetsNotAllHiggsAllAntiHiggs_Veto.size() == 0 ){
-					Av++; 
+					nAv++; 
 					h1.GetTH1("ABCDval_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDval_HiggsMass_A")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDval_CA8Pt")->Fill( H->Pt(), weight_);
@@ -753,15 +760,15 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}
 			//// C region
 			if( H->MassPruned() <= HJetPrunedMassMin_ || H->MassPruned() >= HJetPrunedMassMax_ ){
-				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJet_) ){
+				if ( bJetsNotAllHiggsAllAntiHiggs.size() >= unsigned(numbJetMin_) ){
 					if( H->MassPruned() <= HJetSBMassMax_ && H->MassPruned() > HJetSBMassMin_ ){ 
-						C++; 
+						nC++; 
 						AntiHiggsJets_ABCD.push_back(*H); 
 						AntiHiggsSubJet1_ABCD.push_back(SubJet1);
 						AntiHiggsSubJet2_ABCD.push_back(SubJet2);
 						recoBprime( AK5JetInfo, bJetsNotAllHiggsAllAntiHiggs, *H, p4_bprimes_C);
 					} 
-					C_all++; 
+					nC_all++; 
 					h1.GetTH1("ABCDana_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDana_HiggsMass_C")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDana_CA8Pt")->Fill( H->Pt(), weight_);
@@ -778,7 +785,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 				}
 				if ( bJetsNotAllHiggsAllAntiHiggs_Veto.size() == 0){ // b-Veto
 					if( H->MassPruned() <= HJetSBMassMax_ && H->MassPruned() > HJetSBMassMin_ ){ 
-						Cv++; 
+						nCv++; 
 					} 
 					h1.GetTH1("ABCDval_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDval_HiggsMass_C")->Fill( H->MassPruned(), weight_);
@@ -800,17 +807,17 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
 		h1.GetTH1("ABCDana_NumCA8")->Fill(AllHiggsJets.size()+AllAntiHiggsJets.size());
 		h1.GetTH1("ABCDana_Numbjet")->Fill(bJetsNotAllHiggsAllAntiHiggs.size());
-		if( A+B+C+D > 0){ 
+		if( nA+nB+nC+nD > 0){ 
 			h1.GetTH1("ABCDana_Numbjet_ABCD")->Fill(bJetsNotAllHiggsAllAntiHiggs.size());
-			h1.GetTH1("ABCDana_NumCA8_ABCD")->Fill(A+B+C+D);
+			h1.GetTH1("ABCDana_NumCA8_ABCD")->Fill(nA+nB+nC+nD);
 		}
 
-		if( B > 0 ){
+		if( nB > 0 ){
 			sumw2_b += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("B", weight_); evtPass_ana++;
 			h1.GetTH1("ABCDana_HT_B")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDana_NumCA8_B")->Fill(B);
+			h1.GetTH1("ABCDana_NumCA8_B")->Fill(nB);
 			h1.GetTH1("ABCDana_Numbjet_B")->Fill(bJetsNotAllHiggsAllAntiHiggs.size());
 			for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_B.begin(); bp_ != p4_bprimes_B.end(); bp_++ ){
 				h1.GetTH1("ABCDana_bpMass_B")->Fill( bp_->M(), weight_);
@@ -836,12 +843,12 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					h1.GetTH1("ABCDana_2b_bpEta_B")->Fill( bp_->Eta(), weight_);
 				}
 			}	
-		}else if( D > 0 ){ 
+		}else if( nD > 0 ){ 
 			sumw2_d += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("D", weight_);
 			h1.GetTH1("ABCDana_HT_D")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDana_NumCA8_D")->Fill(D);
+			h1.GetTH1("ABCDana_NumCA8_D")->Fill(nD);
 			h1.GetTH1("ABCDana_Numbjet_D")->Fill(bJetsNotAllHiggsAllAntiHiggs.size());
 			for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_D.begin(); bp_ != p4_bprimes_D.end(); bp_++ ){
 				h1.GetTH1("ABCDana_bpMass_D")->Fill( bp_->M(), weight_);
@@ -867,12 +874,12 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					h1.GetTH1("ABCDana_2b_bpEta_D")->Fill( bp_->Eta(), weight_);
 				}
 			}	
-		}else if( A > 0 ){
+		}else if( nA > 0 ){
 			sumw2_a += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("A", weight_);
 			h1.GetTH1("ABCDana_HT_A")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDana_NumCA8_A")->Fill(A);
+			h1.GetTH1("ABCDana_NumCA8_A")->Fill(nA);
 			h1.GetTH1("ABCDana_Numbjet_A")->Fill(bJetsNotAllHiggsAllAntiHiggs.size());
 			for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_A.begin(); bp_ != p4_bprimes_A.end(); bp_++ ){
 				h1.GetTH1("ABCDana_bpMass_A")->Fill( bp_->M(), weight_);
@@ -898,12 +905,12 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					h1.GetTH1("ABCDana_2b_bpEta_A")->Fill( bp_->Eta(), weight_);
 				}
 			}	
-		}else if( C > 0 ){
+		}else if( nC > 0 ){
 			sumw2_c += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("C", weight_);
 			h1.GetTH1("ABCDana_HT_C")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDana_NumCA8_C")->Fill(C);
+			h1.GetTH1("ABCDana_NumCA8_C")->Fill(nC);
 			h1.GetTH1("ABCDana_Numbjet_C")->Fill(bJetsNotAllHiggsAllAntiHiggs.size());
 			for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_C.begin(); bp_ != p4_bprimes_C.end(); bp_++ ){
 				h1.GetTH1("ABCDana_bpMass_C")->Fill( bp_->M(), weight_);
@@ -931,34 +938,34 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}	
 		}
 
-		if( Bv > 0 ){
+		if( nBv > 0 ){
 			h1.GetTH1("ABCDval_CutRegion")->Fill("B", weight_); evtPass_val++;
 			h1.GetTH1("ABCDval_HT_B")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDval_NumCA8_B")->Fill(Bv);
+			h1.GetTH1("ABCDval_NumCA8_B")->Fill(nBv);
 			sumw2_bv += w2_;
-		}else if( Dv > 0 ){ 
+		}else if( nDv > 0 ){ 
 			h1.GetTH1("ABCDval_CutRegion")->Fill("D", weight_);
 			h1.GetTH1("ABCDval_HT_D")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDval_NumCA8_D")->Fill(Dv);
+			h1.GetTH1("ABCDval_NumCA8_D")->Fill(nDv);
 			sumw2_dv += w2_;
-		}else if( Av > 0 ){
+		}else if( nAv > 0 ){
 			h1.GetTH1("ABCDval_CutRegion")->Fill("A", weight_);
 			h1.GetTH1("ABCDval_HT_A")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDval_NumCA8_A")->Fill(Av);
+			h1.GetTH1("ABCDval_NumCA8_A")->Fill(nAv);
 			sumw2_av += w2_;
-		}else if( Cv > 0 ){
+		}else if( nCv > 0 ){
 			h1.GetTH1("ABCDval_CutRegion")->Fill("C", weight_);
 			h1.GetTH1("ABCDval_HT_C")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
-			h1.GetTH1("ABCDval_NumCA8_C")->Fill(Cv);
+			h1.GetTH1("ABCDval_NumCA8_C")->Fill(nCv);
 			sumw2_cv += w2_;
 		}
 
-		if( B  != 0 ) h1.GetTH1("ABCDana_CutFlow")->Fill(double(4), weight_);
-		if( Bv != 0 ) h1.GetTH1("ABCDval_CutFlow")->Fill(double(4), weight_);
+		if( nB  != 0 ) h1.GetTH1("ABCDana_CutFlow")->Fill(double(4), weight_);
+		if( nBv != 0 ) h1.GetTH1("ABCDval_CutFlow")->Fill(double(4), weight_);
 
 		h1.GetTH1("ABCDana_Sumw2_A")->Fill( 0., sumw2_a);
 		h1.GetTH1("ABCDana_Sumw2_B")->Fill( 0., sumw2_b);
@@ -978,7 +985,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		h1.GetTH1("ABCDval_Sumw2_D")->Fill( 0., sumw2_dv);
 		//// Store new tree, new branch with Jet correction  ====================================================================================================
 		if( BuildMinTree_ ){
-			if( A+B+C+D > 0 ){ 	
+			if( nA+nB+nC+nD > 0 ){ 	
 				McFlagana = EvtInfo.McFlag;
 				PUana = puweight_;
 				evtWtana = br_*evtwt_;
