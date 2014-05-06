@@ -61,8 +61,8 @@ Implementation:
 #include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h" 
 
 //Plots information
-#include "BpbH/BprimeTobHAnalysis/interface/TH1Info/TH2InfoClass.h"
-#include "BpbH/BprimeTobHAnalysis/interface/TH1Info/TH1InfoClass.h"
+#include "BpbH/BprimeTobHAnalysis/interface/TH2InfoClass.h"
+#include "BpbH/BprimeTobHAnalysis/interface/TH1InfoClass.h"
 
 //Evt selection
 #include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
