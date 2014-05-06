@@ -178,7 +178,7 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		EvtInfoBranches    EvtInfo;
 		VertexInfoBranches VtxInfo;
 		JetInfoBranches CA8JetInfo, HiggsJetInfoAna, AntiHiggsJetInfoAna;
-		JetInfoBranches AK5JetInfo, bJetInfoAna;
+		JetInfoBranches AK5JetInfo, bJetInfoAna, Final_bJetInfoAna;
 		JetInfoBranches SubJetInfo, HiggsSubJet1InfoAna, HiggsSubJet2InfoAna, AntiHiggsSubJet1InfoAna, AntiHiggsSubJet2InfoAna;
 
 		edm::Service<TFileService> fs; 
@@ -373,6 +373,7 @@ void BackgroundEstimationABCD::beginJob(){
 		HiggsJetInfoAna.RegisterTree(newtree_ana,"HiggsJetInfo");
 		AntiHiggsJetInfoAna.RegisterTree(newtree_ana,"AntiHiggsJetInfo");
 		bJetInfoAna.RegisterTree(newtree_ana,"bJetInfo");
+		Final_bJetInfoAna.RegisterTree(newtree_ana,"FinalbJetInfo");
 		HiggsSubJet1InfoAna.RegisterTree(newtree_ana,"HiggsSubJet1Info");
 		HiggsSubJet2InfoAna.RegisterTree(newtree_ana,"HiggsSubJet2Info");
 		AntiHiggsSubJet1InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet1Info");
@@ -579,6 +580,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		h1.GetTH1("ABCDval_CutFlow")->Fill(double(3),weight_);
 
 		vector<TLorentzVector> p4_bprimes_A, p4_bprimes_B, p4_bprimes_C, p4_bprimes_D; 
+		JetCollection Final_bJets_ABCD;
 		JetCollection HiggsJets_ABCD, HiggsSubJet1_ABCD, HiggsSubJet2_ABCD;
 		JetCollection AntiHiggsJets_ABCD, AntiHiggsSubJet1_ABCD, AntiHiggsSubJet2_ABCD;
 
@@ -609,6 +611,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					HiggsJets_ABCD.push_back(*H);
 					HiggsSubJet1_ABCD.push_back(SubJet1);
 					HiggsSubJet2_ABCD.push_back(SubJet2);
+					Final_bJets_ABCD.push_back( CloseJetIndex(bJetsNotAllHiggsAllAntiHiggs, *H) );
 					recoBprime( bJetsNotAllHiggsAllAntiHiggs, *H, p4_bprimes_B);
 					h1.GetTH1("ABCDana_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDana_HiggsMass_B")->Fill( H->MassPruned(), weight_);
@@ -660,6 +663,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 						HiggsJets_ABCD.push_back(*H);
 						HiggsSubJet1_ABCD.push_back(SubJet1);
 						HiggsSubJet2_ABCD.push_back(SubJet2);
+						Final_bJets_ABCD.push_back( CloseJetIndex(bJetsNotAllHiggsAllAntiHiggs, *H) );
 						recoBprime( bJetsNotAllHiggsAllAntiHiggs, *H, p4_bprimes_D);
 					}
 					nD_all++; 
@@ -725,6 +729,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 					AntiHiggsJets_ABCD.push_back(*H); 
 					AntiHiggsSubJet1_ABCD.push_back(SubJet1);
 					AntiHiggsSubJet2_ABCD.push_back(SubJet2);
+					Final_bJets_ABCD.push_back( CloseJetIndex(bJetsNotAllHiggsAllAntiHiggs, *H) );
 					recoBprime( bJetsNotAllHiggsAllAntiHiggs, *H, p4_bprimes_A);
 					h1.GetTH1("ABCDana_HiggsMass")->Fill( H->MassPruned(), weight_);
 					h1.GetTH1("ABCDana_HiggsMass_A")->Fill( H->MassPruned(), weight_);
@@ -764,7 +769,8 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 						nC++; 
 						AntiHiggsJets_ABCD.push_back(*H); 
 						AntiHiggsSubJet1_ABCD.push_back(SubJet1);
-						AntiHiggsSubJet2_ABCD.push_back(SubJet2);
+						AntiHiggsSubJet2_ABCD.push_back(SubJet2);	
+						Final_bJets_ABCD.push_back( CloseJetIndex(bJetsNotAllHiggsAllAntiHiggs, *H) );
 						recoBprime( bJetsNotAllHiggsAllAntiHiggs, *H, p4_bprimes_C);
 					} 
 					nC_all++; 
@@ -997,6 +1003,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 				reRegistJet(AntiHiggsSubJet1_ABCD, AntiHiggsSubJet1InfoAna);	
 				reRegistJet(AntiHiggsSubJet2_ABCD, AntiHiggsSubJet2InfoAna);	
 				reRegistJet(bJetsNotAllHiggsAllAntiHiggs, bJetInfoAna);	
+				reRegistJet(Final_bJets_ABCD, Final_bJetInfoAna);			
 				newtree_ana->Fill();	
 				//cout<<"A "<<A<<", B "<<B<<", C "<<C<<", D "<<D<<endl;
 				//cout<<"Higgs "<<HiggsJets_ABCD.size()<<", AntiHiggs "<<AntiHiggsJets_ABCD.size()<<endl;
