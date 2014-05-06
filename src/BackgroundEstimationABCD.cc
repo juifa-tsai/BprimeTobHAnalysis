@@ -101,8 +101,8 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		Jet CloseJetIndex( JetCollection jets_, const Jet myJet_ );
 		void isolateCollection( JetCollection control_, JetCollection input_, JetCollection& output_, double dR_=1.2 );
 		void recoBprime( JetInfoBranches& JetInfo, JetCollection bjets_, const Jet H_, vector<TLorentzVector>& p4_output );
-		template <typename TH1>
-		void setABCDcutRegion(TH1* h1);
+		template <typename TH1_>
+		void setABCDcutRegion(TH1_* h1);
 	
 		edm::LumiReWeighting LumiWeights_; 
 
@@ -293,34 +293,33 @@ BackgroundEstimationABCD::~BackgroundEstimationABCD(){
 }
 
 // ------------ Other function -------------
-template <typename TH1>
-void BackgroundEstimationABCD::setABCDcutRegion(TH1* h1){
+template <typename TH1_>
+void BackgroundEstimationABCD::setABCDcutRegion(TH1_* h1){
 	h1->GetXaxis()->SetBinLabel(1,"A");
 	h1->GetXaxis()->SetBinLabel(2,"B");
 	h1->GetXaxis()->SetBinLabel(3,"C");
 	h1->GetXaxis()->SetBinLabel(4,"D");
 }
 Jet BackgroundEstimationABCD::CloseJetIndex( JetCollection jets_, const Jet myJet_ ){
-	int i_(0), index_(-1);
+	Jet min_Jet;
 	for( JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet ){
-		float DR_min = 100.;
+		float DR_min = 1000.;
 		if( myJet_.DeltaR(*ijet) < DR_min){
 			DR_min = myJet_.DeltaR(*ijet);
-			index_ = i_;
+			min_Jet = *ijet;
 		}
-		i_++;
 	}
-	if( index_ != -1 ){
-		return jets_[index_];
+	if( jets_.size() != 0 ){
+		return min_Jet;
 	}else{
 		std::cout<<"ERROR: JetCollection size is 0 !!!"<<std::endl;
-		Jet emptyJet; emptyJet.Set_Index(-1);
+		Jet emptyJet; emptyJet.Set_Pt(-1);
 		return emptyJet;
 	}
 }
 void BackgroundEstimationABCD::recoBprime( JetInfoBranches& JetInfo, JetCollection bjets_, const Jet H_, vector<TLorentzVector>& p4_output ){
 	Jet b_ = CloseJetIndex( bjets_, H_ );
-	if( b_.Index() == -1 ) return;
+	if( b_.Pt() == -1 ) return;
 	TLorentzVector p4_bp, p4_H, p4_b;
 	p4_H.SetPtEtaPhiM(H_.Pt(), H_.Eta(), H_.Phi(), H_.Mass());
 	p4_b.SetPtEtaPhiM(b_.Pt(), b_.Eta(), b_.Phi(), b_.Mass());

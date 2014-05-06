@@ -8,7 +8,7 @@
 #include "TH2InfoVarClass.h"
 using namespace std;
 
-template<typename TH2> 
+template<typename TH2_type> 
 class TH2InfoClass{
         public:
                 //Fun. of initial TH2
@@ -18,13 +18,13 @@ class TH2InfoClass{
 		void CreateTH2( TFile* f, std::string dirName ); // dirName, ex: "ROC_1/"
 		void SetTitles(); 
                 void Sumw2();
-                TH2* GetTH2(std::string Name_);
+                TH2_type* GetTH2(std::string Name_);
                 TH2InfoVarClass GetVar(std::string Name_);
                 TH2InfoVarClass GetVar(int index);
 
 	private:
                 //Detail info
-                map<std::string, TH2*> mapTH2;
+                map<std::string, TH2_type*> mapTH2;
                 map<std::string, int> indexTH2;
 		TH2InfoVarClass Var[TH2_Size_];
 		
@@ -32,8 +32,8 @@ class TH2InfoClass{
 
 // Define function
 // Constructor
-template<typename TH2> 
-TH2InfoClass<TH2>::TH2InfoClass(){
+template<typename TH2_type> 
+TH2InfoClass<TH2_type>::TH2InfoClass(){
         for(int i=0; i<TH2_Size_; i++){ //Loop all kind of TH2
                 Var[i].Name = TH2Info[i].Name;
 		Var[i].Title = TH2Info[i].Title;
@@ -52,29 +52,29 @@ TH2InfoClass<TH2>::TH2InfoClass(){
 }
 
 // Create Histogram
-template<typename TH2> 
-void TH2InfoClass<TH2>::CreateTH2(){
+template<typename TH2_type> 
+void TH2InfoClass<TH2_type>::CreateTH2(){
         for(int i=0; i<TH2_Size_; i++){ 
                 mapTH2[Var[i].Name] = new TH2(Var[i].Name.c_str(),"",Var[i].xBin, Var[i].xMin, Var[i].xMax, Var[i].yBin, Var[i].yMin, Var[i].yMax);
         }
 
 }
-template<typename TH2> 
-void TH2InfoClass<TH2>::CreateTH2(edm::Service<TFileService> f){
+template<typename TH2_type> 
+void TH2InfoClass<TH2_type>::CreateTH2(edm::Service<TFileService> f){
         for(int i=0; i<TH2_Size_; i++){ 
-                mapTH2[Var[i].Name] = f->make<TH2>(Var[i].Name.c_str(),"",Var[i].xBin, Var[i].xMin, Var[i].xMax, Var[i].yBin, Var[i].yMin, Var[i].yMax);
+                mapTH2[Var[i].Name] = f->make<TH2_type>(Var[i].Name.c_str(),"",Var[i].xBin, Var[i].xMin, Var[i].xMax, Var[i].yBin, Var[i].yMin, Var[i].yMax);
         }
 }
-template<typename TH2> 
-void TH2InfoClass<TH2>::CreateTH2( TFile* f, std::string dirName="" ){
+template<typename TH2_type> 
+void TH2InfoClass<TH2_type>::CreateTH2( TFile* f, std::string dirName="" ){
         for(int i=0; i<TH2_Size_; i++){ 
-                mapTH2[Var[i].Name] = (TH2*)f->Get( (dirName+Var[i].Name).c_str());
+                mapTH2[Var[i].Name] = (TH2_type*)f->Get( (dirName+Var[i].Name).c_str());
         }
 }
 
 // Set some option for Histogram
-template<typename TH2> 
-void TH2InfoClass<TH2>::SetTitles(){
+template<typename TH2_type> 
+void TH2InfoClass<TH2_type>::SetTitles(){
         for(int i=0; i<TH2_Size_; i++){ 
                 //mapTH2[Var[i].Name]->SetTitle(    Var[i].Title.c_str());
                 mapTH2[Var[i].Name]->SetXTitle( Var[i].xTitle.c_str());
@@ -82,26 +82,26 @@ void TH2InfoClass<TH2>::SetTitles(){
         }
 }
 
-template<typename TH2> 
-void TH2InfoClass<TH2>::Sumw2(){
+template<typename TH2_type> 
+void TH2InfoClass<TH2_type>::Sumw2(){
         for(int i=0; i<TH2_Size_; i++){ 
                 mapTH2.find(Var[i].Name)->second->Sumw2();
         }
 }
 
 // Get Histogram
-template<typename TH2> 
-TH2* TH2InfoClass<TH2>::GetTH2(std::string Name_){
+template<typename TH2_type> 
+TH2_type* TH2InfoClass<TH2_type>::GetTH2(std::string Name_){
         return mapTH2.find(Name_)->second;
 }
 
 // Get Variables
-template<typename TH2> 
-TH2InfoVarClass TH2InfoClass<TH2>::GetVar(std::string Name_){
+template<typename TH2_type> 
+TH2InfoVarClass TH2InfoClass<TH2_type>::GetVar(std::string Name_){
         return Var[indexTH2.find(Name_)->second];
 }
-template<typename TH2> 
-TH2InfoVarClass TH2InfoClass<TH2>::GetVar(int index){
+template<typename TH2_type> 
+TH2InfoVarClass TH2InfoClass<TH2_type>::GetVar(int index){
         return Var[index];
 }
 #endif

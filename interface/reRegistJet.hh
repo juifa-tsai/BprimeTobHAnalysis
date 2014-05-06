@@ -82,7 +82,7 @@ inline void reRegistJet( JetInfoBranches& OldJet, JetInfoBranches& NewJet){
 inline void reRegistJet( JetCollection& OldJet, JetInfoBranches& NewJet){
 	int size=0;
 	for( JetCollection::const_iterator ijet = OldJet.begin(); ijet != OldJet.end(); ++ijet) {
-		NewJet.Index[size] = ijet->Index();
+		//NewJet.Index[size] = ijet->Index();
 		NewJet.NTracks[size] = ijet->NTracks();
 		NewJet.Et[size] = ijet->Et();
 		NewJet.Pt[size] = ijet->Pt();
