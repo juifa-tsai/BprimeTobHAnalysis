@@ -68,6 +68,9 @@ Implementation:
 #include "BpbH/BprimeTobHAnalysis/interface/EventSelector.h"
 #include "BpbH/BprimeTobHAnalysis/interface/HiggsBRscaleFactors.h" 
 
+//For mini tree
+#include "BpbH/BprimeTobHAnalysis/interface/reRegistJet.hh"
+
 ///// Jet Correction
 //#include "BpbH/BprimeTobHAnalysis/src/JMEUncertUtil.cc"
 //#include "BpbH/BprimeTobHAnalysis/src/BTagSFUtil.cc"
@@ -188,9 +191,9 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		double higgsTagCorr_;
 
 		// New branch
-		int GenEvt_;
-		bool McFlagana;
+		//int GenEvt_;
 		//double xsec_;
+		bool McFlagana;
 		double PUana;
 		double evtWtana;
 		double HTak5, HThiggsbjet;
@@ -353,9 +356,9 @@ void BackgroundEstimationABCD::beginJob(){
 
 	if( BuildMinTree_ ){
 		newtree_ana = fs->make<TTree>("tree", "");
-		newtree_ana->Branch("EvtInfo.GenEvents",	&GenEvt_, 	"EvtInfo.GenEvents/I"); 
-		newtree_ana->Branch("EvtInfo.McFlag", 		&McFlagana, 	"EvtInfo.McFlag/O"); // store weight of evt and pu for each event
+		//newtree_ana->Branch("EvtInfo.GenEvents",	&GenEvt_, 	"EvtInfo.GenEvents/I"); 
 		//newtree_ana->Branch("EvtInfo.XSec", 		&xsec_, 	"EvtInfo.XSec/D"); 
+		newtree_ana->Branch("EvtInfo.McFlag", 		&McFlagana, 	"EvtInfo.McFlag/O"); // store weight of evt and pu for each event
 		newtree_ana->Branch("EvtInfo.PU", 		&PUana, 	"EvtInfo.PU/D"); // store weight of evt and pu for each event
 		newtree_ana->Branch("EvtInfo.WeightEvt",	&evtWtana, 	"EvtInfo.WeightEvt/D"); 	
 		newtree_ana->Branch("EvtInfo.HT_AK5",		&HTak5, 	"EvtInfo.HT_AK5/D"); 	
@@ -398,11 +401,6 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 	using namespace std;
 
 	if(  chain_ == 0) return;
-
-	ofstream fout("Evt_NoJets.txt"); 
-	if(  isData_ ){
-		fout << "EvtInfo.RunNo " << " EvtInfo.LumiNo " << " EvtInfo.EvtNo " << std::endl;
-	}
 
 	edm::LogInfo("StartingAnalysisLoop") << "Starting analysis loop\n";
 	
@@ -469,11 +467,6 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		if( nGoodVtxs < 1){ edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex "; continue; }
 		h1.GetTH1("ABCDana_CutFlow")->Fill(double(2),weight_);	
 		h1.GetTH1("ABCDval_CutFlow")->Fill(double(2),weight_);
-
-		//// Recall data no Jet =====================================================================================
-		if( isData_ ){
-			if( AK5JetInfo.Size == 0 ) fout << EvtInfo.RunNo << " " << EvtInfo.LumiNo << " " << EvtInfo.EvtNo << std::endl; 
-		}
 
 		////  Higgs jets selection ================================================================================ 
 		JetCollection HiggsJets, HiggsLikeJets, AllHiggsJets, AllHiggsJetsDRCut;
@@ -984,10 +977,28 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		h1.GetTH1("ABCDval_Sumw2_C")->Fill( 0., sumw2_cv);
 		h1.GetTH1("ABCDval_Sumw2_D")->Fill( 0., sumw2_dv);
 		//// Store new tree, new branch with Jet correction  ====================================================================================================
+		if( BuildMinTree_ ){
+			if( A+B+C+D > 0 ){ 	
+				McFlagana = EvtInfo.McFlag;
+				PUana = puweight_;
+				evtWtana = br_*evtwt_;
+				HTak5 = HT_AK5;
+				HThiggsbjet = HT_HiggsBJets;
+				reRegistJet(HiggsJets_ABCD, HiggsJetInfoAna);	
+				reRegistJet(AntiHiggsJets_ABCD, AntiHiggsJetInfoAna);	
+				reRegistJet(HiggsSubJet1_ABCD, HiggsSubJet1InfoAna);	
+				reRegistJet(HiggsSubJet2_ABCD, HiggsSubJet2InfoAna);	
+				reRegistJet(AntiHiggsSubJet1_ABCD, AntiHiggsSubJet1InfoAna);	
+				reRegistJet(AntiHiggsSubJet2_ABCD, AntiHiggsSubJet2InfoAna);	
+				reRegistJet(bJetsNotAllHiggsAllAntiHiggs, bJetInfoAna);	
+				newtree_ana->Fill();	
+				//cout<<"A "<<A<<", B "<<B<<", C "<<C<<", D "<<D<<endl;
+				//cout<<"Higgs "<<HiggsJets_ABCD.size()<<", AntiHiggs "<<AntiHiggsJets_ABCD.size()<<endl;
+				//cout<<"HiggsSub12 "<<HiggsSubJet1_ABCD.size()<<", "<<HiggsSubJet2_ABCD.size()<<", AntiHiggsSub12 "<<AntiHiggsSubJet1_ABCD.size()<<", "<<AntiHiggsSubJet2_ABCD.size()<<endl;
+				//cout<<"========================================"<<endl;
+			}
+		}
 	} //// entry loop 
-
-	fout.close(); 
-
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

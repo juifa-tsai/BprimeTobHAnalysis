@@ -3,7 +3,7 @@
 
 #include "BpbH/BprimeTobH/interface/format.h"
 
-void reRegistGen( GenInfoBranches& OldGen, GenInfoBranches& NewGen){
+inline void reRegistGen( GenInfoBranches& OldGen, GenInfoBranches& NewGen){
 	int size=0;
 	for( int i=0; i<OldGen.Size; i++){
 		size++;

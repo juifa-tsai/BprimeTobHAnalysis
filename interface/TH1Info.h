@@ -65,10 +65,6 @@ enum th1flist_{
 	ABCDana_CA8Pt_B, 	//10-21
 	ABCDana_CA8Pt_C, 	//10-21
 	ABCDana_CA8Pt_D, 	//10-21
-	ABCDana_CA8PrMass_A, 	//10-21
-	ABCDana_CA8PrMass_B, 	//10-21
-	ABCDana_CA8PrMass_C, 	//10-21
-	ABCDana_CA8PrMass_D, 	//10-21
 	ABCDana_dRSubJets_A, 	//10-21
 	ABCDana_dRSubJets_B, 	//10-21
 	ABCDana_dRSubJets_C, 	//10-21
@@ -159,10 +155,6 @@ enum th1flist_{
 	ABCDval_CA8Pt_B, 	//10-21
 	ABCDval_CA8Pt_C, 	//10-21
 	ABCDval_CA8Pt_D, 	//10-21
-	ABCDval_CA8PrMass_A, 	//10-21
-	ABCDval_CA8PrMass_B, 	//10-21
-	ABCDval_CA8PrMass_C, 	//10-21
-	ABCDval_CA8PrMass_D, 	//10-21
 	ABCDval_dRSubJets_A, 	//10-21
 	ABCDval_dRSubJets_B, 	//10-21
 	ABCDval_dRSubJets_C, 	//10-21
@@ -202,10 +194,6 @@ enum th1flist_{
 	ABCDval_HiggsMass_,  		//10-21
 	ABCDval_JetFlavor_,  		//10-21
 	ABCDval_LeadCA8_Pt_,  		//10-21
-
-	GenInfo_HiggsDaPdgID_,  	//11-06
-	GenInfo_NumHiggsTobb_,  	//11-06
-	GenInfo_NumHiggsToOther_,  	//11-06
 
 	TH1_Size_
 };
@@ -285,10 +273,6 @@ struct TH1Info_ TH1Info[TH1_Size_] = {
 	{ 0,	"ABCDana_CA8Pt_B",	 		"",	"",				"Yields", "GeV/c", 	700, 0, 700}, 	//10-21
 	{ 0,	"ABCDana_CA8Pt_C",	 		"",	"",				"Yields", "GeV/c", 	700, 0, 700}, 	//10-21
 	{ 0,	"ABCDana_CA8Pt_D",	 		"",	"",				"Yields", "GeV/c", 	700, 0, 700}, 	//10-21
-	{ 0,	"ABCDana_CA8PrMass_A",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
-	{ 0,	"ABCDana_CA8PrMass_B",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
-	{ 0,	"ABCDana_CA8PrMass_C",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
-	{ 0,	"ABCDana_CA8PrMass_D",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
 	{ 0,	"ABCDana_dRSubJets_A",	 	"",	"",				"Yields", "", 	100, 0, 1}, 	//10-21
 	{ 0,	"ABCDana_dRSubJets_B",	 	"",	"",				"Yields", "", 	100, 0, 1}, 	//10-21
 	{ 0,	"ABCDana_dRSubJets_C",	 	"",	"",				"Yields", "", 	100, 0, 1}, 	//10-21
@@ -379,10 +363,6 @@ struct TH1Info_ TH1Info[TH1_Size_] = {
 	{ 0,	"ABCDval_CA8Pt_B",	 		"",	"",				"Yields", "GeV/c", 	700, 0, 700}, 	//10-21
 	{ 0,	"ABCDval_CA8Pt_C",	 		"",	"",				"Yields", "GeV/c", 	700, 0, 700}, 	//10-21
 	{ 0,	"ABCDval_CA8Pt_D",	 		"",	"",				"Yields", "GeV/c", 	700, 0, 700}, 	//10-21
-	{ 0,	"ABCDval_CA8PrMass_A",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
-	{ 0,	"ABCDval_CA8PrMass_B",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
-	{ 0,	"ABCDval_CA8PrMass_C",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
-	{ 0,	"ABCDval_CA8PrMass_D",	 	"",	"",				"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
 	{ 0,	"ABCDval_dRSubJets_A",	 	"",	"",				"Yields", "", 	100, 0, 1}, 	//10-21
 	{ 0,	"ABCDval_dRSubJets_B",	 	"",	"",				"Yields", "", 	100, 0, 1}, 	//10-21
 	{ 0,	"ABCDval_dRSubJets_C",	 	"",	"",				"Yields", "", 	100, 0, 1}, 	//10-21
@@ -422,10 +402,6 @@ struct TH1Info_ TH1Info[TH1_Size_] = {
 	{ 0,	"ABCDval_HiggsMass", 		"",	"Pruned Mass(Higgs)", 			"Yields", "GeV/c^{2}", 	200, 0, 200}, 	//10-21
 	{ 0,	"ABCDval_JetFlavor",	 	"",	"Jet Flavor",			"Yields", "", 		50, -25, 25}, 	//10-21
 	{ 0,	"ABCDval_CA8Pt", 			"",	"CA8 Pt", 		"Yields", "GeV/c", 	1500,  0, 1500}, 	//10-21
-
-	{ 0,	"GenInfo.HiggsDaPdgID", 		"",	"PdgID", 			"Yields", "", 		52, -26, 26}, 	//11-06
-	{ 0,	"GenInfo.NumHiggsTobb", 		"",	"Number", 			"Yields", "", 		3, 0, 3}, 	//11-06
-	{ 0,	"GenInfo.NumHiggsToOther", 		"",	"Number", 			"Yields", "", 		3, 0, 3}, 	//11-06
 
 };
 

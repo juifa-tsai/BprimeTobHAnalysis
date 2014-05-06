@@ -3,7 +3,7 @@
 
 #include "BpbH/BprimeTobH/interface/format.h"
 
-void reRegistJet( JetInfoBranches& OldJet, JetInfoBranches& NewJet){
+inline void reRegistJet( JetInfoBranches& OldJet, JetInfoBranches& NewJet){
 	int size=0;
 	for( int i=0; i<OldJet.Size; i++){
 		size++;
@@ -79,7 +79,7 @@ void reRegistJet( JetInfoBranches& OldJet, JetInfoBranches& NewJet){
 	NewJet.Size=size;
 }
 
-void reRegistJet( JetCollection& OldJet, JetInfoBranches& NewJet){
+inline void reRegistJet( JetCollection& OldJet, JetInfoBranches& NewJet){
 	int size=0;
 	for( JetCollection::const_iterator ijet = OldJet.begin(); ijet != OldJet.end(); ++ijet) {
 		NewJet.Index[size] = ijet->Index();
