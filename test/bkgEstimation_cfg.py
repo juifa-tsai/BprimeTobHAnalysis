@@ -146,8 +146,8 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
   #  SFbShift            = cms.double(options.SFbShift), 
   #  SFlShift            = cms.double(options.SFlShift),
 
-    #BuildMinTree        = cms.bool(False),
-    BuildMinTree        = cms.bool(True),
+    BuildMinTree        = cms.bool(False),
+    #BuildMinTree        = cms.bool(True),
     ) 
 
 process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",ignoreTotal = cms.untracked.int32(1) )

@@ -400,6 +400,10 @@ void BackgroundEstimationABCD::beginJob(){
 	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_2b"));	
 	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion"));
 	
+	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_UnWt"));	
+	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_UnWt_1b"));	
+	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_UnWt_2b"));	
+	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_UnWt"));
 	return;  
 }
 
@@ -820,6 +824,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		if( nB > 0 ){
 			sumw2_b += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("B", weight_); evtPass_ana++;
+			h1.GetTH1("ABCDana_CutRegion_UnWt")->Fill("B", 1.); 
 			h1.GetTH1("ABCDana_HT_B")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_NumCA8_B")->Fill(nB);
@@ -832,6 +837,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			if( bJetsNotAllHiggsAllAntiHiggs.size() == 1 ){
 				sumw2_b_1b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_1b")->Fill("B", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_1b")->Fill("B", 1.); 
 				h1.GetTH1("ABCDana_1b_HT_B")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_B.begin(); bp_ != p4_bprimes_B.end(); bp_++ ){
 					h1.GetTH1("ABCDana_1b_bpMass_B")->Fill( bp_->M(), weight_);
@@ -841,6 +847,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}else if( bJetsNotAllHiggsAllAntiHiggs.size()>= 2 ){
 				sumw2_b_2b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_2b")->Fill("B", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_2b")->Fill("B", 1.); 
 				h1.GetTH1("ABCDana_2b_HT_B")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_B.begin(); bp_ != p4_bprimes_B.end(); bp_++ ){
 					h1.GetTH1("ABCDana_2b_bpMass_B")->Fill( bp_->M(), weight_);
@@ -851,6 +858,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		}else if( nD > 0 ){ 
 			sumw2_d += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("D", weight_);
+			h1.GetTH1("ABCDana_CutRegion_UnWt")->Fill("D", 1.); 
 			h1.GetTH1("ABCDana_HT_D")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_NumCA8_D")->Fill(nD);
@@ -863,6 +871,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			if( bJetsNotAllHiggsAllAntiHiggs.size() == 1 ){
 				sumw2_d_1b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_1b")->Fill("D", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_1b")->Fill("D", 1.); 
 				h1.GetTH1("ABCDana_1b_HT_D")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_D.begin(); bp_ != p4_bprimes_D.end(); bp_++ ){
 					h1.GetTH1("ABCDana_1b_bpMass_D")->Fill( bp_->M(), weight_);
@@ -872,6 +881,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}else if( bJetsNotAllHiggsAllAntiHiggs.size()>= 2 ){
 				sumw2_d_2b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_2b")->Fill("D", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_2b")->Fill("D", 1.); 
 				h1.GetTH1("ABCDana_2b_HT_D")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_D.begin(); bp_ != p4_bprimes_D.end(); bp_++ ){
 					h1.GetTH1("ABCDana_2b_bpMass_D")->Fill( bp_->M(), weight_);
@@ -882,6 +892,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		}else if( nA > 0 ){
 			sumw2_a += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("A", weight_);
+			h1.GetTH1("ABCDana_CutRegion_UnWt")->Fill("A", 1.); 
 			h1.GetTH1("ABCDana_HT_A")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_NumCA8_A")->Fill(nA);
@@ -894,6 +905,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			if( bJetsNotAllHiggsAllAntiHiggs.size() == 1 ){
 				sumw2_a_1b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_1b")->Fill("A", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_1b")->Fill("A", 1.); 
 				h1.GetTH1("ABCDana_1b_HT_A")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_A.begin(); bp_ != p4_bprimes_A.end(); bp_++ ){
 					h1.GetTH1("ABCDana_1b_bpMass_A")->Fill( bp_->M(), weight_);
@@ -903,6 +915,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}else if( bJetsNotAllHiggsAllAntiHiggs.size()>= 2 ){
 				sumw2_a_2b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_2b")->Fill("A", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_2b")->Fill("A", 1.); 
 				h1.GetTH1("ABCDana_2b_HT_A")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_A.begin(); bp_ != p4_bprimes_A.end(); bp_++ ){
 					h1.GetTH1("ABCDana_2b_bpMass_A")->Fill( bp_->M(), weight_);
@@ -913,6 +926,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		}else if( nC > 0 ){
 			sumw2_c += w2_;
 			h1.GetTH1("ABCDana_CutRegion")->Fill("C", weight_);
+			h1.GetTH1("ABCDana_CutRegion_UnWt")->Fill("C", 1.); 
 			h1.GetTH1("ABCDana_HT_C")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDana_NumCA8_C")->Fill(nC);
@@ -925,6 +939,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			if( bJetsNotAllHiggsAllAntiHiggs.size() == 1 ){
 				sumw2_c_1b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_1b")->Fill("C", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_1b")->Fill("C", 1.); 
 				h1.GetTH1("ABCDana_1b_HT_C")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_C.begin(); bp_ != p4_bprimes_C.end(); bp_++ ){
 					h1.GetTH1("ABCDana_1b_bpMass_C")->Fill( bp_->M(), weight_);
@@ -934,6 +949,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 			}else if( bJetsNotAllHiggsAllAntiHiggs.size()>= 2 ){
 				sumw2_c_2b += w2_;
 				h1.GetTH1("ABCDana_CutRegion_2b")->Fill("C", weight_); 
+				h1.GetTH1("ABCDana_CutRegion_UnWt_2b")->Fill("C", 1.); 
 				h1.GetTH1("ABCDana_2b_HT_C")->Fill( HT_AK5, weight_);
 				for( vector<TLorentzVector>::const_iterator bp_ = p4_bprimes_C.begin(); bp_ != p4_bprimes_C.end(); bp_++ ){
 					h1.GetTH1("ABCDana_2b_bpMass_C")->Fill( bp_->M(), weight_);
@@ -945,24 +961,28 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
 		if( nBv > 0 ){
 			h1.GetTH1("ABCDval_CutRegion")->Fill("B", weight_); evtPass_val++;
+			h1.GetTH1("ABCDval_CutRegion_UnWt")->Fill("B", 1.); 
 			h1.GetTH1("ABCDval_HT_B")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_NumCA8_B")->Fill(nBv);
 			sumw2_bv += w2_;
 		}else if( nDv > 0 ){ 
 			h1.GetTH1("ABCDval_CutRegion")->Fill("D", weight_);
+			h1.GetTH1("ABCDval_CutRegion_UnWt")->Fill("D", 1.); 
 			h1.GetTH1("ABCDval_HT_D")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_NumCA8_D")->Fill(nDv);
 			sumw2_dv += w2_;
 		}else if( nAv > 0 ){
 			h1.GetTH1("ABCDval_CutRegion")->Fill("A", weight_);
+			h1.GetTH1("ABCDval_CutRegion_UnWt")->Fill("A", 1.); 
 			h1.GetTH1("ABCDval_HT_A")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_NumCA8_A")->Fill(nAv);
 			sumw2_av += w2_;
 		}else if( nCv > 0 ){
 			h1.GetTH1("ABCDval_CutRegion")->Fill("C", weight_);
+			h1.GetTH1("ABCDval_CutRegion_UnWt")->Fill("C", 1.); 
 			h1.GetTH1("ABCDval_HT_C")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_HT")->Fill( HT_AK5, weight_);
 			h1.GetTH1("ABCDval_NumCA8_C")->Fill(nCv);
