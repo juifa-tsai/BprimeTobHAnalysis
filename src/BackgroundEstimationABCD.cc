@@ -53,7 +53,6 @@ Implementation:
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-//#include "../interface/format.h"
 #include "BpbH/BprimeTobH/interface/format.h"
 #include "BpbH/BprimeTobH/interface/TriggerBooking.h"
 

@@ -16,6 +16,11 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "Report every N events (default is N=1000)"
     )
+options.register('ttreedir', 'ntuple',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "Name of ROOT TTree dir: Either 'ntuple' or 'skim' or 'bVeto'"
+    )
 options.register('doHLTselection', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
@@ -82,9 +87,16 @@ from BpbH.BprimeTobHAnalysis.JMEUncertUntilParameters_cfi import *
 process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
-    InputTTree          = cms.string('ntuple/tree'),
+    InputTTree          = cms.string(options.ttreedir+'/tree'),
     InputFiles          = cms.vstring(FileNames), 
-
+    #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
+    #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
+    #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
+    #InputFiles          = cms.vstring(SkimmedFileNames_QCD1800), 
+    #InputFiles          = cms.vstring(FileNames_QCD_HT_100To250), 
+    #InputFiles          = cms.vstring(FileNames_QCD_HT_250To500), 
+    #InputFiles          = cms.vstring(FileNames_QCD_HT_500To1000), 
+    #InputFiles          = cms.vstring(FileNames_QCD_HT_1000ToInf), 
     HLTPaths            = defaultTriggerSelectionParameters.clone(), 
     DoHLTSelect     	= cms.bool(options.doHLTselection),
     DoGoodVtxSelect     = cms.bool(options.doGoodVertex),
