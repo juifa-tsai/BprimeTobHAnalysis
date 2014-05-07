@@ -42,8 +42,8 @@ if __name__  == "__main__":
   for hist1b in hsig1b:
     index = hsig1b.index(hist1b) 
     hist2b = hsig2b[index]
-    fname = 'datacard_' + hist1b.GetName().split('_')[0] + '_shapes.txt'
     mass =  (hist1b.GetName().split('BHBH')[1]).split('_')[0]
+    fname = 'datacard_BHBH'+'_M-'+str(mass)+'_normalizedShapes.txt'
     print index, fname
     outf = open(fname, 'w')
     outf.write("------------------------------------------------------------------------------------\n")
@@ -51,12 +51,12 @@ if __name__  == "__main__":
     outf.write("jmax 2 number of backgrounds\n")
     outf.write("kmax * number of nuisance parameters (sources of systematical uncertainties)\n")
     outf.write("------------------------------------------------------------------------------------\n")
-    outf.write("shapes BHBH"+str(mass)+"  Cat1b Final_HT_Bins100GeV.root BHBH"+str(mass)+"_HT_1bjet_Signal\n")
-    outf.write("shapes Bkg      Cat1b Final_HT_Bins100GeV.root DATA_HT_1bjet_Expect\n")
-    outf.write("shapes data_obs Cat1b Final_HT_Bins100GeV.root DATA_HT_1bjet_Observe\n")
-    outf.write("shapes BHBH"+str(mass)+"  Cat2b Final_HT_Bins100GeV.root BHBH"+str(mass)+"_HT_over1bjet_Signal\n")
-    outf.write("shapes Bkg      Cat2b Final_HT_Bins100GeV.root DATA_HT_over1bjet_Expect\n")
-    outf.write("shapes data_obs Cat2b Final_HT_Bins100GeV.root DATA_HT_over1bjet_Observe\n")
+    outf.write("shapes BHBH"+str(mass)+"  Cat1b  "+rootFileName+"  BHBH"+str(mass)+"_HT_1bjet_Signal\n")
+    outf.write("shapes Bkg      Cat1b  "+rootFileName+"  DATA_HT_1bjet_Expect\n")
+    outf.write("shapes data_obs Cat1b  "+rootFileName+"  DATA_HT_1bjet_Observe\n")
+    outf.write("shapes BHBH"+str(mass)+"  Cat2b  "+rootFileName+"  BHBH"+str(mass)+"_HT_over1bjet_Signal\n")
+    outf.write("shapes Bkg      Cat2b  "+rootFileName+"  DATA_HT_over1bjet_Expect\n")
+    outf.write("shapes data_obs Cat2b  "+rootFileName+"  DATA_HT_over1bjet_Observe\n")
     outf.write("------------------------------------------------------------------------------------\n")
     outf.write("bin         Cat1b  Cat2b\n")
     outf.write("observation "+str(hdata1b.Integral())+"   "+str(hdata2b.Integral())+"\n")

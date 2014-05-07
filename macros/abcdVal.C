@@ -30,14 +30,14 @@
 
 using namespace std;
 
-TString filename = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/ABCD_DRbH_SkimmedTrees_31Mar2014/Final_histograms_BprimebH.root" ; 
-TString name = "BJetVeto_Htag_HTAK5" ; 
+TString filename = "/afs/cern.ch/work/d/devdatta/CMSREL/CMSSW_5_3_13_patch3_Bpbh/src/BpbH/BprimeTobHAnalysis/test/OnLxplus/ABCD_08Apr/Final_histograms_BprimebH.root" ; 
+TString name = "BJetsSel_Htag_HMass" ; 
 bool doData(true) ; 
-int nRebin(4) ; 
+int nRebin(1) ; 
 
 Double_t Lint = 19700.0 ; 
 
-TString dir4plots = "ABCD_SkimmedTrees_31Mar2014/BJetVeto" ; 
+TString dir4plots = "ABCD_08Apr" ; 
 
 TString formata = ".pdf";
 TString formatb = ".png";
@@ -78,25 +78,25 @@ void abcdVal () {
   hist2_sig2->SetMarkerSize(1) ; 
   hist2_sig2->SetMarkerColor(kBlue) ; 
 
-  TH1D* histxlow_bkg   = hist2_bkg ->ProjectionX("BKG__"+name+"_HT_antiH", 1, 1, "e") ; 
-  TH1D* histxlow_sig0  = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HT_antiH", 1, 1, "e") ;
-  TH1D* histxlow_sig1  = hist2_sig1->ProjectionX("BpBpbHbH_M800__"+name+"_HT_antiH", 1, 1, "e") ;
-  TH1D* histxlow_sig2  = hist2_sig2->ProjectionX("BpBpbHbH_M1000__"+name+"_HT_antiH", 1, 1, "e") ;
-  TH1D* histxlow_data  = hist2_data->ProjectionX("DATA__"+name+"_HT_antiH", 1, 1, "e") ; 
+  TH1D* histxlow_bkg   = hist2_bkg ->ProjectionX("BKG__"+name+"_HMass_antiH", 1, 1, "e") ; 
+  TH1D* histxlow_sig0  = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HMass_antiH", 1, 1, "e") ;
+  TH1D* histxlow_sig1  = hist2_sig1->ProjectionX("BpBpbHbH_M800__"+name+"_HMass_antiH", 1, 1, "e") ;
+  TH1D* histxlow_sig2  = hist2_sig2->ProjectionX("BpBpbHbH_M1000__"+name+"_HMass_antiH", 1, 1, "e") ;
+  TH1D* histxlow_data  = hist2_data->ProjectionX("DATA__"+name+"_HMass_antiH", 1, 1, "e") ; 
 
-  TH1D* histxhigh_bkg  = hist2_bkg ->ProjectionX("BKG__"+name+"_HT_H", 2, -1, "e") ; 
-  TH1D* histxhigh_sig0 = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HT_H", 2, 2, "e") ;
-  TH1D* histxhigh_sig1 = hist2_sig1->ProjectionX("BpBpbHbH_M800__"+name+"_HT_H", 2, 2, "e") ;
-  TH1D* histxhigh_sig2 = hist2_sig2->ProjectionX("BpBpbHbH_M1000__"+name+"_HT_H", 2, 2, "e") ;
-  TH1D* histxhigh_data = hist2_data->ProjectionX("DATA__"+name+"_HT_H", 2, -1, "e") ; 
+  TH1D* histxhigh_bkg  = hist2_bkg ->ProjectionX("BKG__"+name+"_HMass_H", 2, -1, "e") ; 
+  TH1D* histxhigh_sig0 = hist2_sig0->ProjectionX("BpBpbHbH_M500__"+name+"_HMass_H", 2, 2, "e") ;
+  TH1D* histxhigh_sig1 = hist2_sig1->ProjectionX("BpBpbHbH_M800__"+name+"_HMass_H", 2, 2, "e") ;
+  TH1D* histxhigh_sig2 = hist2_sig2->ProjectionX("BpBpbHbH_M1000__"+name+"_HMass_H", 2, 2, "e") ;
+  TH1D* histxhigh_data = hist2_data->ProjectionX("DATA__"+name+"_HMass_H", 2, -1, "e") ; 
 
-  double NAdata = histxhigh_data->Integral(76,90) ; 
-  double NBdata = histxhigh_data->Integral(91,200) ; 
+  double NAdata = histxhigh_data->Integral(1,8) ; 
+  double NBdata = histxhigh_data->Integral(9,14) ; 
   double NAbyNBdata = NAdata/NBdata ; 
   double errNAbyNBdata = (2/(NAdata+NBdata))*sqrt((NAdata*NBdata)/(NAdata+NBdata)) ; 
 
-  double NCdata = histxlow_data->Integral(76,90) ; 
-  double NDdata = histxlow_data->Integral(91,200) ; 
+  double NCdata = histxlow_data->Integral(1,8) ; 
+  double NDdata = histxlow_data->Integral(9,14) ; 
   double NCbyNDdata = NCdata/NDdata ; 
   double errNCbyNDdata = (2/(NCdata+NDdata))*sqrt((NCdata*NDdata)/(NCdata+NDdata)) ; 
 
@@ -107,13 +107,13 @@ void abcdVal () {
   std::cout << " DATA NA/NB = " << NAbyNBdata << " +/- " << errNAbyNBdata << std::endl ; 
   std::cout << " DATA NC/ND = " << NCbyNDdata << " +/- " << errNCbyNDdata << std::endl ; 
 
-  double NAbkg = histxhigh_bkg->Integral(76,90) ; 
-  double NBbkg = histxhigh_bkg->Integral(91,200) ; 
+  double NAbkg = histxhigh_bkg->Integral(1,8) ; 
+  double NBbkg = histxhigh_bkg->Integral(9,14) ; 
   double NAbyNBbkg = NAbkg/NBbkg ; 
   double errNAbyNBbkg = (2/histxlow_bkg->GetEntries())*sqrt((NBbkg/histxlow_bkg->Integral())*(1-(NBbkg/histxlow_bkg->Integral()))*histxlow_bkg->GetEntries()) ; 
 
-  double NCbkg = histxlow_bkg->Integral(76,90) ; 
-  double NDbkg = histxlow_bkg->Integral(91,200) ; 
+  double NCbkg = histxlow_bkg->Integral(1,8) ; 
+  double NDbkg = histxlow_bkg->Integral(9,14) ; 
   double NCbyNDbkg = NCbkg/NDbkg ; 
   double errNCbyNDbkg = (2/histxlow_bkg->GetEntries())*sqrt((NDbkg/histxlow_bkg->Integral())*(1-(NDbkg/histxlow_bkg->Integral()))*histxlow_bkg->GetEntries()) ; 
 
@@ -124,27 +124,27 @@ void abcdVal () {
   std::cout << " BKG NA/NB = " << NAbyNBbkg << " +/- " << errNAbyNBbkg << std::endl ; 
   std::cout << " BKG NC/ND = " << NCbyNDbkg << " +/- " << errNCbyNDbkg << std::endl ; 
 
-  std::cout << " M(b')500 NA = " << histxhigh_sig0->Integral(76,90)  << std::endl ; 
-  std::cout << " M(b')500 NB = " << histxhigh_sig0->Integral(91,200) << std::endl ; 
-  std::cout << " M(b')500 NC = " << histxlow_sig0->Integral(76,90)  << std::endl ; 
-  std::cout << " M(b')500 ND = " << histxlow_sig0->Integral(91,200) << std::endl ; 
-  std::cout << " Sig contamination M(b')500 = " << (histxhigh_sig0->Integral(76,90)+histxlow_sig0->Integral(76,90)+histxlow_sig0->Integral(91,200))/(histxhigh_bkg->Integral(76,90)+histxlow_bkg->Integral(76,90)+histxlow_bkg->Integral(91,200)) << std::endl ;  
-  std::cout << " Sig leakage M(b')500 = " << (histxhigh_sig0->Integral(76,90)+histxlow_sig0->Integral(76,90)+histxlow_sig0->Integral(91,200))/(histxhigh_sig0->Integral(76,90)+histxhigh_sig0->Integral(91,200)+histxlow_sig0->Integral(76,90)+histxlow_sig0->Integral(91,200)) << std::endl ;  
+  std::cout << " M(b')500 NA = " << histxhigh_sig0->Integral(1,8)  << std::endl ; 
+  std::cout << " M(b')500 NB = " << histxhigh_sig0->Integral(9,14) << std::endl ; 
+  std::cout << " M(b')500 NC = " << histxlow_sig0->Integral(1,8)  << std::endl ; 
+  std::cout << " M(b')500 ND = " << histxlow_sig0->Integral(9,14) << std::endl ; 
+  std::cout << " Sig contamination M(b')500 = " << (histxhigh_sig0->Integral(1,8)+histxlow_sig0->Integral(1,8)+histxlow_sig0->Integral(9,14))/(histxhigh_bkg->Integral(1,8)+histxlow_bkg->Integral(1,8)+histxlow_bkg->Integral(9,14)) << std::endl ;  
+  std::cout << " Sig leakage M(b')500 = " << (histxhigh_sig0->Integral(1,8)+histxlow_sig0->Integral(1,8)+histxlow_sig0->Integral(9,14))/(histxhigh_sig0->Integral(1,8)+histxhigh_sig0->Integral(9,14)+histxlow_sig0->Integral(1,8)+histxlow_sig0->Integral(9,14)) << std::endl ;  
 
-  TH1D* h_cont_sig0 = new TH1D("h_cont_sig0", "M(b')=500 GeV ;HT(AK5) [GeV]; Signal contamination in sideband (%);", 200, 0., 2000.)  ;
-  TH1D* h_leak_sig0 = new TH1D("h_leak_sig0", "M(b')=500 GeV ;HT(AK5) [GeV]; Signal leakage in sideband (%);", 200, 0., 2000.)  ;
-  TH1D* h_cont_sig1 = new TH1D("h_cont_sig1", "M(b')=800 GeV ;HT(AK5) [GeV]; Signal contamination in sideband (%);", 200, 0., 2000.)  ;
+  TH1D* h_cont_sig0 = new TH1D("h_cont_sig0", "M(b')=500 GeV ;HT(AK5) [GeV]; Signal contamination in sideband (%);", 20, 0., 200.)  ;
+  TH1D* h_leak_sig0 = new TH1D("h_leak_sig0", "M(b')=500 GeV ;HT(AK5) [GeV]; Signal leakage in sideband (%);", 20, 0., 200.)  ;
+  TH1D* h_cont_sig1 = new TH1D("h_cont_sig1", "M(b')=800 GeV ;HT(AK5) [GeV]; Signal contamination in sideband (%);", 20, 0., 200.)  ;
   TH1D* h_leak_sig1 = new TH1D("h_leak_sig1", "M(b')=800 GeV ;HT(AK5) [GeV]; Signal leakage in sideband (%);", 200, 0., 2000.)  ;
-  TH1D* h_cont_sig2 = new TH1D("h_cont_sig2", "M(b')=1000 GeV ;HT(AK5) [GeV]; Signal contamination in sideband (%);", 200, 0., 2000.)  ;
-  TH1D* h_leak_sig2 = new TH1D("h_leak_sig2", "M(b')=1000 GeV ;HT(AK5) [GeV]; Signal leakage in sideband (%);", 200, 0., 2000.)  ;
+  TH1D* h_cont_sig2 = new TH1D("h_cont_sig2", "M(b')=1000 GeV ;HT(AK5) [GeV]; Signal contamination in sideband (%);", 20, 0., 200.)  ;
+  TH1D* h_leak_sig2 = new TH1D("h_leak_sig2", "M(b')=1000 GeV ;HT(AK5) [GeV]; Signal leakage in sideband (%);", 20, 0., 200.)  ;
   for (int ii = 0; ii < 200; ++ii) {
     double iht = ii*10. ;
     TCutG* cuthiggs = new TCutG("cuthiggs",4);
     cuthiggs->SetVarX("x") ; 
     cuthiggs->SetVarY("y") ; 
     cuthiggs -> SetPoint(0, 0   , 0.5) ; 
-    cuthiggs -> SetPoint(1, 2000., 0.5) ; 
-    cuthiggs -> SetPoint(2, 2000., 1.5) ; 
+    cuthiggs -> SetPoint(1, 200., 0.5) ; 
+    cuthiggs -> SetPoint(2, 200., 1.5) ; 
     cuthiggs -> SetPoint(3, 0   , 1.5) ;
     cuthiggs->SetLineColor(kBlue) ;
     cuthiggs->SetLineWidth(2) ; 
@@ -152,8 +152,8 @@ void abcdVal () {
     cutsig->SetVarX("x") ; 
     cutsig->SetVarY("y") ; 
     cutsig -> SetPoint(0, iht  , 0.5) ; 
-    cutsig -> SetPoint(1, 2000., 0.5) ; 
-    cutsig -> SetPoint(2, 2000., 1.5) ; 
+    cutsig -> SetPoint(1, 200. , 0.5) ; 
+    cutsig -> SetPoint(2, 200. , 1.5) ; 
     cutsig -> SetPoint(3, iht  , 1.5) ;
     cutsig -> SetPoint(4, iht  , 0.5) ; 
     cutsig->SetLineColor(kMagenta) ;
@@ -183,11 +183,11 @@ void abcdVal () {
   TCutG* cutall = new TCutG("cutall",5);
   cutall->SetVarX("x") ; 
   cutall->SetVarY("y") ; 
-  cutall -> SetPoint(0, 750  ,-0.5) ; 
-  cutall -> SetPoint(1, 2000.,-0.5) ; 
-  cutall -> SetPoint(2, 2000., 1.5) ; 
-  cutall -> SetPoint(3, 750  , 1.5) ;
-  cutall -> SetPoint(4, 750  ,-0.5) ; 
+  cutall -> SetPoint(0,  90  ,-0.5) ; 
+  cutall -> SetPoint(1, 140. ,-0.5) ; 
+  cutall -> SetPoint(2, 140. , 1.5) ; 
+  cutall -> SetPoint(3,  90  , 1.5) ;
+  cutall -> SetPoint(4,  90  ,-0.5) ; 
   cutall->SetLineColor(kGreen) ;
   cutall->SetLineWidth(3) ; 
   cutall->SetLineStyle(1) ; 
@@ -205,16 +205,18 @@ void abcdVal () {
   fix(histxhigh_sig2)        ; 
   fix(histxhigh_data)        ; 
 
-  histxlow_bkg   -> Rebin(nRebin) ; 
-  histxlow_sig0  -> Rebin(nRebin) ; 
-  histxlow_sig1  -> Rebin(nRebin) ; 
-  histxlow_sig2  -> Rebin(nRebin) ; 
-  histxlow_data  -> Rebin(nRebin) ; 
-  histxhigh_bkg  -> Rebin(nRebin) ; 
-  histxhigh_sig0 -> Rebin(nRebin) ; 
-  histxhigh_sig1 -> Rebin(nRebin) ; 
-  histxhigh_sig2 -> Rebin(nRebin) ; 
-  histxhigh_data -> Rebin(nRebin) ; 
+  if (nRebin > 1) {
+    histxlow_bkg   -> Rebin(nRebin) ; 
+    histxlow_sig0  -> Rebin(nRebin) ; 
+    histxlow_sig1  -> Rebin(nRebin) ; 
+    histxlow_sig2  -> Rebin(nRebin) ; 
+    histxlow_data  -> Rebin(nRebin) ; 
+    histxhigh_bkg  -> Rebin(nRebin) ; 
+    histxhigh_sig0 -> Rebin(nRebin) ; 
+    histxhigh_sig1 -> Rebin(nRebin) ; 
+    histxhigh_sig2 -> Rebin(nRebin) ; 
+    histxhigh_data -> Rebin(nRebin) ; 
+  }
 
   //gROOT->SetBatch(kTRUE);
   gROOT->SetStyle("Plain");

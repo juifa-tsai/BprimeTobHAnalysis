@@ -41,7 +41,11 @@ def process_directory(path,files):
             not obj.IsA().InheritsFrom("TH3")):
             newfile.cd()
             newobj = obj.Clone()
-            newobj.Rebin(options.nbins)
+            if options.nbins > 1:
+              newobj.Rebin(options.nbins)
+            if options.normalize:
+              integral = newobj.Integral()
+              if integral: newobj.Scale(1. / integral)
             newobj.GetXaxis().SetRangeUser(900,2500)
     newfile.Write()
     newfile.Close()
@@ -50,11 +54,13 @@ def main():
   usage="""Usage: %prog [options] file.root"""
   parser = optparse.OptionParser(usage=usage)
   parser.add_option('-b', '--bins', default="1", metavar="NUMBER", type="int", help="Number of bins to merge")
+  parser.add_option('-n', '--normalize', action="store_true", default=False, help="'Norm': area normalize the histograms") 
   parser.add_option('--output', default="rebinned.root", metavar="NAME", help="Name of rebinned file; default is 'rebinned.root'")
   global options
   options, arguments = parser.parse_args()
   options.newfile = options.output
   options.nbins = options.bins
+  options.normalize = options.normalize
   print options.newfile, options.nbins
   files = [RootFile(filename) for filename in arguments]
   process_directory("/", files)
