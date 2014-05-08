@@ -8,7 +8,7 @@ from inputFiles_cfi import *
 
 options = VarParsing('python')
 
-options.register('outFilename', 'bprimeTobH.root',
+options.register('outFilename', 'bprimeTobHAnalysis.root',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Output file name"
@@ -37,6 +37,16 @@ options.register('bJetPtMin', 80.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum b jet Pt"
+    )
+options.register('bjetCSVDiscMin', 0.679,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum b jet CSV discriminator"
+    )
+options.register('bjetCSVDiscMax', 1.000,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum b jet CSV discriminator"
     )
 options.register('fatJetPtMin', 300.,
     VarParsing.multiplicity.singleton,
@@ -98,12 +108,12 @@ options.register('subjet2CSVDiscMax', 1.000,
     VarParsing.varType.float,
     "Maximum subjet2 b discriminator"
     )
-options.register('hTMin', 900,
+options.register('hTAK5Min', 900,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum HT"
     )
-options.register('hTMax', 1.E6,
+options.register('hTAK5Max', 1.E6,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum HT"
@@ -193,7 +203,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
-    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames), 
+    InputFiles          = cms.vstring(FileNames_BpBp800), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
@@ -212,6 +223,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     JetPtMax            = cms.double(options.jetPtMax),
     JetAbsEtaMax        = cms.double(2.4),
     BJetPtMin           = cms.double(options.bJetPtMin),
+    BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
+    BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),
     FatJetPtMin         = cms.double(options.fatJetPtMin),
     FatJetPtMax         = cms.double(options.fatJetPtMax),
     FatJetMassMin       = cms.double(options.fatJetMassMin),
@@ -224,8 +237,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     Subjet1CSVDiscMax   = cms.double(options.subjet1CSVDiscMax),
     Subjet2CSVDiscMin   = cms.double(options.subjet2CSVDiscMin),
     Subjet2CSVDiscMax   = cms.double(options.subjet2CSVDiscMax),
-    HTMin               = cms.double(options.hTMin),
-    HTMax               = cms.double(options.hTMax), 
+    HTAK5Min            = cms.double(options.hTAK5Min),
+    HTAK5Max            = cms.double(options.hTAK5Max), 
     JetSelParams        = defaultJetSelectionParameters.clone(), 
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(

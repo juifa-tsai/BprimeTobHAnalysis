@@ -6,7 +6,7 @@ from inputFiles_cfi import *
 
 options = VarParsing('python')
 
-options.register('outFilename', 'bprimeTobH.root',
+options.register('outFilename', 'bprimeTobH_BkgABCDMethod.root',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Output file name"
@@ -21,21 +21,61 @@ options.register('ttreedir', 'ntuple',
     VarParsing.varType.string,
     "Name of ROOT TTree dir: Either 'ntuple' or 'skim' or 'bVeto'"
     )
-options.register('doHLTselection', True,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Do HLT selection"
-)
-options.register('doGoodVertex', True,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Do good vertex selection"
-)
 options.register('doPUReweighting', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Do pileup reweighting"
 )
+options.register('bjetCSVDiscMin', 0.679,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum b jet CSV discriminator"
+    )
+options.register('bjetCSVDiscMax', 1.000,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum b jet CSV discriminator"
+    )
+options.register('fatJetPtMin', 300.,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum fat jet pt"
+    )
+options.register('fatJetPtMax', 1.E6,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum fat jet pt"
+    )
+options.register('fatJetMassMin', 0.,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum fat jet mass"
+    )
+options.register('fatJetMassMax', 1.E6,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum fat jet mass"
+    )
+options.register('fatJetPrunedMassMin', 90.,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum fat jet pruned mass"
+    )
+options.register('fatJetPrunedMassMax', 140.,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum fat jet pruned mass"
+    )
+options.register('ApplyJEC', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply JEC" 
+    )
+options.register('ApplyBTagSF', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply b-tagging scale factors" 
+    )
 options.register('JESShift', 0.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -61,7 +101,6 @@ if options.SFbShift != 0.0 and options.SFlShift != 0.0:
   print "Warning: must be varied independently."
 
 options.setDefault('maxEvents', -1000) 
-#options.setDefault('maxEvents', 1000) 
 
 options.parseArguments()
 
@@ -81,14 +120,19 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outFilename) 
     )
 
+from BpbH.BprimeTobH.TriggerSelector_cfi import * 
+from BpbH.BprimeTobH.HiggsJetSelector_cfi import * 
+from BpbH.BprimeTobH.HTSelector_cfi import * 
 from BpbH.BprimeTobHAnalysis.EventSelector_cfi import * 
 from BpbH.BprimeTobHAnalysis.JMEUncertUntilParameters_cfi import * 
+
 
 process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
-    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames), 
+    InputFiles          = cms.vstring(FileNames_BpBp800), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
@@ -98,8 +142,6 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     #InputFiles          = cms.vstring(FileNames_QCD_HT_500To1000), 
     #InputFiles          = cms.vstring(FileNames_QCD_HT_1000ToInf), 
     HLTPaths            = defaultTriggerSelectionParameters.clone(), 
-    DoHLTSelect     	= cms.bool(options.doHLTselection),
-    DoGoodVtxSelect     = cms.bool(options.doGoodVertex),
     DoPUReweighting     = cms.bool(options.doPUReweighting),
     File_PUDistMC       = cms.string('pileup_Data_Summer12_53X_S10.root'),
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),
@@ -111,7 +153,6 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
 
     HJetPtMin		= cms.double(300),
     HJetPtMax		= cms.double(100000),
-    HJetAbsEtaMin	= cms.double(-1),
     HJetAbsEtaMax	= cms.double(2.4),
     HJetMassMin 	= cms.double(100),	
     HJetMassMax 	= cms.double(150),	
@@ -133,10 +174,15 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     JetPtMax		= cms.double(100000),
     JetAbsEtaMin	= cms.double(-1),
     JetAbsEtaMax	= cms.double(2.4),
-    bJetPtMin		= cms.double(80),
-    bJetPtMax		= cms.double(100000),
-    bJetCSVDiscMin  	= cms.double(0.679),
-    bJetCSVDiscMax   	= cms.double(2),
+    BJetPtMin		= cms.double(80),
+    BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
+    BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),
+    FatJetPtMin         = cms.double(options.fatJetPtMin),
+    FatJetPtMax         = cms.double(options.fatJetPtMax),
+    FatJetMassMin       = cms.double(options.fatJetMassMin),
+    FatJetMassMax       = cms.double(options.fatJetMassMax),
+    FatJetPrunedMassMin = cms.double(options.fatJetPrunedMassMin),
+    FatJetPrunedMassMax = cms.double(options.fatJetPrunedMassMax),
 
     bVetoJetPtMin	= cms.double(30),
     bVetoJetPtMax	= cms.double(100000),
@@ -148,17 +194,23 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     numbJetMin		= cms.int32(1),
     numHiggsJetMin	= cms.int32(1),
 
-  #  HTSelParams         = defaultHTSelectionParameters.clone(),
-  #  EvtSelParams        = defaultEventSelectionParameters.clone(),
-
-    	
-  #  JMEParams           = defaultJMEUncertUntilParameters.clone(),
-  #  JESShift            = cms.double(options.JESShift), 
-  #  JERShift            = cms.double(options.JERShift), 
-  #  SFbShift            = cms.double(options.SFbShift), 
-  #  SFlShift            = cms.double(options.SFlShift),
-
-    #BuildMinTree        = cms.bool(False),
+    JetSelParams        = defaultJetSelectionParameters.clone(), 
+    FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
+    HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(
+      subjet1CSVDiscMin = cms.double(0.679),
+      subjet2CSVDiscMin = cms.double(0.679),
+      ), 
+    HTSelParams         = defaultHTSelectionParameters.clone(
+      HTMin = cms.double(900), 
+      ),
+    EvtSelParams        = defaultEventSelectionParameters.clone(),
+    JMEParams           = defaultJMEUncertUntilParameters.clone(), 
+    ApplyJEC            = cms.bool(options.ApplyJEC), 
+    ApplyBTagSF         = cms.bool(options.ApplyBTagSF), 
+    JESShift            = cms.double(options.JESShift), 
+    JERShift            = cms.double(options.JERShift), 
+    SFbShift            = cms.double(options.SFbShift), 
+    SFlShift            = cms.double(options.SFlShift), 
     BuildMinTree        = cms.bool(True),
     ) 
 

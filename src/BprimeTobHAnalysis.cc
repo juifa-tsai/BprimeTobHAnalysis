@@ -29,10 +29,12 @@ Implementation:
 #include <assert.h>
 #include <vector>
 #include <map>
+#include <string>
 
 // Root headers 
 #include <TLorentzVector.h>
 #include <TChain.h>
+#include <TTree.h>
 #include <TFile.h>
 #include <TMath.h>
 #include <TH1D.h>
@@ -60,7 +62,6 @@ Implementation:
 #include "BpbH/BprimeTobHAnalysis/interface/JMEUncertUtil.h"
 #include "BpbH/BprimeTobHAnalysis/interface/ApplyBTagSF.h"
 #include "BpbH/BprimeTobHAnalysis/interface/ApplyHiggsTagSF.h"
-
 #include "BpbH/BprimeTobHAnalysis/interface/HiggsBRscaleFactors.h" 
 
 //
@@ -98,7 +99,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const std::string               inputTTree_;
     const std::vector<std::string>  inputFiles_;
     const edm::ParameterSet         hltPaths_; 
-    const int                       doPUReweighting_ ;
+    const bool                      doPUReweighting_ ;
     const std::string               file_PUDistMC_ ;
     const std::string               file_PUDistData_ ;
     const std::string               hist_PUDistMC_ ;
@@ -108,6 +109,8 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double jetPtMax_ ; 
     const double jetAbsEtaMax_ ;
     const double bjetPtMin_ ; 
+		const double bjetCSVDiscMin_;
+		const double bjetCSVDiscMax_;
     const double fatJetPtMin_ ;
     const double fatJetPtMax_ ; 
     const double fatJetMassMin_ ;
@@ -120,8 +123,9 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double subj1CSVDiscMax_ ; 
     const double subj2CSVDiscMin_ ; 
     const double subj2CSVDiscMax_ ; 
-    const double HTMin_ ; 
-    const double HTMax_ ; 
+    const double HTAK5Min_ ; 
+    const double HTAK5Max_ ; 
+
     const edm::ParameterSet jetSelParams_ ; 
     const edm::ParameterSet fatJetSelParams_ ; 
     const edm::ParameterSet higgsJetSelParams_ ; 
@@ -172,7 +176,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   inputTTree_(iConfig.getParameter<std::string>("InputTTree")),
   inputFiles_(iConfig.getParameter<std::vector<std::string> >("InputFiles")),
   hltPaths_(iConfig.getParameter<edm::ParameterSet>("HLTPaths")),
-  doPUReweighting_(iConfig.getParameter<bool>("DoPUReweighting")), 
+  doPUReweighting_(iConfig.getParameter<bool>("DoPUReweighting")),
   file_PUDistMC_(iConfig.getParameter<std::string>("File_PUDistMC")),
   file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
   hist_PUDistMC_(iConfig.getParameter<std::string>("Hist_PUDistMC")),
@@ -181,6 +185,8 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   jetPtMax_(iConfig.getParameter<double>("JetPtMax")),
   jetAbsEtaMax_(iConfig.getParameter<double>("JetAbsEtaMax")),
   bjetPtMin_(iConfig.getParameter<double>("BJetPtMin")),
+	bjetCSVDiscMin_(iConfig.getParameter<double>("BJetCSVDiscMin")),
+	bjetCSVDiscMax_(iConfig.getParameter<double>("BJetCSVDiscMax")),
   fatJetPtMin_(iConfig.getParameter<double>("FatJetPtMin")),
   fatJetPtMax_(iConfig.getParameter<double>("FatJetPtMax")), 
   fatJetMassMin_(iConfig.getParameter<double>("FatJetMassMin")),
@@ -193,8 +199,8 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   subj1CSVDiscMax_(iConfig.getParameter<double>("Subjet1CSVDiscMax")),
   subj2CSVDiscMin_(iConfig.getParameter<double>("Subjet2CSVDiscMin")),
   subj2CSVDiscMax_(iConfig.getParameter<double>("Subjet2CSVDiscMax")),
-  HTMin_(iConfig.getParameter<double>("HTMin")), 
-  HTMax_(iConfig.getParameter<double>("HTMax")),
+  HTAK5Min_(iConfig.getParameter<double>("HTAK5Min")), 
+  HTAK5Max_(iConfig.getParameter<double>("HTAK5Max")),
   jetSelParams_(iConfig.getParameter<edm::ParameterSet>("JetSelParams")), 
   fatJetSelParams_(iConfig.getParameter<edm::ParameterSet>("FatJetSelParams")), 
   higgsJetSelParams_(iConfig.getParameter<edm::ParameterSet>("HiggsJetSelParams")), 
@@ -675,64 +681,64 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     }
 
     //// Apply JEC and b-tagging SFs to MC 
-    if ( !isData_ ) {
-      if ( applyJEC_ ) { //// Apply JEC for MC   
+    //DMif ( !isData_ ) {
+    //DM  if ( applyJEC_ ) { //// Apply JEC for MC   
 
-        //// Only AK5 jets not overlapping with Higgs jets 
-        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, ak5jetsNotHJets, "JERAK5MC", jerShift_) ; 
-        JetCollection ak5jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
-        delete jmeUtil_jer ; 
-        ak5jetsNotHJets.clear() ; 
+    //DM    //// Only AK5 jets not overlapping with Higgs jets 
+    //DM    JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, ak5jetsNotHJets, "JERAK5MC", jerShift_) ; 
+    //DM    JetCollection ak5jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
+    //DM    delete jmeUtil_jer ; 
+    //DM    ak5jetsNotHJets.clear() ; 
 
-        if ( abs(jesShift_) > 1E-6 ) {
-          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ak5jets_jer, "JESAK5MC", jesShift_) ; 
-          JetCollection ak5jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
-          delete jmeUtil_jes ; 
+    //DM    if ( abs(jesShift_) > 1E-6 ) {
+    //DM      JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ak5jets_jer, "JESAK5MC", jesShift_) ; 
+    //DM      JetCollection ak5jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
+    //DM      delete jmeUtil_jes ; 
 
-          for (JetCollection::const_iterator ijet = ak5jets_jes.begin(); ijet != ak5jets_jes.end(); ++ijet) {
-            Jet thisjet(*ijet) ; 
-            ak5jetsNotHJets.push_back(thisjet) ; 
-          }
-        }
-        else {
-          for (JetCollection::const_iterator ijet = ak5jets_jer.begin(); ijet != ak5jets_jer.end(); ++ijet) {
-            Jet thisjet(*ijet) ; 
-            ak5jetsNotHJets.push_back(thisjet) ; 
-          }
-        }
+    //DM      for (JetCollection::const_iterator ijet = ak5jets_jes.begin(); ijet != ak5jets_jes.end(); ++ijet) {
+    //DM        Jet thisjet(*ijet) ; 
+    //DM        ak5jetsNotHJets.push_back(thisjet) ; 
+    //DM      }
+    //DM    }
+    //DM    else {
+    //DM      for (JetCollection::const_iterator ijet = ak5jets_jer.begin(); ijet != ak5jets_jer.end(); ++ijet) {
+    //DM        Jet thisjet(*ijet) ; 
+    //DM        ak5jetsNotHJets.push_back(thisjet) ; 
+    //DM      }
+    //DM    }
 
-        //// All AK5 jets 
-        jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5jets, "JERAK5MC", jerShift_) ; 
-        JetCollection allAK5jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
-        delete jmeUtil_jer ; 
-        allAK5jets.clear() ; 
+    //DM    //// All AK5 jets 
+    //DM    jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5jets, "JERAK5MC", jerShift_) ; 
+    //DM    JetCollection allAK5jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
+    //DM    delete jmeUtil_jer ; 
+    //DM    allAK5jets.clear() ; 
 
-        if ( abs(jesShift_) > 1E-6 ) {
-          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5jets_jer, "JESAK5MC", jesShift_) ; 
-          JetCollection allAK5jets_jec = jmeUtil_jes->GetModifiedJetColl() ; 
-          delete jmeUtil_jes ; 
+    //DM    if ( abs(jesShift_) > 1E-6 ) {
+    //DM      JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5jets_jer, "JESAK5MC", jesShift_) ; 
+    //DM      JetCollection allAK5jets_jec = jmeUtil_jes->GetModifiedJetColl() ; 
+    //DM      delete jmeUtil_jes ; 
 
-          for (JetCollection::const_iterator ijet = allAK5jets_jec.begin(); ijet != allAK5jets_jec.end(); ++ijet) {
-            Jet thisjet(*ijet) ; 
-            allAK5jets.push_back(thisjet) ; 
-          }
-        }
-        else {
-          for (JetCollection::const_iterator ijet = allAK5jets_jer.begin(); ijet != allAK5jets_jer.end(); ++ijet) {
-            Jet thisjet(*ijet) ; 
-            allAK5jets.push_back(thisjet) ; 
-          }
-        }
+    //DM      for (JetCollection::const_iterator ijet = allAK5jets_jec.begin(); ijet != allAK5jets_jec.end(); ++ijet) {
+    //DM        Jet thisjet(*ijet) ; 
+    //DM        allAK5jets.push_back(thisjet) ; 
+    //DM      }
+    //DM    }
+    //DM    else {
+    //DM      for (JetCollection::const_iterator ijet = allAK5jets_jer.begin(); ijet != allAK5jets_jer.end(); ++ijet) {
+    //DM        Jet thisjet(*ijet) ; 
+    //DM        allAK5jets.push_back(thisjet) ; 
+    //DM      }
+    //DM    }
 
-      } //// Apply JEC for MC 
+    //DM  } //// Apply JEC for MC 
 
-      if ( applyBTagSF_  ) { //// Apply b-tagging SF for MC  
-        ApplyBTagSF * btagsf =  new ApplyBTagSF(ak5jetsNotHJets, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
-        ak5jetsNotHJets.clear() ; 
-        ak5jetsNotHJets =  btagsf->getBtaggedJetsWithSF () ; 
-        delete btagsf ; 
-      } //// Apply b-tagging SF for MC 
-    } //// Apply JEC and b-tagging SFs to MC 
+    //DM  if ( applyBTagSF_  ) { //// Apply b-tagging SF for MC  
+    //DM    ApplyBTagSF * btagsf =  new ApplyBTagSF(ak5jetsNotHJets, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
+    //DM    ak5jetsNotHJets.clear() ; 
+    //DM    ak5jetsNotHJets =  btagsf->getBtaggedJetsWithSF () ; 
+    //DM    delete btagsf ; 
+    //DM  } //// Apply b-tagging SF for MC 
+    //DM} //// Apply JEC and b-tagging SFs to MC 
 
     for (JetCollection::const_iterator ijet = ak5jetsNotHJets.begin(); ijet != ak5jetsNotHJets.end(); ++ijet) {
       if (ijet->Pt() > jetPtMin_ && ijet->Pt() < jetPtMax_) { 
@@ -740,7 +746,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         if ( ijet - ak5jetsNotHJets.begin() < 4 ) ak5jets_leading4.push_back(*ijet) ; 
         if ( ijet - ak5jetsNotHJets.begin() < 2 ) jets_CA8_leading2_AK5_leading2.push_back(*ijet) ;  
       }
-      if (ijet->Pt() > bjetPtMin_ && ijet->CombinedSVBJetTags() > 0.679) bjets.push_back(*ijet) ; //// Select b-tagged AK5 jets 
+      if (ijet->Pt() > bjetPtMin_ && ijet->CombinedSVBJetTags() > bjetCSVDiscMin_) bjets.push_back(*ijet) ; //// Select b-tagged AK5 jets 
     }
 
     for (JetCollection::const_iterator ijet = allAK5jets.begin(); ijet != allAK5jets.end(); ++ijet) {
@@ -777,7 +783,6 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt_) ; 
       for (JetCollection::const_iterator ib = bjets.begin(); ib != bjets.end(); ++ib) { 
         FillHisto(TString("TriggerSel")+TString("_BJet_Pt"), ib->Pt(), evtwt_) ; 
-        std::cout << " bjet pT = " << ib->Pt() << " csv = " << ib->CombinedSVBJetTags() << std::endl ; 
         FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt_) ; 
       }
 
