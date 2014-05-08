@@ -67,8 +67,8 @@ Implementation:
 #include "BpbH/BprimeTobHAnalysis/interface/reRegistJet.hh"
 
 //Plots information
-#include "BpbH/BprimeTobHAnalysis/interface/TH2InfoClass.h"
-#include "BpbH/BprimeTobHAnalysis/interface/TH1InfoClass.h"
+//#include "BpbH/BprimeTobHAnalysis/interface/TH2InfoClass.h"
+//#include "BpbH/BprimeTobHAnalysis/interface/TH1InfoClass.h"
 ///// Jet Correction
 //#include "BpbH/BprimeTobHAnalysis/src/JMEUncertUtil.cc"
 //#include "BpbH/BprimeTobHAnalysis/src/BTagSFUtil.cc"
@@ -175,8 +175,6 @@ class EvtCutFlowCheck : public edm::EDAnalyzer{
 		JetInfoBranches SubJetInfo;
 
 		edm::Service<TFileService> fs; 
-		TH2InfoClass<TH2D> h2;
-		TH1InfoClass<TH1D> h1;
 		
 		bool isData_; 
 		bool evtwt_;
@@ -347,7 +345,6 @@ void EvtCutFlowCheck::beginJob(){
 	HT_=fs->make<TH1D>("HT", "", 3000, 0, 3000);
 	HT_UnWt_=fs->make<TH1D>("HT_UnWt", "", 3000, 0, 3000);
 
-	h1.CreateTH1(fs); h1.Sumw2();
 	CutFlow_->GetXaxis()->SetBinLabel(1,"All_Evt");	
 	CutFlow_->GetXaxis()->SetBinLabel(2,"Trigger_Sel");	
 	CutFlow_->GetXaxis()->SetBinLabel(3,"Vertex_Sel");	
@@ -497,31 +494,22 @@ void EvtCutFlowCheck::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 			Jet bJet(AK5JetInfo, i);
 			bJets.push_back(bJet);
 		}//bJet end
-		for( int i=0; i<AK5JetInfo.Size; ++i){ 
+		/*for( int i=0; i<AK5JetInfo.Size; ++i){ 
 			if( AK5JetInfo.NHF[i]>=0.90 || AK5JetInfo.NEF[i]>=0.90 || AK5JetInfo.NConstituents[i]<=1 || fabs(AK5JetInfo.Eta[i]) >=2.4 || AK5JetInfo.CHF[i]<=0 || AK5JetInfo.CEF[i]>=0.99 ||  AK5JetInfo.NCH[i]<=0 ) continue; //// apply loose jet ID
 			if( fabs(AK5JetInfo.Eta[i]) > bVetoJetAbsEtaMax_ ) continue; 
 			if( AK5JetInfo.Pt[i] < bVetoJetPtMin_ ) continue; 
 			if( AK5JetInfo.CombinedSVBJetTags[i] <= bVetoJetCSVDiscMin_ ) continue;
 			Jet bJet(AK5JetInfo, i);
 			bJets_Veto.push_back(bJet);
-		}//bVeto's bJet selection end
+		}//bVeto's bJet selection end*/
 
 		// dR(b, H)>1.2 to Isolate bJet and HJet //================================================================================================================
 		JetCollection bJetsNotHiggs; //Only for HT(Higgs, bjet)
 		JetCollection bJetsNotAllHiggs;
 		JetCollection bJetsNotAllHiggsAllAntiHiggs;
-		JetCollection bJetsNotAllHiggs_Veto;
-		JetCollection bJetsNotAllHiggsAllAntiHiggs_Veto;
-		// isolateCollection( control_collection, input_collection, output_collection, dR(control, input)>1.2 )
 		isolateCollection( HiggsJets, 		bJets, 			bJetsNotHiggs, 			1.2); //Only for HT(Higgs, bjet)
 		isolateCollection( AllHiggsJets, 	bJets, 			bJetsNotAllHiggs, 		1.2);
 		isolateCollection( AllAntiHiggsJets, 	bJetsNotAllHiggs, 	bJetsNotAllHiggsAllAntiHiggs, 	1.2);
-		isolateCollection( AllHiggsJets, 	bJets_Veto, 		bJetsNotAllHiggs_Veto, 			1.2);
-		isolateCollection( AllAntiHiggsJets, 	bJetsNotAllHiggs_Veto,	bJetsNotAllHiggsAllAntiHiggs_Veto, 	1.2);
-
-		for( JetCollection::const_iterator AK5 = bJetsNotHiggs.begin(); AK5 != bJetsNotHiggs.end(); ++AK5 ){
-			HT_HiggsBJets = HT_HiggsBJets + AK5->Pt();
-		}
 
 		///// Fill evt and ABCD plots //==================================================================================================================================================	
 		if( bJetsNotAllHiggsAllAntiHiggs.size() < unsigned(numbJetMin_) ) continue;	
