@@ -512,11 +512,11 @@ void EvtCutFlowCheck::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 		isolateCollection( AllAntiHiggsJets, 	bJetsNotAllHiggs, 	bJetsNotAllHiggsAllAntiHiggs, 	1.2);
 
 		///// Fill evt and ABCD plots //==================================================================================================================================================	
-		if( bJetsNotAllHiggsAllAntiHiggs.size() < unsigned(numbJetMin_) ) continue;	
+		if( HiggsJets.size() < unsigned(numHiggsJetMin_) ) continue;		
 		CutFlow_->Fill(double(3),weight_);	
 		CutFlow_UnWt_->Fill(double(3),1.);
 	
-		if( HiggsJets.size() < unsigned(numHiggsJetMin_) ) continue;		
+		if( bJetsNotAllHiggsAllAntiHiggs.size() < unsigned(numbJetMin_) ) continue;	
 		CutFlow_->Fill(double(4),weight_);	
 		CutFlow_UnWt_->Fill(double(4),1.);
 
