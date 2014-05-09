@@ -3,11 +3,11 @@
 
 #include <map>
 #include <string>
-#include "TFile.h"
+#include <TFile.h>
 
 using namespace std;
 
-enum TH1List{
+enum TH1List {
   ABCDana_CutFlow_, 		
   ABCDval_CutFlow_, 		
 
@@ -223,8 +223,7 @@ class TH1Info{
       _unit  (unit), 
       _bin   (bin), 
       _min   (min), 
-      _max   (max) { 
-  }
+      _max   (max) { } 
     bool 	      _output;
     std::string	_name;
     std::string	_title;
@@ -244,11 +243,11 @@ class TH1Info{
 template<typename TH1_type> 
 class TH1InfoClass{
   public:
-    TH1InfoClass();
+    TH1InfoClass() {};
     void CreateTH1();
     void CreateTH1(edm::Service<TFileService> f);
-    void CreateTH1(TFile* f, std::string dir_name ); // dir_name, ex: "BprimeBH/"
-    void Set_titles(); 
+    void CreateTH1(TFile* f, std::string dir_name ); 
+    void SetTitles(); 
     void Sumw2();
     TH1_type* GetTH1(std::string _name_);
     TH1Info GetVar(std::string _name_);
@@ -257,7 +256,7 @@ class TH1InfoClass{
   private:
     map<std::string, TH1_type*> mapTH1;
     map<std::string, int> indexTH1;
-   static TH1Info Var[TH1_Size_];
+    static TH1Info Var[TH1_Size_];
 };
 
 template<typename TH1_type>
@@ -450,13 +449,7 @@ TH1Info TH1InfoClass<TH1_type>::Var[TH1_Size_] = {
   TH1Info( 0,	"ABCDval_CA8Pt", 			"",	"CA8 Pt", 		"Yields", "GeV/c", 	1500,  0, 1500 )   	
 };
 
-/////// Define function ==============================================
-// Constructor
-template<typename TH1_type> 
-TH1InfoClass<TH1_type>::TH1InfoClass() { 
-}
-
-// Create Histogram
+//// Create Histogram
 template<typename TH1_type> 
 void TH1InfoClass<TH1_type>::CreateTH1(){
   for(int i=0; i<TH1_Size_; i++){
@@ -481,7 +474,7 @@ void TH1InfoClass<TH1_type>::CreateTH1( TFile* f, std::string dir_name="" ){
 
 // Set some option for Histogram
 template<typename TH1_type> 
-void TH1InfoClass<TH1_type>::Set_titles(){
+void TH1InfoClass<TH1_type>::SetTitles(){
   for(int i=0; i<TH1_Size_; i++){ 
     //mapTH1[Var[i]._name]->SetTile(Var[i]._title.c_str());
     mapTH1[Var[i]._name]->SetX_title( (Var[i]._xtitle+" ["+Var[i]._unit+"]").c_str());
