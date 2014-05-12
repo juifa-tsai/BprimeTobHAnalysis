@@ -26,6 +26,11 @@ options.register('doPUReweighting', True,
     VarParsing.varType.bool,
     "Do pileup reweighting"
 )
+options.register('bJetPtMin', 80.,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum b jet Pt"
+    )
 options.register('bjetCSVDiscMin', 0.679,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -65,6 +70,36 @@ options.register('fatJetPrunedMassMax', 140.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum fat jet pruned mass"
+    )
+options.register('dRSubjetsMin', 0.3,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum dR(subjet1, subjet2)"
+    )
+options.register('dRSubjetsMax', 0.8,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum dR(subjet1, subjet2)"
+    )
+options.register('subjet1CSVDiscMin', 0.679,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum subjet1 b discriminator"
+    )
+options.register('subjet1CSVDiscMax', 1.000,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum subjet1 b discriminator"
+    )
+options.register('subjet2CSVDiscMin', 0.679,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum subjet2 b discriminator"
+    )
+options.register('subjet2CSVDiscMax', 1.000,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Maximum subjet2 b discriminator"
     )
 options.register('ApplyJEC', False,
     VarParsing.multiplicity.singleton,
@@ -161,12 +196,12 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     HJetPrunedMassMax = cms.double(140),	
     HJetTau2ByTau1Min = cms.double(-1),
     HJetTau2ByTau1Max = cms.double(0.5),
-    Subjet1CSVDiscMin   = cms.double(0.679),
-    Subjet1CSVDiscMax   = cms.double(2),
-    Subjet2CSVDiscMin   = cms.double(0.679),
-    Subjet2CSVDiscMax   = cms.double(2),
-    dRSubjetsMin 	= cms.double(0.3),
-    dRSubjetsMax 	= cms.double(1000),
+    DRSubjetsMin        = cms.double(options.dRSubjetsMin),
+    DRSubjetsMax        = cms.double(options.dRSubjetsMax),
+    Subjet1CSVDiscMin   = cms.double(options.subjet1CSVDiscMin),
+    Subjet1CSVDiscMax   = cms.double(options.subjet1CSVDiscMax),
+    Subjet2CSVDiscMin   = cms.double(options.subjet2CSVDiscMin),
+    Subjet2CSVDiscMax   = cms.double(options.subjet2CSVDiscMax),
 
     HJetSBMassMin = cms.double(-1),	
     HJetSBMassMax = cms.double(80),
@@ -175,7 +210,7 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     JetPtMax		= cms.double(100000),
     JetAbsEtaMin	= cms.double(-1),
     JetAbsEtaMax	= cms.double(2.4),
-    BJetPtMin		= cms.double(80),
+    BJetPtMin           = cms.double(options.bJetPtMin),
     BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
     BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),
     FatJetPtMin         = cms.double(options.fatJetPtMin),

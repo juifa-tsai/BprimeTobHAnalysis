@@ -2,8 +2,6 @@ import FWCore.ParameterSet.Config as cms
 
 from FWCore.ParameterSet.VarParsing import VarParsing
 
-#from BprimeTobHAnalysisv1.BprimeTobHAnalysis.BpBpToBHBHinc.BprimeBprimeTobHbHinc_M_800_cfi import * 
-#from BprimeTobHAnalysisv1.BprimeTobHAnalysis.Data.JetHT_Run2012BCD_cfi import * 
 from inputFiles_cfi import * 
 
 options = VarParsing('python')
@@ -78,7 +76,7 @@ options.register('fatJetPrunedMassMax', 140.,
     VarParsing.varType.float,
     "Maximum fat jet pruned mass"
     )
-options.register('dRSubjetsMin', 0.4,
+options.register('dRSubjetsMin', 0.3,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum dR(subjet1, subjet2)"
