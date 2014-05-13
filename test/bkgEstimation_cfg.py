@@ -51,16 +51,6 @@ options.register('fatJetPtMax', 1.E6,
     VarParsing.varType.float,
     "Maximum fat jet pt"
     )
-options.register('fatJetMassMin', 0.,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    "Minimum fat jet mass"
-    )
-options.register('fatJetMassMax', 1.E6,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    "Maximum fat jet mass"
-    )
 options.register('fatJetPrunedMassMin', 90.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -183,10 +173,8 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),
     Hist_PUDistMC       = cms.string('pileup_mc'),
     Hist_PUDistData     = cms.string('pileup_data'),
-
     HTAK5Min		= cms.double(900),
     HTAK5Max		= cms.double(100000),
-
     HJetPtMin		= cms.double(300),
     HJetPtMax		= cms.double(100000),
     HJetAbsEtaMax	= cms.double(2.4),
@@ -202,34 +190,23 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     Subjet1CSVDiscMax   = cms.double(options.subjet1CSVDiscMax),
     Subjet2CSVDiscMin   = cms.double(options.subjet2CSVDiscMin),
     Subjet2CSVDiscMax   = cms.double(options.subjet2CSVDiscMax),
-
-    HJetSBMassMin = cms.double(-1),	
-    HJetSBMassMax = cms.double(80),
-	
-    JetPtMin		= cms.double(50),
-    JetPtMax		= cms.double(100000),
-    JetAbsEtaMin	= cms.double(-1),
-    JetAbsEtaMax	= cms.double(2.4),
+    HJetSBMassMin       = cms.double(-1),	
+    HJetSBMassMax       = cms.double(80),
     BJetPtMin           = cms.double(options.bJetPtMin),
     BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
     BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),
     FatJetPtMin         = cms.double(options.fatJetPtMin),
     FatJetPtMax         = cms.double(options.fatJetPtMax),
-    FatJetMassMin       = cms.double(options.fatJetMassMin),
-    FatJetMassMax       = cms.double(options.fatJetMassMax),
     FatJetPrunedMassMin = cms.double(options.fatJetPrunedMassMin),
     FatJetPrunedMassMax = cms.double(options.fatJetPrunedMassMax),
-
-    bVetoJetPtMin	= cms.double(30),
-    bVetoJetPtMax	= cms.double(100000),
-    bVetoJetAbsEtaMin	= cms.double(-1),
-    bVetoJetAbsEtaMax	= cms.double(2.4),
+    bVetoJetPtMin	      = cms.double(30),
+    bVetoJetPtMax	      = cms.double(100000),
+    bVetoJetAbsEtaMin	  = cms.double(0.0),
+    bVetoJetAbsEtaMax	  = cms.double(2.4),
     bVetoJetCSVDiscMin 	= cms.double(0.244),
     bVetoJetCSVDiscMax 	= cms.double(2),
-
-    numbJetMin		= cms.int32(1),
-    numHiggsJetMin	= cms.int32(1),
-
+    numbJetMin		      = cms.int32(1),
+    numHiggsJetMin    	= cms.int32(1),
     JetSelParams        = defaultJetSelectionParameters.clone(), 
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(

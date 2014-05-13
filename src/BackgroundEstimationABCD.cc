@@ -107,16 +107,11 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const std::string               hist_PUDistMC_;
 		const std::string               hist_PUDistData_;
 
-		const double jetPtMin_;
-		const double jetPtMax_;
-		const double jetAbsEtaMax_;
 		const double bJetPtMin_;
-		const double bjetCSVDiscMin_;
-		const double bjetCSVDiscMax_;
+		const double bJetCSVDiscMin_;
+		const double bJetCSVDiscMax_;
     const double fatJetPtMin_ ;
     const double fatJetPtMax_ ; 
-    const double fatJetMassMin_ ;
-    const double fatJetMassMax_ ; 
     const double fatJetPrunedMassMin_ ;
     const double fatJetPrunedMassMax_ ; 
 		const double dRSubjetsMin_;
@@ -208,16 +203,11 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
 	hist_PUDistMC_(iConfig.getParameter<std::string>("Hist_PUDistMC")),
 	hist_PUDistData_(iConfig.getParameter<std::string>("Hist_PUDistData")),
-	jetPtMin_(iConfig.getParameter<double>("JetPtMin")),
-	jetPtMax_(iConfig.getParameter<double>("JetPtMax")),
-	jetAbsEtaMax_(iConfig.getParameter<double>("JetAbsEtaMax")),
 	bJetPtMin_(iConfig.getParameter<double>("BJetPtMin")),
-	bjetCSVDiscMin_(iConfig.getParameter<double>("BJetCSVDiscMin")),
-	bjetCSVDiscMax_(iConfig.getParameter<double>("BJetCSVDiscMax")),
+	bJetCSVDiscMin_(iConfig.getParameter<double>("BJetCSVDiscMin")),
+	bJetCSVDiscMax_(iConfig.getParameter<double>("BJetCSVDiscMax")),
   fatJetPtMin_(iConfig.getParameter<double>("FatJetPtMin")),
   fatJetPtMax_(iConfig.getParameter<double>("FatJetPtMax")), 
-  fatJetMassMin_(iConfig.getParameter<double>("FatJetMassMin")),
-  fatJetMassMax_(iConfig.getParameter<double>("FatJetMassMax")), 
   fatJetPrunedMassMin_(iConfig.getParameter<double>("FatJetPrunedMassMin")),
   fatJetPrunedMassMax_(iConfig.getParameter<double>("FatJetPrunedMassMax")),
 	dRSubjetsMin_(iConfig.getParameter<double>("DRSubjetsMin")),
@@ -510,7 +500,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
       if (subjet1.CombinedSVBJetTags() < subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() < subj2CSVDiscMin_) { //// subjet disc
         AllAntiHiggsJets.push_back(thisjet); 
-        if (thisjet.MassPruned() > HJetPrunedMassMin_ && thisjet.MassPruned() < HJetPrunedMassMax_ ) { //// fat jet pruned mass 
+        if (thisjet.MassPruned() > fatJetPrunedMassMin_ && thisjet.MassPruned() < fatJetPrunedMassMax_ ) { //// fat jet pruned mass 
           if( subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ){
             AntiHiggsJets.push_back(thisjet);
             AllAntiHiggsJetsDRCut.push_back(thisjet);
@@ -525,6 +515,14 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
         AllHiggsJets.push_back(thisjet);
         if (thisjet.MassPruned() > HJetPrunedMassMin_ && thisjet.MassPruned() < HJetPrunedMassMax_ ) { //// fat jet pruned mass 
           if( subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ){
+            if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
+              ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
+                  double(subjet1.Eta()), double(subjet2.Eta()),
+                  subjet1.GenFlavor(), subjet2.GenFlavor(), 
+                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags()) ; 
+              evtwt *= higgsTagSF->GetHiggsTagSF() ;
+              delete higgsTagSF ; 
+            } //// Apply Higgs-tagging scale factor  
             HiggsJets.push_back(thisjet);
             AllHiggsJetsDRCut.push_back(thisjet);
           }
@@ -552,7 +550,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     JetCollection allBJets, selectedBJets ;  
     for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
       if (ijet->Pt() > bVetoJetPtMin_ && ijet->CombinedSVBJetTags() > bVetoJetCSVDiscMin_) allBJets.push_back(*ijet) ; 
-      if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bjetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
+      if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
     }
 
     HT HTAllAK5, MyHT ; 

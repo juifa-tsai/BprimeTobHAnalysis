@@ -21,16 +21,6 @@ options.register('ttreedir', 'ntuple',
     VarParsing.varType.string,
     "Name of ROOT TTree dir: Either 'ntuple' or 'skim' or 'bVeto'"
     )
-options.register('jetPtMin', 50.,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    "Minimum jet Pt"
-    )
-options.register('jetPtMax', 1.E6,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    "Maximum jet Pt"
-    )
 options.register('bJetPtMin', 80.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -55,16 +45,6 @@ options.register('fatJetPtMax', 1.E6,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum fat jet pt"
-    )
-options.register('fatJetMassMin', 0.,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    "Minimum fat jet mass"
-    )
-options.register('fatJetMassMax', 1.E6,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.float,
-    "Maximum fat jet mass"
     )
 options.register('fatJetPrunedMassMin', 90.,
     VarParsing.multiplicity.singleton,
@@ -217,16 +197,11 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),
     Hist_PUDistMC       = cms.string('pileup_mc'),
     Hist_PUDistData     = cms.string('pileup_data'),
-    JetPtMin            = cms.double(options.jetPtMin),
-    JetPtMax            = cms.double(options.jetPtMax),
-    JetAbsEtaMax        = cms.double(2.4),
     BJetPtMin           = cms.double(options.bJetPtMin),
     BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
     BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),
     FatJetPtMin         = cms.double(options.fatJetPtMin),
     FatJetPtMax         = cms.double(options.fatJetPtMax),
-    FatJetMassMin       = cms.double(options.fatJetMassMin),
-    FatJetMassMax       = cms.double(options.fatJetMassMax),
     FatJetPrunedMassMin = cms.double(options.fatJetPrunedMassMin),
     FatJetPrunedMassMax = cms.double(options.fatJetPrunedMassMax),
     DRSubjetsMin        = cms.double(options.dRSubjetsMin),

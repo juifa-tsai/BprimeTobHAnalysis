@@ -106,16 +106,11 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const std::string               hist_PUDistMC_ ;
     const std::string               hist_PUDistData_ ;
 
-    const double jetPtMin_ ; 
-    const double jetPtMax_ ; 
-    const double jetAbsEtaMax_ ;
-    const double bjetPtMin_ ; 
-    const double bjetCSVDiscMin_;
-    const double bjetCSVDiscMax_;
+    const double bJetPtMin_ ; 
+    const double bJetCSVDiscMin_;
+    const double bJetCSVDiscMax_;
     const double fatJetPtMin_ ;
     const double fatJetPtMax_ ; 
-    const double fatJetMassMin_ ;
-    const double fatJetMassMax_ ; 
     const double fatJetPrunedMassMin_ ;
     const double fatJetPrunedMassMax_ ; 
     const double dRSubjetsMin_ ; 
@@ -177,16 +172,11 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
   hist_PUDistMC_(iConfig.getParameter<std::string>("Hist_PUDistMC")),
   hist_PUDistData_(iConfig.getParameter<std::string>("Hist_PUDistData")),
-  jetPtMin_(iConfig.getParameter<double>("JetPtMin")),
-  jetPtMax_(iConfig.getParameter<double>("JetPtMax")),
-  jetAbsEtaMax_(iConfig.getParameter<double>("JetAbsEtaMax")),
-  bjetPtMin_(iConfig.getParameter<double>("BJetPtMin")),
-  bjetCSVDiscMin_(iConfig.getParameter<double>("BJetCSVDiscMin")),
-  bjetCSVDiscMax_(iConfig.getParameter<double>("BJetCSVDiscMax")),
+  bJetPtMin_(iConfig.getParameter<double>("BJetPtMin")),
+  bJetCSVDiscMin_(iConfig.getParameter<double>("BJetCSVDiscMin")),
+  bJetCSVDiscMax_(iConfig.getParameter<double>("BJetCSVDiscMax")),
   fatJetPtMin_(iConfig.getParameter<double>("FatJetPtMin")),
   fatJetPtMax_(iConfig.getParameter<double>("FatJetPtMax")), 
-  fatJetMassMin_(iConfig.getParameter<double>("FatJetMassMin")),
-  fatJetMassMax_(iConfig.getParameter<double>("FatJetMassMax")), 
   fatJetPrunedMassMin_(iConfig.getParameter<double>("FatJetPrunedMassMin")),
   fatJetPrunedMassMax_(iConfig.getParameter<double>("FatJetPrunedMassMax")),
   dRSubjetsMin_(iConfig.getParameter<double>("DRSubjetsMin")),
@@ -428,7 +418,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     int nGoodVtxs(0) ;
     bool isdata(0);
     double evtwt(1); 
-    double puweight(1); 
+    double puwt(1); 
     HT HTAK5, HTAllAK5, HTAK5_leading4, HTCA8_leading2_AK5_leading2, MyHT ; 
     std::vector<TLorentzVector>p4bprimes ; 
 
@@ -436,7 +426,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     isdata   = EvtInfo.McFlag ? 0 : 1; 
     if ( !isdata ) evtwt = EvtInfo.Weight ; 
-    if ( doPUReweighting_ && !isdata ) puweight = LumiWeights_.weight(EvtInfo.TrueIT[0]) ; 
+    if ( doPUReweighting_ && !isdata ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]) ; 
 
     if ( !isdata ) { //// Gen info 
       std::vector<int> gen_bp_indices, gen_higgs_indices ; 
@@ -488,16 +478,16 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     if ( !doTrigEff_ ) {
       h_cutflow -> Fill("TriggerSel", 1) ; 
       FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
-      FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puweight) ; 
+      FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
     }
 
     VertexSelector vtxSel(VtxInfo) ; 
     nGoodVtxs = vtxSel.NGoodVtxs(); 
     if (nGoodVtxs < 1)  { edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex " ; continue ; }
     FillHisto(TString("VertexSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
-    FillHisto(TString("VertexSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puweight) ; 
+    FillHisto(TString("VertexSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
 
-    evtwt *= puweight ; 
+    evtwt *= puwt ; 
 
     JetCollection fatjets ; 
     for (int ifatjet = 0; ifatjet < FatJetInfo.Size; ++ifatjet) { 
@@ -546,12 +536,15 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         if (selectedFatJets.size() < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
       } //// Selecting fat jets with mass and dy cuts 
       if (subjet1.CombinedSVBJetTags() < 0.244 || subjet2.CombinedSVBJetTags() < 0.244) continue ;  
-      AllHiggsAntiHiggsJets.push_back(thisjet) ; 
-      if (subjet1.CombinedSVBJetTags() >= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() >= subj2CSVDiscMin_) {
+      if (subjet1.CombinedSVBJetTags() < subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() < subj2CSVDiscMin_) { //// subjet disc
+        AllHiggsAntiHiggsJets.push_back(thisjet) ; 
+      }
+      else if (subjet1.CombinedSVBJetTags() >= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() >= subj2CSVDiscMin_) {
+        AllHiggsAntiHiggsJets.push_back(thisjet) ; 
         AllHiggsJets.push_back(thisjet);
         if (thisjet.MassPruned() > fatJetPrunedMassMin_ && thisjet.MassPruned() < fatJetPrunedMassMax_ 
             && subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ) { //// fat jet pruned mass 
-          if ( !isdata ) { //// Apply Higgs-tagging scale factor 
+          if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
             ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
                 double(subjet1.Eta()), double(subjet2.Eta()),
                 subjet1.GenFlavor(), subjet2.GenFlavor(), 
@@ -634,7 +627,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
       if ( ijet - cleanedAK5Jets.begin() < 4 ) ak5jets_leading4.push_back(*ijet) ; 
       if ( ijet - cleanedAK5Jets.begin() < 2 ) jets_CA8_leading2_AK5_leading2.push_back(*ijet) ;  
-      if (ijet->Pt() > bjetPtMin_ && ijet->CombinedSVBJetTags() > bjetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
+      if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
     }
 
     HTAK5.setJetCollection(cleanedAK5Jets) ; 
@@ -695,7 +688,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     if (selectedFatJets.size() >= 1) {
     h_cutflow -> Fill("FatJetSel", 1) ; 
     FillHisto(TString("FatJetSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-    FillHisto(TString("FatJetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+    FillHisto(TString("FatJetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
     FillHisto(TString("FatJetSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
     FillHisto(TString("FatJetSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
     FillHisto(TString("FatJetSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
@@ -813,7 +806,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       if (selectedBJets.size() >= 1 ) { 
         h_cutflow -> Fill("BJetsSel", 1) ;
         FillHisto(TString("BJetsSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+        FillHisto(TString("BJetsSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
         FillHisto(TString("BJetsSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
         FillHisto(TString("BJetsSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
         FillHisto(TString("BJetsSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
@@ -840,7 +833,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         if ( htsel(HTAllAK5, retht) != 0 ) { //// If event passes HT 
           h_cutflow -> Fill("HTSel", 1) ; 
           FillHisto(TString("HTSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+          FillHisto(TString("HTSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
           FillHisto(TString("HTSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
           FillHisto(TString("HTSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
           FillHisto(TString("HTSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
@@ -889,7 +882,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
           if (HiggsJets.size() == 1 && selectedBJets.size() == 1) { //// 1 HJet and 1 bjet 
             h_cutflow -> Fill("HTSel_1H_1b", 1) ; 
             FillHisto(TString("HTSel_1H_1b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+            FillHisto(TString("HTSel_1H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
             FillHisto(TString("HTSel_1H_1b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_1H_1b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_1H_1b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
@@ -929,7 +922,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
           if (HiggsJets.size() == 1 && selectedBJets.size() >= 2) { //// 1 HJet and >=2 bjet 
             h_cutflow -> Fill("HTSel_1H_2b", 1) ; 
             FillHisto(TString("HTSel_1H_2b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+            FillHisto(TString("HTSel_1H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
             FillHisto(TString("HTSel_1H_2b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_1H_2b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_1H_2b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
@@ -969,7 +962,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
           if (HiggsJets.size() >= 2 && selectedBJets.size() == 1) { //// >= 2 HJet and 1 bjet 
             h_cutflow -> Fill("HTSel_2H_1b", 1) ; 
             FillHisto(TString("HTSel_2H_1b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+            FillHisto(TString("HTSel_2H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
             FillHisto(TString("HTSel_2H_1b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_2H_1b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_2H_1b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
@@ -1009,7 +1002,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
           if (HiggsJets.size() >= 2 && selectedBJets.size() >= 2) { //// >= 2 HJet and >=2 bjet  
             h_cutflow -> Fill("HTSel_2H_2b", 1) ; 
             FillHisto(TString("HTSel_2H_2b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puweight) ; 
+            FillHisto(TString("HTSel_2H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
             FillHisto(TString("HTSel_2H_2b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_2H_2b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
             FillHisto(TString("HTSel_2H_2b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
@@ -1055,7 +1048,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
   if ( doTrigEff_ && passBSel && passHLT) { 
     h_cutflow -> Fill("TriggerSel", 1) ; 
     FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
-    FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puweight) ; 
+    FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nFatJets"), selectedFatJets.size(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
