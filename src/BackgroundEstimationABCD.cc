@@ -177,8 +177,8 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		int	evtPass_val;
 
 		bool BuildMiniTree_;
-		TChain*            chain_;
-		TTree*             newtree_ana;
+		TChain*         chain_;
+		TTree*          newtree_ana;
 		JetInfoBranches HiggsJetInfoAna, AntiHiggsJetInfoAna;
 		JetInfoBranches bJetInfoAna, Final_bJetInfoAna;
 		JetInfoBranches HiggsSubJet1InfoAna, HiggsSubJet2InfoAna, 
@@ -339,11 +339,11 @@ void BackgroundEstimationABCD::beginJob(){
 
 	if( BuildMiniTree_ ){
 		newtree_ana = fs->make<TTree>("tree", "");
-		newtree_ana->Branch("EvtInfo.McFlag", 		&McFlagana, 	"EvtInfo.McFlag/O"); // store weight of evt and pu for each event
-		newtree_ana->Branch("EvtInfo.PU", 		&PUana, 	"EvtInfo.PU/D"); // store weight of evt and pu for each event
-		newtree_ana->Branch("EvtInfo.WeightEvt",	&evtWtana, 	"EvtInfo.WeightEvt/D"); 	
-		newtree_ana->Branch("EvtInfo.HT_AK5",		&HTak5, 	"EvtInfo.HT_AK5/D"); 	
-		newtree_ana->Branch("EvtInfo.HT_HiggsbJets",	&HThiggsbjet, 	"EvtInfo.HT_HiggsbJets/D"); 	
+		newtree_ana->Branch("EvtInfo.McFlag", &McFlagana,	"EvtInfo.McFlag/O"); // store weight of evt and pu for each event
+		newtree_ana->Branch("EvtInfo.PU",	&PUana,	"EvtInfo.PU/D"); // store weight of evt and pu for each event
+		newtree_ana->Branch("EvtInfo.WeightEvt", &evtWtana, "EvtInfo.WeightEvt/D"); 	
+		newtree_ana->Branch("EvtInfo.HT_AK5",	&HTak5,	"EvtInfo.HT_AK5/D"); 	
+		newtree_ana->Branch("EvtInfo.HT_HiggsbJets", &HThiggsbjet, "EvtInfo.HT_HiggsbJets/D"); 	
 		HiggsJetInfoAna.RegisterTree(newtree_ana,"HiggsJetInfo");
 		AntiHiggsJetInfoAna.RegisterTree(newtree_ana,"AntiHiggsJetInfo");
 		bJetInfoAna.RegisterTree(newtree_ana,"bJetInfo");

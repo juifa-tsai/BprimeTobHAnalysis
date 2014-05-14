@@ -135,6 +135,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double SFbShift_;
     const double SFlShift_;
     const bool   doTrigEff_;
+    const bool   doPDFTree_;
     const bool   fillBDTTrees_; 
 
     TChain*            chain_;
@@ -153,6 +154,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     std::map<TString, TH1D*> hmap_1d ;  
     std::map<TString, TH2D*> hmap_2d ;  
 
+    TTree* pdfTree_ ; 
     EventSelector *eSelector_ ; 
     std::vector<std::string> cutLevels_; 
 
@@ -200,6 +202,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   SFbShift_(iConfig.getParameter<double>("SFbShift")),
   SFlShift_(iConfig.getParameter<double>("SFlShift")),
   doTrigEff_(iConfig.getParameter<double>("DoTrigEff")),
+  doPDFTree_(iConfig.getParameter<double>("DoPDFTree")),
   fillBDTTrees_(iConfig.getParameter<double>("FillBDTTrees"))  
 { 
 
@@ -408,17 +411,33 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
   pat::strbitset retjetidak5 = jetSelAK5.getBitTemplate() ; 
   pat::strbitset retjetidca8 = jetSelCA8.getBitTemplate() ; 
 
+  //// Event variables 
+  bool passHLT(false) ; 
+  int nGoodVtxs(0) ;
+  bool isdata(0);
+  double evtwt(1); 
+  double puwt(1); 
+  if (doPDFTree_) { 
+    pdfTree_ = fs->make<TTree>("pdftree", "") ; 
+    pdfTree_ -> Branch ("McFlag"   , &EvtInfo.McFlag  , "EvtInfo.McFlag/I"   ) ; 
+    pdfTree_ -> Branch ("PDFid1"   , &EvtInfo.PDFid1  , "EvtInfo.PDFid1/I"   ) ; 
+    pdfTree_ -> Branch ("PDFid2"   , &EvtInfo.PDFid1  , "EvtInfo.PDFid2/I"   ) ; 
+    pdfTree_ -> Branch ("PDFx1"    , &EvtInfo.PDFx1   , "EvtInfo.PDFx1/F"    ) ; 
+    pdfTree_ -> Branch ("PDFx2"    , &EvtInfo.PDFx1   , "EvtInfo.PDFx2/F"    ) ; 
+    pdfTree_ -> Branch ("PDFv1"    , &EvtInfo.PDFv1   , "EvtInfo.PDFv1/F"    ) ; 
+    pdfTree_ -> Branch ("PDFv2"    , &EvtInfo.PDFv2   , "EvtInfo.PDFv2/F"    ) ; 
+    pdfTree_ -> Branch ("qScale"   , &EvtInfo.qScale  , "EvtInfo.qScale/F"   ) ; 
+    pdfTree_ -> Branch ("alphaQCD" , &EvtInfo.alphaQCD, "EvtInfo.alphaQCD/F" ) ; 
+    pdfTree_ -> Branch ("alphaQED" , &EvtInfo.alphaQED, "EvtInfo.alphaQED/F" ) ; 
+    pdfTree_ -> Branch ("evtwt"    , &evtwt           , "evtwt/D"            ) ; 
+    pdfTree_ -> Branch ("puwt"     , &puwt            , "puwt/D"             ) ; 
+  }
+
   edm::LogInfo("StartingAnalysisLoop") << "Starting analysis loop\n";
 
   for(int entry=0; entry<maxEvents_; entry++) {
     if((entry%reportEvery_) == 0) edm::LogInfo("Event") << entry << " of " << maxEvents_ ; 
 
-    //// Event variables 
-    bool passHLT(false), passBSel(false) ; 
-    int nGoodVtxs(0) ;
-    bool isdata(0);
-    double evtwt(1); 
-    double puwt(1); 
     HT HTAK5, HTAllAK5, HTAK5_leading4, HTCA8_leading2_AK5_leading2, MyHT ; 
     std::vector<TLorentzVector>p4bprimes ; 
 
@@ -474,187 +493,190 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     TriggerSelector trigSel(hltPaths_) ; 
     passHLT = trigSel.getTrigDecision(EvtInfo) ; 
-    if ( !doTrigEff_ && !passHLT ) continue ; 
-    if ( !doTrigEff_ ) {
+    if ( !doTrigEff_ && !passHLT ) evtwt = 0 ; 
+    else if ( doTrigEff_ || (!doTrigEff_  && passHLT) ) {
       h_cutflow -> Fill("TriggerSel", 1) ; 
       FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
       FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
-    }
 
-    VertexSelector vtxSel(VtxInfo) ; 
-    nGoodVtxs = vtxSel.NGoodVtxs(); 
-    if (nGoodVtxs < 1)  { edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex " ; continue ; }
-    FillHisto(TString("VertexSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
-    FillHisto(TString("VertexSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
+      VertexSelector vtxSel(VtxInfo) ; 
+      nGoodVtxs = vtxSel.NGoodVtxs(); 
+      if (nGoodVtxs < 1)  { edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex " ; continue ; }
+      FillHisto(TString("VertexSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
+      FillHisto(TString("VertexSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
 
-    evtwt *= puwt ; 
+      evtwt *= puwt ; 
 
-    JetCollection fatjets ; 
-    for (int ifatjet = 0; ifatjet < FatJetInfo.Size; ++ifatjet) { 
-      if (jetSelCA8(FatJetInfo, ifatjet, SubJetInfo, retjetidca8) == 0) continue ; //// pt > 150 GeV, |eta| < 2.4 tau2/tau1 < 0.5 
-      Jet thisjet(FatJetInfo, ifatjet) ; 
-      fatjets.push_back(thisjet) ; 
-    } //// Loop over fat jets 
+      JetCollection fatjets ; 
+      for (int ifatjet = 0; ifatjet < FatJetInfo.Size; ++ifatjet) { 
+        if (jetSelCA8(FatJetInfo, ifatjet, SubJetInfo, retjetidca8) == 0) continue ; //// pt > 150 GeV, |eta| < 2.4 tau2/tau1 < 0.5 
+        Jet thisjet(FatJetInfo, ifatjet) ; 
+        fatjets.push_back(thisjet) ; 
+      } //// Loop over fat jets 
 
-    //// Apply JEC and b-tagging SFs for CA8 jets in MC  
-    if ( !isdata && applyJEC_ ) {
-      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, fatjets, "JERCA8MC", jerShift_) ; 
-      JetCollection ca8jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
-      delete jmeUtil_jer ; 
-      fatjets.clear() ; 
-
-      if ( abs(jesShift_) > 1E-6 ) {
-        JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ca8jets_jer, "JESCA8MC", jesShift_) ; 
-        JetCollection ca8jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
-        delete jmeUtil_jes ; 
-
-        for (JetCollection::const_iterator ijet = ca8jets_jes.begin(); ijet != ca8jets_jes.end(); ++ijet) {
-          Jet thisjet(*ijet) ; 
-          fatjets.push_back(thisjet) ; 
-        }
-      }
-      else {
-        for (JetCollection::const_iterator ijet = ca8jets_jer.begin(); ijet != ca8jets_jer.end(); ++ijet) {
-          Jet thisjet(*ijet) ; 
-          fatjets.push_back(thisjet) ; 
-        }
-      }
-    } //// Apply JEC and b-tagging SFs for CA8 jets in MC 
-
-    FillHisto(TString("VertexSel")+TString("_nFatJets"), fatjets.size(), evtwt) ; 
-    JetCollection selectedFatJets, HiggsJets, AllHiggsJets, AllHiggsAntiHiggsJets; 
-    JetCollection allAK5Jets, cleanedAK5Jets, ak5jets_leading4, selectedBJets, jets_CA8_leading2_AK5_leading2 ; 
-    for (JetCollection::const_iterator ifat = fatjets.begin(); ifat != fatjets.end(); ++ifat) {
-      Jet thisjet(*ifat) ; 
-      if ( thisjet.Pt() < fatJetPtMin_ || thisjet.Pt() > fatJetPtMax_ ) continue ; //// Apply fat jet pT cut  
-      Jet subjet1(SubJetInfo, ifat->Jet_SubJet1Idx()) ;
-      Jet subjet2(SubJetInfo, ifat->Jet_SubJet2Idx()) ;
-      double subjet_dyphi = subjet1.DeltaR(subjet2) ; 
-      if ( ifat->MassPruned() > fatJetPrunedMassMin_ && ifat->MassPruned() < fatJetPrunedMassMax_ 
-          && subjet_dyphi > dRSubjetsMin_ && subjet_dyphi < dRSubjetsMax_ ) { //// Selecting fat jets with mass and dy cuts   
-        selectedFatJets.push_back(thisjet) ; 
-        if (selectedFatJets.size() < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
-      } //// Selecting fat jets with mass and dy cuts 
-      if (subjet1.CombinedSVBJetTags() < 0.244 || subjet2.CombinedSVBJetTags() < 0.244) continue ;  
-      if (subjet1.CombinedSVBJetTags() <= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() <= subj2CSVDiscMin_) { //// subjet disc
-        AllHiggsAntiHiggsJets.push_back(thisjet) ; 
-      }
-      else if (subjet1.CombinedSVBJetTags() > subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() > subj2CSVDiscMin_) {
-        AllHiggsAntiHiggsJets.push_back(thisjet) ; 
-        AllHiggsJets.push_back(thisjet);
-        if (thisjet.MassPruned() > fatJetPrunedMassMin_ && thisjet.MassPruned() < fatJetPrunedMassMax_ 
-            && subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ) { //// fat jet pruned mass 
-          if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
-            ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
-                double(subjet1.Eta()), double(subjet2.Eta()),
-                subjet1.GenFlavor(), subjet2.GenFlavor(), 
-                subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags()) ; 
-            evtwt *= higgsTagSF->GetHiggsTagSF() ;
-            delete higgsTagSF ; 
-          } //// Apply Higgs-tagging scale factor  
-          HiggsJets.push_back(thisjet);
-        } //// fat jet pruned mass   
-      } //// Subjet CSV 
-
-      FillHisto(TString("VertexSel")+TString("_FatJets_Pt")                 ,ifat->Pt() ,evtwt)  ;  
-      FillHisto(TString("VertexSel")+TString("_FatJets_Eta")                ,ifat->Eta() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_CombinedSVBJetTags") ,ifat->CombinedSVBJetTags() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_tau2ByTau1")         ,ifat->tau2()/ifat->tau1() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_tau3ByTau2")         ,ifat->tau3()/ifat->tau2() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_tau3ByTau1")         ,ifat->tau3()/ifat->tau1() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_Mass")               ,ifat->Mass() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_MassPruned")         ,ifat->MassPruned() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_FatJets_DYPhiSubjets")       ,subjet_dyphi ,evtwt)  ; 
-
-      FillHisto(TString("VertexSel")+TString("_SubJet1_Pt") ,subjet1.Pt() ,evtwt)  ;  
-      FillHisto(TString("VertexSel")+TString("_SubJet1_Eta") ,subjet1.Eta() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_SubJet1_Mass") ,subjet1.Mass() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_SubJet1_CombinedSVBJetTags") ,subjet1.CombinedSVBJetTags() ,evtwt)  ; 
-
-      FillHisto(TString("VertexSel")+TString("_SubJet2_Pt") ,subjet2.Pt() ,evtwt)  ;  
-      FillHisto(TString("VertexSel")+TString("_SubJet2_Eta") ,subjet2.Eta() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_SubJet2_Mass") ,subjet2.Mass() ,evtwt)  ; 
-      FillHisto(TString("VertexSel")+TString("_SubJet2_CombinedSVBJetTags") ,subjet2.CombinedSVBJetTags() ,evtwt)  ; 
-
-    } //// Looping over all fat jets with pt > 150 GeV, |eta| < 2.4, loose jet ID, tau2/tau1 < 0.5 
-
-    for (int ijet = 0; ijet < JetInfo.Size; ++ijet) {
-      retjetidak5.set(false) ;
-      if (jetSelAK5(JetInfo, ijet,retjetidak5) == 0) continue ; 
-      Jet thisjet(JetInfo, ijet) ;
-      allAK5Jets.push_back(thisjet) ; 
-    }
-
-    //// Apply JEC and b-tagging SFs to MC 
-    if ( !isdata ) {
-      if ( applyJEC_ ) { //// Apply JEC for MC   
-
-        //// All AK5 jets 
-        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, "JERAK5MC", jerShift_) ; 
-        JetCollection allAK5JetsJER = jmeUtil_jer->GetModifiedJetColl() ; 
+      //// Apply JEC and b-tagging SFs for CA8 jets in MC  
+      if ( !isdata && applyJEC_ ) {
+        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, fatjets, "JERCA8MC", jerShift_) ; 
+        JetCollection ca8jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
         delete jmeUtil_jer ; 
-        allAK5Jets.clear() ; 
+        fatjets.clear() ; 
 
         if ( abs(jesShift_) > 1E-6 ) {
-          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, "JESAK5MC", jesShift_) ; 
-          JetCollection allAK5JetsJES = jmeUtil_jes->GetModifiedJetColl() ; 
+          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ca8jets_jer, "JESCA8MC", jesShift_) ; 
+          JetCollection ca8jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
           delete jmeUtil_jes ; 
 
-          for (JetCollection::const_iterator ijet = allAK5JetsJES.begin(); ijet != allAK5JetsJES.end(); ++ijet) {
+          for (JetCollection::const_iterator ijet = ca8jets_jes.begin(); ijet != ca8jets_jes.end(); ++ijet) {
             Jet thisjet(*ijet) ; 
-            allAK5Jets.push_back(thisjet) ; 
+            fatjets.push_back(thisjet) ; 
           }
         }
         else {
-          for (JetCollection::const_iterator ijet = allAK5JetsJER.begin(); ijet != allAK5JetsJER.end(); ++ijet) {
+          for (JetCollection::const_iterator ijet = ca8jets_jer.begin(); ijet != ca8jets_jer.end(); ++ijet) {
             Jet thisjet(*ijet) ; 
-            allAK5Jets.push_back(thisjet) ; 
+            fatjets.push_back(thisjet) ; 
           }
         }
+      } //// Apply JEC and b-tagging SFs for CA8 jets in MC 
 
-      } //// Apply JEC for MC 
+      FillHisto(TString("VertexSel")+TString("_nFatJets"), fatjets.size(), evtwt) ; 
+      JetCollection selectedFatJets, HiggsJets, AllHiggsJets, AllHiggsAntiHiggsJets; 
+      JetCollection allAK5Jets, cleanedAK5Jets, ak5jets_leading4, selectedBJets, jets_CA8_leading2_AK5_leading2 ; 
+      for (JetCollection::const_iterator ifat = fatjets.begin(); ifat != fatjets.end(); ++ifat) {
+        Jet thisjet(*ifat) ; 
+        if ( thisjet.Pt() < fatJetPtMin_ || thisjet.Pt() > fatJetPtMax_ ) continue ; //// Apply fat jet pT cut  
+        Jet subjet1(SubJetInfo, ifat->Jet_SubJet1Idx()) ;
+        Jet subjet2(SubJetInfo, ifat->Jet_SubJet2Idx()) ;
+        double subjet_dyphi = subjet1.DeltaR(subjet2) ; 
+        if ( ifat->MassPruned() > fatJetPrunedMassMin_ && ifat->MassPruned() < fatJetPrunedMassMax_ 
+            && subjet_dyphi > dRSubjetsMin_ && subjet_dyphi < dRSubjetsMax_ ) { //// Selecting fat jets with mass and dy cuts   
+          selectedFatJets.push_back(thisjet) ; 
+          if (selectedFatJets.size() < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
+        } //// Selecting fat jets with mass and dy cuts 
+        if (subjet1.CombinedSVBJetTags() < 0.244 || subjet2.CombinedSVBJetTags() < 0.244) continue ;  
+        if (subjet1.CombinedSVBJetTags() <= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() <= subj2CSVDiscMin_) { //// subjet disc
+          AllHiggsAntiHiggsJets.push_back(thisjet) ; 
+        }
+        else if (subjet1.CombinedSVBJetTags() > subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() > subj2CSVDiscMin_) {
+          AllHiggsAntiHiggsJets.push_back(thisjet) ; 
+          AllHiggsJets.push_back(thisjet);
+          if (thisjet.MassPruned() > fatJetPrunedMassMin_ && thisjet.MassPruned() < fatJetPrunedMassMax_ 
+              && subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ) { //// fat jet pruned mass 
+            if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
+              ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
+                  double(subjet1.Eta()), double(subjet2.Eta()),
+                  subjet1.GenFlavor(), subjet2.GenFlavor(), 
+                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags()) ; 
+              evtwt *= higgsTagSF->GetHiggsTagSF() ;
+              delete higgsTagSF ; 
+            } //// Apply Higgs-tagging scale factor  
+            HiggsJets.push_back(thisjet);
+          } //// fat jet pruned mass   
+        } //// Subjet CSV 
 
-      if ( applyBTagSF_  ) { //// Apply b-tagging SF for MC  
-        ApplyBTagSF * btagsf =  new ApplyBTagSF(allAK5Jets, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
-        allAK5Jets.clear() ; 
-        allAK5Jets =  btagsf->getBtaggedJetsWithSF () ; 
-        delete btagsf ; 
-      } //// Apply b-tagging SF for MC 
-    } //// Apply JEC and b-tagging SFs to MC 
+        FillHisto(TString("VertexSel")+TString("_FatJets_Pt")                 ,ifat->Pt() ,evtwt)  ;  
+        FillHisto(TString("VertexSel")+TString("_FatJets_Eta")                ,ifat->Eta() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_CombinedSVBJetTags") ,ifat->CombinedSVBJetTags() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_tau2ByTau1")         ,ifat->tau2()/ifat->tau1() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_tau3ByTau2")         ,ifat->tau3()/ifat->tau2() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_tau3ByTau1")         ,ifat->tau3()/ifat->tau1() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_Mass")               ,ifat->Mass() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_MassPruned")         ,ifat->MassPruned() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_FatJets_DYPhiSubjets")       ,subjet_dyphi ,evtwt)  ; 
 
-    isolateCollection (AllHiggsAntiHiggsJets, allAK5Jets, cleanedAK5Jets) ; 
+        FillHisto(TString("VertexSel")+TString("_SubJet1_Pt") ,subjet1.Pt() ,evtwt)  ;  
+        FillHisto(TString("VertexSel")+TString("_SubJet1_Eta") ,subjet1.Eta() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_SubJet1_Mass") ,subjet1.Mass() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_SubJet1_CombinedSVBJetTags") ,subjet1.CombinedSVBJetTags() ,evtwt)  ; 
 
-    for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
-      if ( ijet - cleanedAK5Jets.begin() < 4 ) ak5jets_leading4.push_back(*ijet) ; 
-      if ( ijet - cleanedAK5Jets.begin() < 2 ) jets_CA8_leading2_AK5_leading2.push_back(*ijet) ;  
-      if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
-    }
+        FillHisto(TString("VertexSel")+TString("_SubJet2_Pt") ,subjet2.Pt() ,evtwt)  ;  
+        FillHisto(TString("VertexSel")+TString("_SubJet2_Eta") ,subjet2.Eta() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_SubJet2_Mass") ,subjet2.Mass() ,evtwt)  ; 
+        FillHisto(TString("VertexSel")+TString("_SubJet2_CombinedSVBJetTags") ,subjet2.CombinedSVBJetTags() ,evtwt)  ; 
 
-    HTAK5.setJetCollection(cleanedAK5Jets) ; 
-    HTAK5.buildHT() ; 
+      } //// Looping over all fat jets with pt > 150 GeV, |eta| < 2.4, loose jet ID, tau2/tau1 < 0.5 
 
-    HTAllAK5.setJetCollection(allAK5Jets) ; 
-    HTAllAK5.buildHT() ; 
+      for (int ijet = 0; ijet < JetInfo.Size; ++ijet) {
+        retjetidak5.set(false) ;
+        if (jetSelAK5(JetInfo, ijet,retjetidak5) == 0) continue ; 
+        Jet thisjet(JetInfo, ijet) ;
+        allAK5Jets.push_back(thisjet) ; 
+      }
 
-    HTAK5_leading4.setJetCollection(ak5jets_leading4) ; 
-    HTAK5_leading4.buildHT() ; 
+      //// Apply JEC and b-tagging SFs to MC 
+      if ( !isdata ) {
+        if ( applyJEC_ ) { //// Apply JEC for MC   
 
-    HTCA8_leading2_AK5_leading2.setJetCollection(jets_CA8_leading2_AK5_leading2) ; 
-    HTCA8_leading2_AK5_leading2.buildHT() ; 
+          //// All AK5 jets 
+          JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, "JERAK5MC", jerShift_) ; 
+          JetCollection allAK5JetsJER = jmeUtil_jer->GetModifiedJetColl() ; 
+          delete jmeUtil_jer ; 
+          allAK5Jets.clear() ; 
 
-    MyHT.setJetCollection(HiggsJets) ; 
-    MyHT.setJetCollection(selectedBJets) ; 
-    MyHT.buildHT() ; 
+          if ( abs(jesShift_) > 1E-6 ) {
+            JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, "JESAK5MC", jesShift_) ; 
+            JetCollection allAK5JetsJES = jmeUtil_jes->GetModifiedJetColl() ; 
+            delete jmeUtil_jes ; 
 
-    HTSelector htsel(HTSelParams_) ; 
-    pat::strbitset retht = htsel.getBitTemplate() ; 
-    retht.set(false) ; 
+            for (JetCollection::const_iterator ijet = allAK5JetsJES.begin(); ijet != allAK5JetsJES.end(); ++ijet) {
+              Jet thisjet(*ijet) ; 
+              allAK5Jets.push_back(thisjet) ; 
+            }
+          }
+          else {
+            for (JetCollection::const_iterator ijet = allAK5JetsJER.begin(); ijet != allAK5JetsJER.end(); ++ijet) {
+              Jet thisjet(*ijet) ; 
+              allAK5Jets.push_back(thisjet) ; 
+            }
+          }
 
-    if (HiggsJets.size() < 1) continue ; 
-    if (selectedBJets.size() < 1) continue ; 
-    if( HTAllAK5.getHT() < HTAK5Min_ ) continue;
-    h_cutflow -> Fill("HTSel", 1) ; 
-    FillHisto(TString("HTSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+        } //// Apply JEC for MC 
+
+        if ( applyBTagSF_  ) { //// Apply b-tagging SF for MC  
+          ApplyBTagSF * btagsf =  new ApplyBTagSF(allAK5Jets, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
+          allAK5Jets.clear() ; 
+          allAK5Jets =  btagsf->getBtaggedJetsWithSF () ; 
+          delete btagsf ; 
+        } //// Apply b-tagging SF for MC 
+      } //// Apply JEC and b-tagging SFs to MC 
+
+      isolateCollection (AllHiggsAntiHiggsJets, allAK5Jets, cleanedAK5Jets) ; 
+
+      for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
+        if ( ijet - cleanedAK5Jets.begin() < 4 ) ak5jets_leading4.push_back(*ijet) ; 
+        if ( ijet - cleanedAK5Jets.begin() < 2 ) jets_CA8_leading2_AK5_leading2.push_back(*ijet) ;  
+        if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
+      }
+
+      HTAK5.setJetCollection(cleanedAK5Jets) ; 
+      HTAK5.buildHT() ; 
+
+      HTAllAK5.setJetCollection(allAK5Jets) ; 
+      HTAllAK5.buildHT() ; 
+
+      HTAK5_leading4.setJetCollection(ak5jets_leading4) ; 
+      HTAK5_leading4.buildHT() ; 
+
+      HTCA8_leading2_AK5_leading2.setJetCollection(jets_CA8_leading2_AK5_leading2) ; 
+      HTCA8_leading2_AK5_leading2.buildHT() ; 
+
+      MyHT.setJetCollection(HiggsJets) ; 
+      MyHT.setJetCollection(selectedBJets) ; 
+      MyHT.buildHT() ; 
+
+      HTSelector htsel(HTSelParams_) ; 
+      pat::strbitset retht = htsel.getBitTemplate() ; 
+      retht.set(false) ; 
+
+      if ( HiggsJets.size() >= 1
+          && selectedBJets.size() >= 1
+          && HTAllAK5.getHT() >= HTAK5Min_ ) {
+        h_cutflow -> Fill("HTSel", 1) ; 
+        FillHisto(TString("HTSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+      }
+      else evtwt = 0. ; 
+    } /// Event passes HLT 
+    if (doPDFTree_) pdfTree_->Fill() ; 
 
     /*
        if ( !doTrigEff_ ) {

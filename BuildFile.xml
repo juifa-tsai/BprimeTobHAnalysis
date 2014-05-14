@@ -17,4 +17,5 @@
 <use name="fastjet"/>
 <use name="root"/>
 <use name="boost"/>
+<use name="lhapdf"/>
 <flags EDM_PLUGIN="1"/>

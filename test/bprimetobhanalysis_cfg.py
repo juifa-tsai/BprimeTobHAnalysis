@@ -146,6 +146,11 @@ options.register('DoTrigEff', False,
     VarParsing.varType.bool,
     "Do trigger efficiency" 
     )
+options.register('DoPDFTree', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Do trigger efficiency" 
+    )
 options.register('DoABCDPlots', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
@@ -242,6 +247,7 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     SFbShift            = cms.double(options.SFbShift), 
     SFlShift            = cms.double(options.SFlShift), 
     DoTrigEff           = cms.double(options.DoTrigEff),
+    DoPDFTree           = cms.double(options.DoPDFTree),
     DoABCDPlots         = cms.double(options.DoABCDPlots),
     FillBDTTrees        = cms.double(options.FillBDTTrees), 
     ) 
