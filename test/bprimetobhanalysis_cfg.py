@@ -222,7 +222,9 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     Subjet2CSVDiscMax   = cms.double(options.subjet2CSVDiscMax),
     HTAK5Min            = cms.double(options.hTAK5Min),
     HTAK5Max            = cms.double(options.hTAK5Max), 
-    JetSelParams        = defaultJetSelectionParameters.clone(), 
+    JetSelParams        = defaultJetSelectionParameters.clone(
+    	jetPtMin            = cms.double(50),
+	), 
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(
       subjet1CSVDiscMin = cms.double(0.679),
