@@ -61,7 +61,7 @@ options.register('dRSubjetsMin', 0.3,
     VarParsing.varType.float,
     "Minimum dR(subjet1, subjet2)"
     )
-options.register('dRSubjetsMax', 0.8,
+options.register('dRSubjetsMax', 999,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum dR(subjet1, subjet2)"
@@ -101,6 +101,16 @@ options.register('doPUReweighting', True,
     VarParsing.varType.bool,
     "Do pileup reweighting"
 )
+options.register('pileupmchist', 'pileup_mc',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "Name of Histogram for MC pileup weights"
+    )
+options.register('pileupdatahist', 'pileup_data',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "Name of Histogram for data pileup weights"
+    )
 options.register('ApplyJEC', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
@@ -195,8 +205,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     DoPUReweighting     = cms.bool(options.doPUReweighting),
     File_PUDistMC       = cms.string('pileup_Data_Summer12_53X_S10.root'),
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),
-    Hist_PUDistMC       = cms.string('pileup_mc'),
-    Hist_PUDistData     = cms.string('pileup_data'),
+    Hist_PUDistMC       = cms.string(options.pileupmchist),
+    Hist_PUDistData     = cms.string(options.pileupdatahist),
     BJetPtMin           = cms.double(options.bJetPtMin),
     BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
     BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),

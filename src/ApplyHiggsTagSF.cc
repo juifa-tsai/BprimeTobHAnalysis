@@ -21,20 +21,22 @@ ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double eta
 
   double sf1(1.), sf2(1.)  ; 
 
-  if (flavSubjet1_ == 4 || flavSubjet1_ == 5) sf1 = SFb_CSVL->Eval(ptSubjet1) ; 
+  if (flavSubjet1_ == 4 || flavSubjet1_ == 5) sf1 = SFb_CSVM->Eval(ptSubjet1) ; 
   else if (flavSubjet1_ < 4 || flavSubjet1_ == 21) {
     for (int ii = 0; ii < 4; ++ii) {
-      if ( etaSubjet1_ >= SFlight_CSVL_etamin[ii] && etaSubjet1_ < SFlight_CSVL_etamax[ii] ) {
-        sf1 = GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD")->Eval(ptSubjet1) ; 
+      if ( etaSubjet1_ >= SFlight_CSVM_etamin[ii] && etaSubjet1_ < SFlight_CSVM_etamax[ii] ) {
+        sf1 = GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD")->Eval(ptSubjet1) ; 
+        break ;
       }
     }
   }
 
-  if (flavSubjet2_ == 4 || flavSubjet2_ == 5) sf2 = SFb_CSVL->Eval(ptSubjet2) ; 
+  if (flavSubjet2_ == 4 || flavSubjet2_ == 5) sf2 = SFb_CSVM->Eval(ptSubjet2) ; 
   else if (flavSubjet2_ < 4 || flavSubjet2_ == 21) {
     for (int ii = 0; ii < 4; ++ii) {
-      if ( etaSubjet2_ >= SFlight_CSVL_etamin[ii] && etaSubjet2_ < SFlight_CSVL_etamax[ii] ) {
-        sf2 = GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD")->Eval(ptSubjet2) ; 
+      if ( etaSubjet2_ >= SFlight_CSVM_etamin[ii] && etaSubjet2_ < SFlight_CSVM_etamax[ii] ) {
+        sf2 = GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD")->Eval(ptSubjet2) ; 
+        break ;
       }
     }
   }

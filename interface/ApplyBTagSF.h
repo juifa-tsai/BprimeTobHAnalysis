@@ -9,7 +9,7 @@
 class ApplyBTagSF {
 
   public:
-  //ApplyBTagSF(JetCollection&, double, std::string, std::string) ;
+    //ApplyBTagSF(JetCollection&, double, std::string, std::string) ;
     ApplyBTagSF(JetCollection&, double, std::string, double, double) ; 
     ~ApplyBTagSF() ; 
 

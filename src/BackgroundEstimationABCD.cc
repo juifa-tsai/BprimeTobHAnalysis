@@ -107,6 +107,7 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const std::string               hist_PUDistMC_;
 		const std::string               hist_PUDistData_;
 
+		const double jetPtMin_;
 		const double bJetPtMin_;
 		const double bJetCSVDiscMin_;
 		const double bJetCSVDiscMax_;
@@ -203,6 +204,7 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
 	hist_PUDistMC_(iConfig.getParameter<std::string>("Hist_PUDistMC")),
 	hist_PUDistData_(iConfig.getParameter<std::string>("Hist_PUDistData")),
+	jetPtMin_(iConfig.getParameter<double>("JetPtMin")),
 	bJetPtMin_(iConfig.getParameter<double>("BJetPtMin")),
 	bJetCSVDiscMin_(iConfig.getParameter<double>("BJetCSVDiscMin")),
 	bJetCSVDiscMax_(iConfig.getParameter<double>("BJetCSVDiscMax")),
@@ -237,7 +239,6 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	bVetoJetCSVDiscMax_(iConfig.getParameter<double>("bVetoJetCSVDiscMax")),
 	numbJetMin_(iConfig.getParameter<int>("numbJetMin")),
 	numHiggsJetMin_(iConfig.getParameter<int>("numHiggsJetMin")),
-	BuildMiniTree_(iConfig.getParameter<bool>("BuildMinTree")),
 	jetSelParams_(iConfig.getParameter<edm::ParameterSet>("JetSelParams")), 
   fatJetSelParams_(iConfig.getParameter<edm::ParameterSet>("FatJetSelParams")), 
   higgsJetSelParams_(iConfig.getParameter<edm::ParameterSet>("HiggsJetSelParams")), 
@@ -250,7 +251,8 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	SFbShift_(iConfig.getParameter<double>("SFbShift")),
 	SFlShift_(iConfig.getParameter<double>("SFlShift")),
 	evtPass_ana(0),  
-	evtPass_val(0) 
+	evtPass_val(0), 
+	BuildMiniTree_(iConfig.getParameter<bool>("BuildMinTree")) 
 { 
 	if( doPUReweighting_) LumiWeights_ = edm::LumiReWeighting(file_PUDistMC_, file_PUDistData_, hist_PUDistMC_, hist_PUDistData_);
 }
@@ -498,7 +500,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       if (subjet1.CombinedSVBJetTags() < 0.244 || subjet2.CombinedSVBJetTags() < 0.244) continue ;  
       double subjet_dyphi = subjet1.DeltaR(subjet2) ; 
 
-      if (subjet1.CombinedSVBJetTags() < subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() < subj2CSVDiscMin_) { //// subjet disc
+      if (subjet1.CombinedSVBJetTags() <= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() <= subj2CSVDiscMin_) { //// subjet disc
         AllAntiHiggsJets.push_back(thisjet); 
         if (thisjet.MassPruned() > fatJetPrunedMassMin_ && thisjet.MassPruned() < fatJetPrunedMassMax_ ) { //// fat jet pruned mass 
           if( subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ){
@@ -511,7 +513,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
           AllAntiHiggsJetsDRCut.push_back(thisjet);
         }
       }
-      else if (subjet1.CombinedSVBJetTags() >= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() >= subj2CSVDiscMin_) {
+      else if (subjet1.CombinedSVBJetTags() > subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() > subj2CSVDiscMin_) {
         AllHiggsJets.push_back(thisjet);
         if (thisjet.MassPruned() > HJetPrunedMassMin_ && thisjet.MassPruned() < HJetPrunedMassMax_ ) { //// fat jet pruned mass 
           if( subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ){
@@ -538,13 +540,55 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     JetCollection AllHiggsAntiHiggsJets(AllHiggsJets.begin(), AllHiggsJets.end()) ; 
     AllHiggsAntiHiggsJets.insert(AllHiggsAntiHiggsJets.end(), AllAntiHiggsJets.begin(), AllAntiHiggsJets.end()) ; 
 
-    JetCollection allAK5Jets, cleanedAK5Jets;  
+    JetCollection allAK5Jets, cleanedAK5Jets, ak5JetsForHT;  
     for (int ijet = 0; ijet < JetInfo.Size; ++ijet) {
       retjetidak5.set(false) ;
       if (jetSelAK5(JetInfo, ijet,retjetidak5) == 0) continue ; 
       Jet thisjet(JetInfo, ijet) ;
       allAK5Jets.push_back(thisjet) ; 
     }
+
+    //// Apply JEC and b-tagging SFs to MC 
+    if ( !isdata ) {
+      if ( applyJEC_ ) { //// Apply JEC for MC   
+
+        //// All AK5 jets 
+        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, "JERAK5MC", jerShift_) ; 
+        JetCollection allAK5JetsJER = jmeUtil_jer->GetModifiedJetColl() ; 
+        delete jmeUtil_jer ; 
+        allAK5Jets.clear() ; 
+
+        if ( abs(jesShift_) > 1E-6 ) {
+          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, "JESAK5MC", jesShift_) ; 
+          JetCollection allAK5JetsJES = jmeUtil_jes->GetModifiedJetColl() ; 
+          delete jmeUtil_jes ; 
+
+          for (JetCollection::const_iterator ijet = allAK5JetsJES.begin(); ijet != allAK5JetsJES.end(); ++ijet) {
+            Jet thisjet(*ijet) ; 
+            allAK5Jets.push_back(thisjet) ; 
+          }
+        }
+        else {
+          for (JetCollection::const_iterator ijet = allAK5JetsJER.begin(); ijet != allAK5JetsJER.end(); ++ijet) {
+            Jet thisjet(*ijet) ; 
+            allAK5Jets.push_back(thisjet) ; 
+          }
+        }
+
+      } //// Apply JEC for MC 
+
+      if ( applyBTagSF_  ) { //// Apply b-tagging SF for MC  
+        ApplyBTagSF * btagsf =  new ApplyBTagSF(allAK5Jets, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
+        allAK5Jets.clear() ; 
+        allAK5Jets =  btagsf->getBtaggedJetsWithSF () ; 
+        delete btagsf ; 
+      } //// Apply b-tagging SF for MC 
+    } //// Apply JEC and b-tagging SFs to MC 
+
+    for (JetCollection::const_iterator ijet = allAK5Jets.begin(); ijet != allAK5Jets.end(); ++ijet) {
+      if (ijet->Pt() > jetPtMin_ ) ak5JetsForHT.push_back(*ijet) ; 
+    }
+
     isolateCollection (AllHiggsAntiHiggsJets, allAK5Jets, cleanedAK5Jets) ; 
 
     JetCollection allBJets, selectedBJets ;  
@@ -554,7 +598,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     }
 
     HT HTAllAK5, MyHT ; 
-    HTAllAK5.setJetCollection(allAK5Jets) ; 
+    HTAllAK5.setJetCollection(ak5JetsForHT) ;  
     HTAllAK5.buildHT() ; 
 
     MyHT.setJetCollection(HiggsJets);

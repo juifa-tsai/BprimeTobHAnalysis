@@ -536,10 +536,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         if (selectedFatJets.size() < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
       } //// Selecting fat jets with mass and dy cuts 
       if (subjet1.CombinedSVBJetTags() < 0.244 || subjet2.CombinedSVBJetTags() < 0.244) continue ;  
-      if (subjet1.CombinedSVBJetTags() < subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() < subj2CSVDiscMin_) { //// subjet disc
+      if (subjet1.CombinedSVBJetTags() <= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() <= subj2CSVDiscMin_) { //// subjet disc
         AllHiggsAntiHiggsJets.push_back(thisjet) ; 
       }
-      else if (subjet1.CombinedSVBJetTags() >= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() >= subj2CSVDiscMin_) {
+      else if (subjet1.CombinedSVBJetTags() > subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() > subj2CSVDiscMin_) {
         AllHiggsAntiHiggsJets.push_back(thisjet) ; 
         AllHiggsJets.push_back(thisjet);
         if (thisjet.MassPruned() > fatJetPrunedMassMin_ && thisjet.MassPruned() < fatJetPrunedMassMax_ 
