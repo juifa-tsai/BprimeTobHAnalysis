@@ -42,13 +42,18 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outFilename) 
     )
 
-FileNames = ['bprimeTobHAnalysis_PDFtree.root']
+FileNames = ['bprimeTobHAnalysis_BpBpbHbH500_PDFtree.root']
 
 process.PDFSyst = cms.EDAnalyzer('PdfSystematicsAnalyzer',
-    MaxEvents           = cms.int32(options.maxEvents),
-    ReportEvery         = cms.int32(options.reportEvery),  
-    InputTTree          = cms.string(options.ttreedir+'/pdftree'),
-    InputFiles          = cms.vstring(FileNames), 
+    MaxEvents   = cms.int32(options.maxEvents),
+    ReportEvery = cms.int32(options.reportEvery),  
+    InputTTree  = cms.string(options.ttreedir+'/pdftree'),
+    InputFiles  = cms.vstring(FileNames), 
+    PdfSetNames = cms.untracked.vstring(
+      "MSTW2008nlo68cl.LHgrid", 
+      "NNPDF21_as_0118_100.LHgrid", 
+      "cteq66.LHgrid" 
+      ) 
     ) 
 
 process.p = cms.Path(process.PDFSyst)

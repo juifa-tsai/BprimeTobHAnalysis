@@ -88,9 +88,14 @@ class PdfSystematicsAnalyzer : public edm::EDAnalyzer {
     const int                       reportEvery_; 
     const std::string               inputTTree_;
     const std::vector<std::string>  inputFiles_;
+    std::vector<std::string>       pdfSetNames_;
 
+    std::vector<double> pdf_weight0_sum_ ; 
+    std::vector<std::vector<double> >pdf_weights_sum_ ; 
+    std::vector<double> passed_pdf_weight0_sum_ ; 
+    std::vector<std::vector<double> >passed_pdf_weights_sum_ ; 
 
-    TChain*            chain_;
+    TChain* chain_;
 
     PDFTree pdfTree_ ; 
 
@@ -105,8 +110,15 @@ PdfSystematicsAnalyzer::PdfSystematicsAnalyzer(const edm::ParameterSet& iConfig)
   maxEvents_(iConfig.getParameter<int>("MaxEvents")), 
   reportEvery_(iConfig.getParameter<int>("ReportEvery")),
   inputTTree_(iConfig.getParameter<std::string>("InputTTree")),
-  inputFiles_(iConfig.getParameter<std::vector<std::string> >("InputFiles")) 
+  inputFiles_(iConfig.getParameter<std::vector<std::string> >("InputFiles")),
+  pdfSetNames_(iConfig.getUntrackedParameter<std::vector<std::string> > ("PdfSetNames"))  
 { 
+
+
+  if (pdfSetNames_.size()>3) {
+    edm::LogWarning("PdfSystematicsAnalyzer") << pdfSetNames_.size() << " PDF sets requested on input. Using only the first 3 sets and ignoring the rest!!";
+    pdfSetNames_.erase(pdfSetNames_.begin()+3,pdfSetNames_.end());
+  }
 
 }
 
@@ -130,7 +142,25 @@ void PdfSystematicsAnalyzer::beginJob() {
 
   if(maxEvents_<0 || maxEvents_>chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
 
-  LHAPDF::initPDFSet(1, "cteq66.LHgrid");
+  pdf_weight0_sum_.reserve(pdfSetNames_.size()) ; 
+  passed_pdf_weight0_sum_.reserve(pdfSetNames_.size()) ; 
+  pdf_weights_sum_.reserve(pdfSetNames_.size()) ; 
+  passed_pdf_weights_sum_.reserve(pdfSetNames_.size()) ; 
+
+  for (unsigned int ik = 0; ik < pdfSetNames_.size(); ++ik) {
+    LHAPDF::initPDFSet(ik+1,pdfSetNames_[ik]) ;  
+    unsigned int nweights = 1 ;
+    if (LHAPDF::numberPDF(ik+1) > 1) { 
+      nweights += LHAPDF::numberPDF(ik+1) ;
+      std::vector<double> weights ; 
+      weights.reserve(nweights) ; 
+      for (unsigned int ii = 0; ii < nweights; ++ii) {
+        weights.push_back(0) ; 
+      }
+      pdf_weights_sum_.push_back(weights) ; 
+      passed_pdf_weights_sum_.push_back(weights) ; 
+    }
+  }
 
   return ;  
 
@@ -145,26 +175,24 @@ void PdfSystematicsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
 
   edm::LogInfo("StartingAnalysisLoop") << "Starting analysis loop\n";
 
+
   for(int entry=0; entry<maxEvents_; entry++) {
     if((entry%reportEvery_) == 0) edm::LogInfo("Event") << entry << " of " << maxEvents_ ; 
 
-    std::vector<double>pdf_weights_ ; 
-    pdf_weights_.reserve(44) ; 
-
     chain_->GetEntry(entry);
 
-    LHAPDF::usePDFMember(1,0);
-    double xpdf1 = LHAPDF::xfx(1, pdfTree_.PDFx1, pdfTree_.qScale, pdfTree_.PDFid1);
-    double xpdf2 = LHAPDF::xfx(1, pdfTree_.PDFx2, pdfTree_.qScale, pdfTree_.PDFid2);
-    double w0 = xpdf1 * xpdf2;
-    for(int ipdf=1; ipdf <=44; ++ipdf){
-      LHAPDF::usePDFMember(1,ipdf);
-      double xpdf1_new = LHAPDF::xfx(1, pdfTree_.PDFx1, pdfTree_.qScale, pdfTree_.PDFid1);
-      double xpdf2_new = LHAPDF::xfx(1, pdfTree_.PDFx2, pdfTree_.qScale, pdfTree_.PDFid2);
-      double weight = xpdf1_new * xpdf2_new / w0;
-      pdf_weights_.push_back(weight);
+    for (unsigned int ik = 0; ik < pdfSetNames_.size(); ++ik) {
+
+      for (unsigned int ipdf=1; ipdf <= pdf_weights_sum_.size(); ++ipdf) {
+        LHAPDF::usePDFMember(ik+1, ipdf); 
+        double xpdf1 = LHAPDF::xfx(ik+1, pdfTree_.PDFx1, pdfTree_.qScale, pdfTree_.PDFid1);
+        double xpdf2 = LHAPDF::xfx(ik+1, pdfTree_.PDFx2, pdfTree_.qScale, pdfTree_.PDFid2);
+        double weight = xpdf1 * xpdf2 ;
+        (pdf_weights_sum_.at(ik)).at(ipdf-1) += weight ; 
+        if (pdfTree_.evtwt > 0) (passed_pdf_weights_sum_.at(ik)).at(ipdf-1) += weight ; 
+      }
+
     }
-    edm::LogInfo("PdfSystematicsAnalyzer") << " Weight w0 =" << w0 ; 
 
   } //// entry loop 
 
@@ -172,6 +200,20 @@ void PdfSystematicsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
 
 // ------------ method called once each job just after ending the event loop  ------------
 void PdfSystematicsAnalyzer::endJob() { 
+
+  for (unsigned int ik = 0; ik < pdfSetNames_.size(); ++ik) {
+    double eff0 = (passed_pdf_weights_sum_.at(ik)).at(0)/(pdf_weights_sum_.at(ik)).at(0) ; 
+    double deleffP(0), deleffM(0) ;
+    edm::LogInfo("PdfSystematicsAnalyzer") << pdfSetNames_.at(ik) << " eff0 = " << eff0 ; 
+    for (unsigned int ii = 1; ii < passed_pdf_weights_sum_.size(); ++ii) {
+      double eff = (passed_pdf_weights_sum_.at(ik)).at(ii)/(pdf_weights_sum_.at(ik)).at(ii) ;
+      if (ii%2 == 0) deleffP += pow((eff - eff0)/eff0, 2.) ;
+      else deleffM += pow((eff - eff0)/eff0, 2.) ;
+    }
+    deleffP = sqrt(deleffP) ; deleffM = sqrt(deleffM) ; 
+    edm::LogInfo("PdfSystematicsAnalyzer") << pdfSetNames_.at(ik) << " pdf uncertainy  +1sigma = " << 1.00+deleffP << " -1sigma = " << 1-deleffM << "%"  ;
+  }
+
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
