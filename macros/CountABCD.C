@@ -14,27 +14,33 @@ void CountABCD(){
 	string loadpath = "../test/OnLxplus/";
 	string savepath = "results/";
 	vector<string> workspace, fileName;	
-	workspace.push_back("14May_PU_Mean"); 	fileName.push_back("Final_histograms_ABCD.root");
-	workspace.push_back("14May_PU_UP");	fileName.push_back("Final_histograms_ABCD.root");
-	workspace.push_back("14May_PU_Down");	fileName.push_back("Final_histograms_ABCD.root");
+	workspace.push_back("15May_Mean"); 	fileName.push_back("Final_histograms_ABCD.root");
 	
 	vector<string> hName;
 	hName.push_back("ABCDana_CutRegion");
 	hName.push_back("ABCDana_CutRegion_1b");
 	hName.push_back("ABCDana_CutRegion_2b");
+	hName.push_back("ABCDval_CutRegion");
+	hName.push_back("ABCDval_CutRegion_0ak5");
+	hName.push_back("ABCDval_CutRegion_1ak5");
+	hName.push_back("ABCDval_CutRegion_2ak5");
 
-	vector<string> Title, fullName; 
-	Title.push_back("BHBH450"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-450");
-	Title.push_back("BHBH500"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-500");
-	Title.push_back("BHBH550"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-550");
-	Title.push_back("BHBH600"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-600");
-	Title.push_back("BHBH650");	fullName.push_back("BprimeBprimeToBHBHinc_M-650");
-	Title.push_back("BHBH700"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-700");
-	Title.push_back("BHBH750"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-750");
-	Title.push_back("BHBH800"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-800");
-	Title.push_back("BHBH1000"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-1000");
-	Title.push_back("BHBH1200"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-1200");
-	Title.push_back("BHBH1500"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-1500");
+
+	vector<string> Title, fullName; vector<bool> showbkg; 
+	Title.push_back("DATA"); 	fullName.push_back("DATA");   showbkg.push_back(0); 
+	Title.push_back("Bkg. MC"); 	fullName.push_back("BkgMC");  showbkg.push_back(0); 
+
+	Title.push_back("BHBH450"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-450");  showbkg.push_back(1); 
+	Title.push_back("BHBH500"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-500");  showbkg.push_back(1);
+	Title.push_back("BHBH550"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-550");  showbkg.push_back(1);
+	Title.push_back("BHBH600"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-600");  showbkg.push_back(1);
+	Title.push_back("BHBH650");	fullName.push_back("BprimeBprimeToBHBHinc_M-650");  showbkg.push_back(1);
+	Title.push_back("BHBH700"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-700");  showbkg.push_back(1);
+	Title.push_back("BHBH750"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-750");  showbkg.push_back(1);
+	Title.push_back("BHBH800"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-800");  showbkg.push_back(1);
+	Title.push_back("BHBH1000"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-1000");  showbkg.push_back(1);
+	Title.push_back("BHBH1200"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-1200");  showbkg.push_back(1);
+	Title.push_back("BHBH1500"); 	fullName.push_back("BprimeBprimeToBHBHinc_M-1500");  showbkg.push_back(1);
 
 	const int workspaceSize = workspace.size();
 	const int hSize = hName.size();
@@ -50,8 +56,10 @@ void CountABCD(){
 			output[i][j].open(save.c_str(),ios_base::out);
 			for( int k=0; k<titleSize; k++){
 				string hname = fullName[k]+"__"+hName[j];
-				string fname = loadpath + workspace[i] + "/" + fileName[i]; 
-				countAndStore( Title[k], hname, fname, output[i][j]);
+				string fname = loadpath + workspace[i] + "/" + fileName[i];
+				string hbkgname = "BkgMC__"+hName[j];
+				string fbkgname = loadpath + workspace[i] + "/" + fileName[i];
+				countAndStore( Title[k], hname, fname, output[i][j], showbkg[k], hbkgname, fbkgname );
 			}
 		}
 	}
