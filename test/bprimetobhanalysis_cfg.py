@@ -143,7 +143,12 @@ options.register('SFlShift', 0.0,
     VarParsing.varType.float,
     "SFl shift in unit of sigmas" 
     )
-options.register('DoTrigEff', True, #False,
+options.register('DoApplyMuTrig', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply muon triggers"
+    )
+options.register('DoTrigEff', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Do trigger efficiency" 
@@ -194,9 +199,9 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
     InputFiles          = cms.vstring(FileNames), 
-    #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470),
     #InputFiles          = cms.vstring(FileNames_BpBp500), #FileNames_Bp500), 
-    HLTPaths            = defaultTriggerSelectionParameters.clone(), 
+    HLTPaths            = defaultTriggerSelectionParameters.clone(), #cms.string('HT750'),
+    HLTMuPaths          = defaultMuTriggerSelectionParameters.clone(), #eleni
     DoPUReweighting     = cms.bool(options.doPUReweighting),
     File_PUDistMC       = cms.string('pileup_Data_Summer12_53X_S10.root'),
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),
@@ -237,6 +242,7 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     JERShift            = cms.double(options.JERShift), 
     SFbShift            = cms.double(options.SFbShift), 
     SFlShift            = cms.double(options.SFlShift), 
+    DoApplyMuTrig     = cms.double(options.DoApplyMuTrig),
     DoTrigEff           = cms.double(options.DoTrigEff),
     DoABCDPlots         = cms.double(options.DoABCDPlots),
     FillBDTTrees        = cms.double(options.FillBDTTrees), 

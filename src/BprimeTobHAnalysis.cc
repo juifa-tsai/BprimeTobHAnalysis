@@ -98,7 +98,8 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const int                       reportEvery_; 
     const std::string               inputTTree_;
     const std::vector<std::string>  inputFiles_;
-    const edm::ParameterSet         hltPaths_; 
+    const edm::ParameterSet         hltPaths_;
+    const edm::ParameterSet         hltMuPaths_; 
     const int                       doPUReweighting_ ;
     const std::string               file_PUDistMC_ ;
     const std::string               file_PUDistData_ ;
@@ -135,6 +136,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const double jerShift_; 
     const double SFbShift_;
     const double SFlShift_;
+    const bool   doApplyMuTrig_;
     const bool   doTrigEff_;
     const bool   doABCDPlots_; 
     const bool   fillBDTTrees_; 
@@ -173,6 +175,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   inputTTree_(iConfig.getParameter<std::string>("InputTTree")),
   inputFiles_(iConfig.getParameter<std::vector<std::string> >("InputFiles")),
   hltPaths_(iConfig.getParameter<edm::ParameterSet>("HLTPaths")),
+  hltMuPaths_(iConfig.getParameter<edm::ParameterSet>("HLTMuPaths")),
   doPUReweighting_(iConfig.getParameter<bool>("DoPUReweighting")), 
   file_PUDistMC_(iConfig.getParameter<std::string>("File_PUDistMC")),
   file_PUDistData_(iConfig.getParameter<std::string>("File_PUDistData")),
@@ -208,6 +211,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   jerShift_(iConfig.getParameter<double>("JERShift")),
   SFbShift_(iConfig.getParameter<double>("SFbShift")),
   SFlShift_(iConfig.getParameter<double>("SFlShift")),
+  doApplyMuTrig_(iConfig.getParameter<double>("DoApplyMuTrig")),
   doTrigEff_(iConfig.getParameter<double>("DoTrigEff")),
   doABCDPlots_(iConfig.getParameter<double>("DoABCDPlots")),
   fillBDTTrees_(iConfig.getParameter<double>("FillBDTTrees")), 
@@ -546,6 +550,18 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     TriggerSelector trigSel(hltPaths_) ; 
     passHLT = trigSel.getTrigDecision(EvtInfo) ; 
+
+    // *************** Muon triggers 
+    if ( doApplyMuTrig_ ) {
+      //cout << ".";
+      TriggerSelector trigSelMu(hltMuPaths_) ;
+      bool passMuHLT(false);
+      passMuHLT = trigSelMu.getTrigDecision(EvtInfo) ;
+      if(!passMuHLT) continue;
+      //cout << " ";
+    }
+    // *************** 
+
     if ( !doTrigEff_ && !passHLT ) continue ; 
     if ( !doTrigEff_ ) {
       h_cutflow -> Fill("TriggerSel", 1) ; 
