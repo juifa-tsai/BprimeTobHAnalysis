@@ -111,12 +111,12 @@ options.register('pileupdatahist', 'pileup_data',
     VarParsing.varType.string,
     "Name of Histogram for data pileup weights"
     )
-options.register('ApplyJEC', False,
+options.register('ApplyJEC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Apply JEC" 
     )
-options.register('ApplyBTagSF', False,
+options.register('ApplyBTagSF', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Apply b-tagging scale factors" 
@@ -173,10 +173,17 @@ if options.SFbShift != 0.0 and options.SFlShift != 0.0:
 process = cms.Process("BprimebH")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cout = cms.untracked.PSet(
-    threshold = cms.untracked.string('INFO'), 
+#process.MessageLogger.cout = cms.untracked.PSet(
+process.MessageLogger = cms.Service("MessageLogger",
+    destinations = cms.untracked.vstring(
+      'detailedInfo',
+      ),
+    detailedInfo = cms.untracked.PSet(
+      threshold = cms.untracked.string('INFO'),  
+      ), 
+    #suppressInfo = cms.untracked.vstring('BprimebH'),
     ) 
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
+#process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) ) # Leave it this way. 
 
@@ -196,9 +203,9 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
-    #InputFiles          = cms.vstring(FileNames), 
-    InputFiles          = cms.vstring(FileNames_BpBp800), 
-    #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
+    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames_BpBp800), 
+    #InputFiles          = cms.vstring(FileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD1800), 
@@ -228,8 +235,8 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     HTAK5Min            = cms.double(options.hTAK5Min),
     HTAK5Max            = cms.double(options.hTAK5Max), 
     JetSelParams        = defaultJetSelectionParameters.clone(
-    	jetPtMin            = cms.double(50),
-	), 
+      jetPtMin            = cms.double(50),
+      ), 
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(
       subjet1CSVDiscMin = cms.double(0.679),

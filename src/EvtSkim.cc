@@ -264,23 +264,23 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
       JetCollection myjets_jerDown = jmeUtil_jerDown->GetModifiedJetColl() ; 
       delete jmeUtil_jerDown ; 
 
-      ApplyBTagSF * btagsf =  new ApplyBTagSF(myjets, 0.679, "CSVM", 0.0, 0.0) ;  
+      ApplyBTagSF * btagsf =  new ApplyBTagSF(myjets, 0.679, 0.0, 0.0) ;  
       JetCollection mybtaggedjets =  btagsf->getBtaggedJetsWithSF () ; 
       delete btagsf ; 
 
-      ApplyBTagSF * btagsf_sfbUp =  new ApplyBTagSF(myjets, 0.679, "CSVM", 1.0, 0.0) ;  
+      ApplyBTagSF * btagsf_sfbUp =  new ApplyBTagSF(myjets, 0.679, 1.0, 0.0) ;  
       JetCollection mybtaggedjets_sfbUp =  btagsf_sfbUp->getBtaggedJetsWithSF () ; 
       delete btagsf_sfbUp ; 
 
-      ApplyBTagSF * btagsf_sfbDown =  new ApplyBTagSF(myjets, 0.679, "CSVM", -1.0, 0.0) ;  
+      ApplyBTagSF * btagsf_sfbDown =  new ApplyBTagSF(myjets, 0.679, -1.0, 0.0) ;  
       JetCollection mybtaggedjets_sfbDown =  btagsf_sfbDown->getBtaggedJetsWithSF () ; 
       delete btagsf_sfbDown ; 
 
-      ApplyBTagSF * btagsfsflUp =  new ApplyBTagSF(myjets, 0.679, "CSVM", 0.0, 1.0) ;  
+      ApplyBTagSF * btagsfsflUp =  new ApplyBTagSF(myjets, 0.679, 0.0, 1.0) ;  
       JetCollection mybtaggedjets_sflUp =  btagsfsflUp->getBtaggedJetsWithSF () ; 
       delete btagsfsflUp ; 
 
-      ApplyBTagSF * btagsfsflDown =  new ApplyBTagSF(myjets, 0.679, "CSVM", 0.0, -1.0) ;  
+      ApplyBTagSF * btagsfsflDown =  new ApplyBTagSF(myjets, 0.679, 0.0, -1.0) ;  
       JetCollection mybtaggedjets_sflDown =  btagsfsflDown->getBtaggedJetsWithSF () ; 
       delete btagsfsflDown ; 
 

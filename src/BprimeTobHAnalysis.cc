@@ -315,18 +315,6 @@ void BprimeTobHAnalysis::CreateHistos(const TString& cutname) {
   AddHisto(cutname ,"_nPVtx_NoPUWt"                ,"N(PV), No PU weight"                          ,50     ,-0.5     ,49.5    ) ; 
   AddHisto(cutname ,"_nPVtx_PUWt"                  ,"N(PV)"                                        ,50     ,-0.5     ,49.5    ) ; 
 
-  AddHisto(cutname ,"_nJets"                       ,"N(AK5 jets)"                                  ,20     ,-0.5     ,19.5    ) ; 
-
-  AddHisto(cutname ,"_nAllAK5"                     ,"N(All AK5 jets)"                              ,20     ,-0.5     ,19.5    ) ; 
-  AddHisto(cutname ,"_AK5Jet_1_Pt"                 ,";p_{T} (leading AK5 jet)[GeV]; Events"        ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_AK5Jet_2_Pt"                 ,";p_{T} (2nd AK5 jet)[GeV]; Events"            ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_AK5Jet_3_Pt"                 ,";p_{T} (3rd AK5 jet)[GeV]; Events"            ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_AK5Jet_4_Pt"                 ,";p_{T} (4th AK5 jet)[GeV]; Events"            ,100    ,0.       ,2000.   ) ;
-  AddHisto(cutname ,"_AK5Jet_1_Eta"                ,";#eta (leading AK5 jet); Events"              ,50     ,-4.      ,4.      ) ;
-  AddHisto(cutname ,"_AK5Jet_2_Eta"                ,";#eta (2nd AK5 jet); Events"                  ,50     ,-4.      ,4.      ) ;
-  AddHisto(cutname ,"_AK5Jet_3_Eta"                ,";#eta (3rd AK5 jet); Events"                  ,50     ,-4.      ,4.      ) ;
-  AddHisto(cutname ,"_AK5Jet_4_Eta"                ,";#eta (4th AK5 jet); Events"                  ,50     ,-4.      ,4.      ) ;
-
   AddHisto(cutname ,"_nFatJets"                    ,"N(fat jets)"                                  ,20     ,-0.5     ,19.5    ) ; 
   AddHisto(cutname ,"_FatJets_Pt"                  ,"p_{T}(fat jets)"                              ,1000   ,0.       ,1000.   ) ; 
   AddHisto(cutname ,"_FatJets_Eta"                 ,"#eta(fat jets)"                               ,50     ,-4.      ,4.      ) ; 
@@ -358,9 +346,6 @@ void BprimeTobHAnalysis::CreateHistos(const TString& cutname) {
   AddHisto(cutname ,"_BJet_Eta"                    ,"#eta (b jet)"                                 ,50     ,-4.      ,4.      ) ;
 
   AddHisto(cutname ,"_HT"                          ,"H_{T}[GeV]"                                   ,400   ,0.       ,4000.   ) ;
-  AddHisto(cutname ,"_HTAK5"                       ,"H_{T} (AK5 jets, no Higgs jet overlap) [GeV]" ,400   ,0.       ,4000.   ) ;
-  AddHisto(cutname ,"_HTAK5_leading4"              ,"H_{T} (leading 4 AK5 jets) [GeV]"             ,400   ,0.       ,4000.   ) ;
-  AddHisto(cutname ,"_HTCA8_leading2_AK5_leading2" ,"H_{T} (leading 2 CA8 and AK5 jets) [GeV]"     ,400   ,0.       ,4000.   ) ;
   AddHisto(cutname ,"_HTAllAK5"                    ,"H_{T} (AK5 jets) [GeV]"                       ,400   ,0.       ,4000.   ) ;
   AddHisto(cutname ,"_Nbprimes"                    ,";N (b' candidates); Events"                   ,5     ,-0.5     ,4.5     ) ;
   AddHisto(cutname ,"_bprimePt"                    ,"b' p_{T} [GeV]"                               ,200   ,0.       ,2000.   ) ;
@@ -438,7 +423,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
   for(int entry=0; entry<maxEvents_; entry++) {
     if((entry%reportEvery_) == 0) edm::LogInfo("Event") << entry << " of " << maxEvents_ ; 
 
-    HT HTAK5, HTAllAK5, HTAK5_leading4, HTCA8_leading2_AK5_leading2, MyHT ; 
+    HT HTAllAK5, MyHT ; 
     std::vector<TLorentzVector>p4bprimes ; 
 
     chain_->GetEntry(entry);
@@ -541,7 +526,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
       FillHisto(TString("VertexSel")+TString("_nFatJets"), fatjets.size(), evtwt) ; 
       JetCollection selectedFatJets, HiggsJets, AllHiggsJets, AllHiggsAntiHiggsJets; 
-      JetCollection allAK5Jets, cleanedAK5Jets, ak5jets_leading4, selectedBJets, jets_CA8_leading2_AK5_leading2 ; 
+      JetCollection allAK5Jets, cleanedAK5Jets, allBJets, selectedBJets ; 
       for (JetCollection::const_iterator ifat = fatjets.begin(); ifat != fatjets.end(); ++ifat) {
         Jet thisjet(*ifat) ; 
         if ( thisjet.Pt() < fatJetPtMin_ || thisjet.Pt() > fatJetPtMax_ ) continue ; //// Apply fat jet pT cut  
@@ -551,7 +536,6 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         if ( ifat->MassPruned() > fatJetPrunedMassMin_ && ifat->MassPruned() < fatJetPrunedMassMax_ 
             && subjet_dyphi > dRSubjetsMin_ && subjet_dyphi < dRSubjetsMax_ ) { //// Selecting fat jets with mass and dy cuts   
           selectedFatJets.push_back(thisjet) ; 
-          if (selectedFatJets.size() < 2) jets_CA8_leading2_AK5_leading2.push_back(thisjet) ;  
         } //// Selecting fat jets with mass and dy cuts 
         if (subjet1.CombinedSVBJetTags() < 0.244 || subjet2.CombinedSVBJetTags() < 0.244) continue ;  
         if (subjet1.CombinedSVBJetTags() <= subj1CSVDiscMin_ && subjet2.CombinedSVBJetTags() <= subj2CSVDiscMin_) { //// subjet disc
@@ -596,6 +580,9 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
       } //// Looping over all fat jets with pt > 150 GeV, |eta| < 2.4, loose jet ID, tau2/tau1 < 0.5 
 
+
+      fatjets.clear() ; 
+
       for (int ijet = 0; ijet < JetInfo.Size; ++ijet) {
         retjetidak5.set(false) ;
         if (jetSelAK5(JetInfo, ijet,retjetidak5) == 0) continue ; 
@@ -603,62 +590,56 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
         allAK5Jets.push_back(thisjet) ; 
       }
 
-      //// Apply JEC and b-tagging SFs to MC 
-      if ( !isdata ) {
-        if ( applyJEC_ ) { //// Apply JEC for MC   
+      if ( !isdata && applyJEC_ ) { //// Apply JEC for MC   
 
-          //// All AK5 jets 
-          JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, "JERAK5MC", jerShift_) ; 
-          JetCollection allAK5JetsJER = jmeUtil_jer->GetModifiedJetColl() ; 
-          delete jmeUtil_jer ; 
-          allAK5Jets.clear() ; 
+        //// All AK5 jets 
+        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, "JERAK5MC", jerShift_) ; 
+        JetCollection allAK5JetsJER = jmeUtil_jer->GetModifiedJetColl() ; 
+        delete jmeUtil_jer ; 
+        allAK5Jets.clear() ; 
 
-          if ( abs(jesShift_) > 1E-6 ) {
-            JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, "JESAK5MC", jesShift_) ; 
-            JetCollection allAK5JetsJES = jmeUtil_jes->GetModifiedJetColl() ; 
-            delete jmeUtil_jes ; 
+        if ( abs(jesShift_) > 1E-6 ) {
+          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, "JESAK5MC", jesShift_) ; 
+          JetCollection allAK5JetsJES = jmeUtil_jes->GetModifiedJetColl() ; 
+          delete jmeUtil_jes ; 
 
-            for (JetCollection::const_iterator ijet = allAK5JetsJES.begin(); ijet != allAK5JetsJES.end(); ++ijet) {
-              Jet thisjet(*ijet) ; 
-              allAK5Jets.push_back(thisjet) ; 
-            }
+          for (JetCollection::const_iterator ijet = allAK5JetsJES.begin(); ijet != allAK5JetsJES.end(); ++ijet) {
+            Jet thisjet(*ijet) ; 
+            allAK5Jets.push_back(thisjet) ; 
           }
-          else {
-            for (JetCollection::const_iterator ijet = allAK5JetsJER.begin(); ijet != allAK5JetsJER.end(); ++ijet) {
-              Jet thisjet(*ijet) ; 
-              allAK5Jets.push_back(thisjet) ; 
-            }
+        }
+        else {
+          for (JetCollection::const_iterator ijet = allAK5JetsJER.begin(); ijet != allAK5JetsJER.end(); ++ijet) {
+            Jet thisjet(*ijet) ; 
+            allAK5Jets.push_back(thisjet) ; 
           }
+        }
 
-        } //// Apply JEC for MC 
-
-        if ( applyBTagSF_  ) { //// Apply b-tagging SF for MC  
-          ApplyBTagSF * btagsf =  new ApplyBTagSF(allAK5Jets, 0.679, "CSVM", SFbShift_, SFlShift_) ;  
-          allAK5Jets.clear() ; 
-          allAK5Jets =  btagsf->getBtaggedJetsWithSF () ; 
-          delete btagsf ; 
-        } //// Apply b-tagging SF for MC 
-      } //// Apply JEC and b-tagging SFs to MC 
+      } //// Apply JEC for MC 
 
       isolateCollection (AllHiggsAntiHiggsJets, allAK5Jets, cleanedAK5Jets) ; 
 
-      for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
-        if ( ijet - cleanedAK5Jets.begin() < 4 ) ak5jets_leading4.push_back(*ijet) ; 
-        if ( ijet - cleanedAK5Jets.begin() < 2 ) jets_CA8_leading2_AK5_leading2.push_back(*ijet) ;  
-        if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
+      if ( !isdata && applyBTagSF_  ) { //// Apply b-tagging SF for MC  
+        ApplyBTagSF * btagsf =  new ApplyBTagSF(cleanedAK5Jets, 0.679, SFbShift_, SFlShift_) ;  
+        allBJets.clear() ; 
+        allBJets =  btagsf->getBtaggedJetsWithSF () ; 
+        delete btagsf ; 
+      } //// Apply b-tagging SF for MC 
+      else {
+        for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
+          if (ijet->CombinedSVBJetTags() > bJetCSVDiscMin_) allBJets.push_back(*ijet) ; 
+        }
       }
 
-      HTAK5.setJetCollection(cleanedAK5Jets) ; 
-      HTAK5.buildHT() ; 
+      for (JetCollection::const_iterator ijet = allBJets.begin(); ijet != allBJets.end(); ++ijet) {
+        if (ijet->Pt() > bJetPtMin_ /*&& ijet->CombinedSVBJetTags() > bJetCSVDiscMin_*/ ) selectedBJets.push_back(*ijet) ; 
+      }
+
+      cleanedAK5Jets.clear() ; 
+      allBJets.clear() ; 
 
       HTAllAK5.setJetCollection(allAK5Jets) ; 
       HTAllAK5.buildHT() ; 
-
-      HTAK5_leading4.setJetCollection(ak5jets_leading4) ; 
-      HTAK5_leading4.buildHT() ; 
-
-      HTCA8_leading2_AK5_leading2.setJetCollection(jets_CA8_leading2_AK5_leading2) ; 
-      HTCA8_leading2_AK5_leading2.buildHT() ; 
 
       MyHT.setJetCollection(HiggsJets) ; 
       MyHT.setJetCollection(selectedBJets) ; 
@@ -680,14 +661,10 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     /*
        if ( !doTrigEff_ ) {
-       FillHisto(TString("TriggerSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
        FillHisto(TString("TriggerSel")+TString("_nFatJets"), selectedFatJets.size(), evtwt) ; 
        FillHisto(TString("TriggerSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
        FillHisto(TString("TriggerSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
        FillHisto(TString("TriggerSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-       FillHisto(TString("TriggerSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-       FillHisto(TString("TriggerSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-       FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
        FillHisto(TString("TriggerSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
        FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
        for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
@@ -695,27 +672,15 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
        FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
        }
 
-       if (allAK5Jets.size() > 0) FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-       else FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-       if (allAK5Jets.size() > 1) FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-       else FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-       if (allAK5Jets.size() > 2) FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-       else FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-       if (allAK5Jets.size() > 3) FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-       else FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
        }
 
     //// Event selection  
     passBSel = false ; 
     if (selectedFatJets.size() >= 1) {
     h_cutflow -> Fill("FatJetSel", 1) ; 
-    FillHisto(TString("FatJetSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
     FillHisto(TString("FatJetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
     FillHisto(TString("FatJetSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
     FillHisto(TString("FatJetSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-    FillHisto(TString("FatJetSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-    FillHisto(TString("FatJetSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-    FillHisto(TString("FatJetSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
     FillHisto(TString("FatJetSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
     FillHisto(TString("FatJetSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
     for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
@@ -752,333 +717,213 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     FillHisto(TString("FatJetSel")+TString("_SubJet2_Mass") ,subj2_p4.Mag() ,evtwt)  ; 
     FillHisto(TString("FatJetSel")+TString("_SubJet2_CombinedSVBJetTags") ,SubJetInfo.CombinedSVBJetTags[iSubJet2] ,evtwt)  ; 
 
-  }
-  for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-    FillHisto(TString("FatJetSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-    FillHisto(TString("FatJetSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-    FillHisto(TString("FatJetSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
-  }
-  if (allAK5Jets.size() > 0) FillHisto(TString("FatJetSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-  else FillHisto(TString("FatJetSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-  if (allAK5Jets.size() > 1) FillHisto(TString("FatJetSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-  else FillHisto(TString("FatJetSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-  if (allAK5Jets.size() > 2) FillHisto(TString("FatJetSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-  else FillHisto(TString("FatJetSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-  if (allAK5Jets.size() > 3) FillHisto(TString("FatJetSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-  else FillHisto(TString("FatJetSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
-
-  if (HiggsJets.size() >= 1) {
-    h_cutflow -> Fill("HiggsJetSel", 1) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-    FillHisto(TString("HiggsJetSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-    for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-      FillHisto(TString("HiggsJetSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-      FillHisto(TString("HiggsJetSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
     }
     for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-      FillHisto(TString("HiggsJetSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-      FillHisto(TString("HiggsJetSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-      FillHisto(TString("HiggsJetSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+      FillHisto(TString("FatJetSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+      FillHisto(TString("FatJetSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+      FillHisto(TString("FatJetSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
     }
-    if (allAK5Jets.size() > 0) FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-    else FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-    if (allAK5Jets.size() > 1) FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-    else FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-    if (allAK5Jets.size() > 2) FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-    else FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-    if (allAK5Jets.size() > 3) FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-    else FillHisto(TString("HiggsJetSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
 
-    if (allAK5Jets.size() > 0) { 
-      h_cutflow -> Fill("JetSel", 1) ; 
-      FillHisto(TString("JetSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-      FillHisto(TString("JetSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+    if (HiggsJets.size() >= 1) {
+      h_cutflow -> Fill("HiggsJetSel", 1) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+      FillHisto(TString("HiggsJetSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
       for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-        FillHisto(TString("JetSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-        FillHisto(TString("JetSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+        FillHisto(TString("HiggsJetSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+        FillHisto(TString("HiggsJetSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
       }
       for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-        FillHisto(TString("JetSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-        FillHisto(TString("JetSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-        FillHisto(TString("JetSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+        FillHisto(TString("HiggsJetSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+        FillHisto(TString("HiggsJetSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+        FillHisto(TString("HiggsJetSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
       }
-      if (allAK5Jets.size() > 0) FillHisto(TString("JetSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-      else FillHisto(TString("JetSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-      if (allAK5Jets.size() > 1) FillHisto(TString("JetSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-      else FillHisto(TString("JetSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-      if (allAK5Jets.size() > 2) FillHisto(TString("JetSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-      else FillHisto(TString("JetSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-      if (allAK5Jets.size() > 3) FillHisto(TString("JetSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-      else FillHisto(TString("JetSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
 
-      if (selectedBJets.size() >= 1 ) { 
-        h_cutflow -> Fill("BJetsSel", 1) ;
-        FillHisto(TString("BJetsSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-        FillHisto(TString("BJetsSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+      if (allAK5Jets.size() > 0) { 
+        h_cutflow -> Fill("JetSel", 1) ; 
+        FillHisto(TString("JetSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
+        FillHisto(TString("JetSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+        FillHisto(TString("JetSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+        FillHisto(TString("JetSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+        FillHisto(TString("JetSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
         for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-          FillHisto(TString("BJetsSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-          FillHisto(TString("BJetsSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+          FillHisto(TString("JetSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+          FillHisto(TString("JetSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
         }
         for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-          FillHisto(TString("BJetsSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-          FillHisto(TString("BJetsSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-          FillHisto(TString("BJetsSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+          FillHisto(TString("JetSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+          FillHisto(TString("JetSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+          FillHisto(TString("JetSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
         }
-        if (allAK5Jets.size() > 0) FillHisto(TString("BJetsSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-        else FillHisto(TString("BJetsSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-        if (allAK5Jets.size() > 1) FillHisto(TString("BJetsSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-        else FillHisto(TString("BJetsSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-        if (allAK5Jets.size() > 2) FillHisto(TString("BJetsSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-        else FillHisto(TString("BJetsSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-        if (allAK5Jets.size() > 3) FillHisto(TString("BJetsSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-        else FillHisto(TString("BJetsSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
 
-        if ( htsel(HTAllAK5, retht) != 0 ) { //// If event passes HT 
-          h_cutflow -> Fill("HTSel", 1) ; 
-          FillHisto(TString("HTSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
-          FillHisto(TString("HTSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-          FillHisto(TString("HTSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+        if (selectedBJets.size() >= 1 ) { 
+          h_cutflow -> Fill("BJetsSel", 1) ;
+          FillHisto(TString("BJetsSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
+          FillHisto(TString("BJetsSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+          FillHisto(TString("BJetsSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
           for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-            FillHisto(TString("HTSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-            FillHisto(TString("HTSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+            FillHisto(TString("BJetsSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+            FillHisto(TString("BJetsSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
           }
           for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-            FillHisto(TString("HTSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-            FillHisto(TString("HTSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-            FillHisto(TString("HTSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+            FillHisto(TString("BJetsSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+            FillHisto(TString("BJetsSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+            FillHisto(TString("BJetsSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
           }
-          if (allAK5Jets.size() > 0) FillHisto(TString("HTSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-          else FillHisto(TString("HTSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-          if (allAK5Jets.size() > 1) FillHisto(TString("HTSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-          else FillHisto(TString("HTSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-          if (allAK5Jets.size() > 2) FillHisto(TString("HTSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-          else FillHisto(TString("HTSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-          if (allAK5Jets.size() > 3) FillHisto(TString("HTSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-          else FillHisto(TString("HTSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
 
-          //// Reconstruct b' candidates
-          for (JetCollection::const_iterator ihig = HiggsJets.begin(); ihig != HiggsJets.end(); ++ihig) { 
-            unsigned int closestBIndex(selectedBJets.size()) ;
-            double deltaR(TMath::Pi()) ; 
+          if ( htsel(HTAllAK5, retht) != 0 ) { //// If event passes HT 
+            h_cutflow -> Fill("HTSel", 1) ; 
+            FillHisto(TString("HTSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
+            FillHisto(TString("HTSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+            FillHisto(TString("HTSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+            FillHisto(TString("HTSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+            FillHisto(TString("HTSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
             for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-              if ( ihig->DeltaR(*ib) < deltaR) {
-                deltaR = ihig->DeltaR(*ib) ; 
-                closestBIndex = ib - selectedBJets.begin() ; 
+              FillHisto(TString("HTSel")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+              FillHisto(TString("HTSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+            }
+            for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
+              FillHisto(TString("HTSel")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+              FillHisto(TString("HTSel")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+              FillHisto(TString("HTSel")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+            }
+
+            //// Reconstruct b' candidates
+            for (JetCollection::const_iterator ihig = HiggsJets.begin(); ihig != HiggsJets.end(); ++ihig) { 
+              unsigned int closestBIndex(selectedBJets.size()) ;
+              double deltaR(TMath::Pi()) ; 
+              for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
+                if ( ihig->DeltaR(*ib) < deltaR) {
+                  deltaR = ihig->DeltaR(*ib) ; 
+                  closestBIndex = ib - selectedBJets.begin() ; 
+                }
               }
-            }
-            if (closestBIndex < selectedBJets.size()) {
-              p4bprimes.push_back(ihig->p4() + (selectedBJets.at(closestBIndex)).p4()) ; 
-            }
-          } //// Reconstruct b' candidates
-          FillHisto(TString("HTSel")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
-          for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
-            FillHisto(TString("HTSel")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
-            FillHisto(TString("HTSel")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
-          } //// Fill all bprime candidates 
-
-          if (HiggsJets.size() == 1 && selectedBJets.size() == 1) { //// 1 HJet and 1 bjet 
-            h_cutflow -> Fill("HTSel_1H_1b", 1) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-              FillHisto(TString("HTSel_1H_1b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_1H_1b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
-            }
-            for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-              FillHisto(TString("HTSel_1H_1b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_1H_1b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-              FillHisto(TString("HTSel_1H_1b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
-            }
-            if (allAK5Jets.size() > 0) FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 1) FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 2) FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 3) FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_1b")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_1b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
+              if (closestBIndex < selectedBJets.size()) {
+                p4bprimes.push_back(ihig->p4() + (selectedBJets.at(closestBIndex)).p4()) ; 
+              }
+            } //// Reconstruct b' candidates
+            FillHisto(TString("HTSel")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
             for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
-              FillHisto(TString("HTSel_1H_1b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
-              FillHisto(TString("HTSel_1H_1b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
+              FillHisto(TString("HTSel")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
+              FillHisto(TString("HTSel")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
             } //// Fill all bprime candidates 
-          } //// 1 HJet and 1 bjet 
 
-          if (HiggsJets.size() == 1 && selectedBJets.size() >= 2) { //// 1 HJet and >=2 bjet 
-            h_cutflow -> Fill("HTSel_1H_2b", 1) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-              FillHisto(TString("HTSel_1H_2b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_1H_2b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
-            }
-            for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-              FillHisto(TString("HTSel_1H_2b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_1H_2b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-              FillHisto(TString("HTSel_1H_2b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
-            }
-            if (allAK5Jets.size() > 0) FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 1) FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 2) FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 3) FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_1H_2b")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_1H_2b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
-            for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
-              FillHisto(TString("HTSel_1H_2b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
-              FillHisto(TString("HTSel_1H_2b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
-            } //// Fill all bprime candidates 
-          } //// 1 HJet and >=2 bjet 
+            if (HiggsJets.size() == 1 && selectedBJets.size() == 1) { //// 1 HJet and 1 bjet 
+              h_cutflow -> Fill("HTSel_1H_1b", 1) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
+                FillHisto(TString("HTSel_1H_1b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_1H_1b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+              }
+              for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
+                FillHisto(TString("HTSel_1H_1b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_1H_1b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+                FillHisto(TString("HTSel_1H_1b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+              }
+              FillHisto(TString("HTSel_1H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_1b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
+              for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
+                FillHisto(TString("HTSel_1H_1b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
+                FillHisto(TString("HTSel_1H_1b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
+              } //// Fill all bprime candidates 
+            } //// 1 HJet and 1 bjet 
 
-          if (HiggsJets.size() >= 2 && selectedBJets.size() == 1) { //// >= 2 HJet and 1 bjet 
-            h_cutflow -> Fill("HTSel_2H_1b", 1) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-              FillHisto(TString("HTSel_2H_1b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_2H_1b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
-            }
-            for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-              FillHisto(TString("HTSel_2H_1b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_2H_1b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-              FillHisto(TString("HTSel_2H_1b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
-            }
-            if (allAK5Jets.size() > 0) FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 1) FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 2) FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 3) FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_1b")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_1b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
-            for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
-              FillHisto(TString("HTSel_2H_1b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
-              FillHisto(TString("HTSel_2H_1b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
-            } //// Fill all bprime candidates 
-          } //// >= 2 HJet and 1 bjet 
+            if (HiggsJets.size() == 1 && selectedBJets.size() >= 2) { //// 1 HJet and >=2 bjet 
+              h_cutflow -> Fill("HTSel_1H_2b", 1) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
+                FillHisto(TString("HTSel_1H_2b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_1H_2b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+              }
+              for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
+                FillHisto(TString("HTSel_1H_2b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_1H_2b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+                FillHisto(TString("HTSel_1H_2b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+              }
+              FillHisto(TString("HTSel_1H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_1H_2b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
+              for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
+                FillHisto(TString("HTSel_1H_2b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
+                FillHisto(TString("HTSel_1H_2b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
+              } //// Fill all bprime candidates 
+            } //// 1 HJet and >=2 bjet 
 
-          if (HiggsJets.size() >= 2 && selectedBJets.size() >= 2) { //// >= 2 HJet and >=2 bjet  
-            h_cutflow -> Fill("HTSel_2H_2b", 1) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
-              FillHisto(TString("HTSel_2H_2b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_2H_2b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
-            }
-            for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
-              FillHisto(TString("HTSel_2H_2b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
-              FillHisto(TString("HTSel_2H_2b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
-              FillHisto(TString("HTSel_2H_2b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
-            }
-            if (allAK5Jets.size() > 0) FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 1) FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 2) FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-            if (allAK5Jets.size() > 3) FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-            else FillHisto(TString("HTSel_2H_2b")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
-            FillHisto(TString("HTSel_2H_2b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
-            for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
-              FillHisto(TString("HTSel_2H_2b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
-              FillHisto(TString("HTSel_2H_2b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
-            } //// Fill all bprime candidates 
-          } //// >= 2 HJet and >=2 bjet  
-        } //// If event passes HT 
-        passBSel = true ; 
-      } //// If at least one b-jets 
-    } //// If at least one AK5 jet 
-  } //// If at least one Higgs jet 
+            if (HiggsJets.size() >= 2 && selectedBJets.size() == 1) { //// >= 2 HJet and 1 bjet 
+              h_cutflow -> Fill("HTSel_2H_1b", 1) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
+                FillHisto(TString("HTSel_2H_1b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_2H_1b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+              }
+              for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
+                FillHisto(TString("HTSel_2H_1b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_2H_1b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+                FillHisto(TString("HTSel_2H_1b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+              }
+              FillHisto(TString("HTSel_2H_1b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_1b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
+              for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
+                FillHisto(TString("HTSel_2H_1b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
+                FillHisto(TString("HTSel_2H_1b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
+              } //// Fill all bprime candidates 
+            } //// >= 2 HJet and 1 bjet 
+
+            if (HiggsJets.size() >= 2 && selectedBJets.size() >= 2) { //// >= 2 HJet and >=2 bjet  
+              h_cutflow -> Fill("HTSel_2H_2b", 1) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_nAllAK5"), allAK5Jets.size() , evtwt*puwt) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
+                FillHisto(TString("HTSel_2H_2b")+TString("_BJet_Pt"), ib->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_2H_2b")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
+              }
+              for (JetCollection::const_iterator ih = HiggsJets.begin(); ih != HiggsJets.end(); ++ih) { 
+                FillHisto(TString("HTSel_2H_2b")+TString("_HiggsJet_Pt"), ih->Pt(), evtwt) ; 
+                FillHisto(TString("HTSel_2H_2b")+TString("_HiggsJet_Eta"), ih->Eta(), evtwt) ; 
+                FillHisto(TString("HTSel_2H_2b")+TString("_HiggsJet_Mass") ,ih->Mass() ,evtwt)  ;
+              }
+              FillHisto(TString("HTSel_2H_2b")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_HT"), MyHT.getHT(), evtwt) ; 
+              FillHisto(TString("HTSel_2H_2b")+TString("_Nbprimes"), p4bprimes.size(), evtwt) ; 
+              for (std::vector<TLorentzVector>::const_iterator ibprime = p4bprimes.begin(); ibprime != p4bprimes.end(); ++ibprime) {
+                FillHisto(TString("HTSel_2H_2b")+TString("_bprimePt") ,ibprime->Pt() ,evtwt)  ; 
+                FillHisto(TString("HTSel_2H_2b")+TString("_bprimeMass") ,ibprime->Mag() ,evtwt)  ;
+              } //// Fill all bprime candidates 
+            } //// >= 2 HJet and >=2 bjet  
+          } //// If event passes HT 
+          passBSel = true ; 
+        } //// If at least one b-jets 
+      } //// If at least one AK5 jet 
+    } //// If at least one Higgs jet 
   } //// If at least one fat jet 
 
   if ( doTrigEff_ && passBSel && passHLT) { 
     h_cutflow -> Fill("TriggerSel", 1) ; 
     FillHisto(TString("TriggerSel")+TString("_nPVtx_NoPUWt"), nGoodVtxs, evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nPVtx_PUWt"), nGoodVtxs, evtwt*puwt) ; 
-    FillHisto(TString("TriggerSel")+TString("_nJets"), cleanedAK5Jets.size(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nFatJets"), selectedFatJets.size(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nAllAK5"), allAK5Jets.size() , evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nBJets"), selectedBJets.size(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_nHJets"), HiggsJets.size(), evtwt) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTCA8_leading2_AK5_leading2"), HTCA8_leading2_AK5_leading2.getHT(), evtwt) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTAK5_leading4"), HTAK5_leading4.getHT(), evtwt) ; 
-    FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAK5.getHT(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_HTAllAK5"), HTAllAK5.getHT(), evtwt) ; 
     FillHisto(TString("TriggerSel")+TString("_HT"), MyHT.getHT(), evtwt) ; 
     for (JetCollection::const_iterator ib = selectedBJets.begin(); ib != selectedBJets.end(); ++ib) { 
@@ -1086,14 +931,6 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       FillHisto(TString("TriggerSel")+TString("_BJet_Eta"), ib->Eta(), evtwt) ; 
     }
 
-    if (allAK5Jets.size() > 0) FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), (allAK5Jets.at(0)).Pt(), evtwt) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_1_Pt"), 0., evtwt) ; 
-    if (allAK5Jets.size() > 1) FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), (allAK5Jets.at(1)).Pt(), evtwt) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_2_Pt"), 0., evtwt) ; 
-    if (allAK5Jets.size() > 2) FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), (allAK5Jets.at(2)).Pt(), evtwt) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_3_Pt"), 0., evtwt) ; 
-    if (allAK5Jets.size() > 3) FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), (allAK5Jets.at(3)).Pt(), evtwt) ; 
-    else FillHisto(TString("TriggerSel")+TString("_AK5Jet_4_Pt"), 0., evtwt) ; 
   }
   */ 
 

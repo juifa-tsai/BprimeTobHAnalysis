@@ -24,7 +24,7 @@ void BTagSFUtil::modifyBTagsWithSF(bool& isBTagged, int pdgIdPart, float Btag_SF
     newBTag = applySF(isBTagged, Btag_SF, bctag_eff);
 
     // light quarks:
-  } else if( abs( pdgIdPart )>0 ) { //in data it is 0 (save computing time)
+  } else if( abs( pdgIdPart ) < 4 || abs( pdgIdPart ) == 21 ) { //in data it is 0 (save computing time)
 
     newBTag = applySF(isBTagged, Bmistag_SF, Bmistag_eff);
 
@@ -49,7 +49,7 @@ bool BTagSFUtil::applySF(bool& isBTagged, float Btag_SF, float Btag_eff){
     if( !isBTagged ) {
 
       //fraction of jets that need to be upgraded
-      float mistagPercent = (1.0 - Btag_SF) / (1.0 - (Btag_SF/Btag_eff) );
+      float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
 
       //upgrade to tagged
       if( coin < mistagPercent ) {newBTag = true;}

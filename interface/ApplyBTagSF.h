@@ -10,7 +10,7 @@ class ApplyBTagSF {
 
   public:
     //ApplyBTagSF(JetCollection&, double, std::string, std::string) ;
-    ApplyBTagSF(JetCollection&, double, std::string, double, double) ; 
+    ApplyBTagSF(JetCollection&, double, double, double) ; 
     ~ApplyBTagSF() ; 
 
     JetCollection getBtaggedJetsWithSF () ; 
@@ -19,12 +19,13 @@ class ApplyBTagSF {
 
     JetCollection jets_ ; 
     double bDisc_ ; 
+    std::string algo_ ; 
     JetCollection btaggedJetsWithSF_ ; 
 
-    std::string algo_ ;
     double SFbShift_ ; 
     double SFlShift_ ; 
-    //std::string mode_ ; 
+
+    static std::map<double, std::string> btagOP_ ; 
 
 };
 

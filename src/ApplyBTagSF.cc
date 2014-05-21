@@ -2,22 +2,27 @@
 #include "BpbH/BprimeTobHAnalysis/interface/SFb-pt_WITHttbar_payload_EPS13.h"
 #include "BpbH/BprimeTobHAnalysis/interface/SFlightFuncs_EPS2013.h"
 
-//ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, std::string algo_, std::string mode_) : 
-ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, std::string algo, double SFbShift, double SFlShift) : 
+std::map<double, std::string>ApplyBTagSF::btagOP_ = {{0.2440, "CSVL"}, {0.6790, "CSVM"}, {0.8980, "CSVT"}} ;
+
+ApplyBTagSF::ApplyBTagSF(JetCollection& jets, double bDisc, double SFbShift, double SFlShift) : 
   jets_(jets),
   bDisc_(bDisc),
-  algo_(algo),
   //mode_(mode_),
   SFbShift_(SFbShift),
   SFlShift_(SFlShift) 
 {
   btaggedJetsWithSF_.clear() ; 
+  for (std::map<double, std::string>::iterator it = btagOP_.begin(); it != btagOP_.end(); ++it) { 
+    if (bDisc_ >= it->first) {
+      algo_ = it->second ; 
+    } 
+  }
+
 }
 
 ApplyBTagSF::~ApplyBTagSF() {
   btaggedJetsWithSF_.clear() ; 
   algo_.clear();
-  //mode_.clear(); 
 }
 
 JetCollection ApplyBTagSF::getBtaggedJetsWithSF () { 
@@ -36,10 +41,16 @@ JetCollection ApplyBTagSF::getBtaggedJetsWithSF () {
   for (JetCollection::const_iterator ijet = jets_.begin(); ijet != jets_.end(); ++ijet) {
 
     jet_flavor = abs(ijet->GenFlavor()) ; 
-    jet_et     = ijet->Et()        ; 
-    jet_phi    = ijet->Eta()       ; 
-    jet_eta    = ijet->Phi()       ; 
+    jet_et     = ijet->Et() ; 
+    jet_eta    = abs(ijet->Eta()) ; 
+    jet_phi    = ijet->Phi() ; 
     isTagged   = ijet->CombinedSVBJetTags() > bDisc_ ; 
+
+    double errscale(1.);
+    if ( jet_flavor == 4) errscale *= 2. ; 
+
+    if ( jet_et < 20. )  jet_et = 20.;
+    if ( jet_et > 800. ) jet_et = 799.9 ; 
 
     int ptbin(-1) ; 
     for (int ii = 0; ii < int(sizeof(ptmin)/sizeof(ptmin[0])); ++ii) {  
@@ -48,57 +59,47 @@ JetCollection ApplyBTagSF::getBtaggedJetsWithSF () {
       }
     }
 
-    double errscale(1.);
-    if ( jet_flavor == 4) errscale *= 2. ; 
-
-    if ( jet_et < 20. )  jet_et = 20.;
-    if ( jet_et > 800. ) jet_et = 800.;
-
-    if (strcmp(algo_.c_str(), "CSVL") == 0) 
+    if (strcmp(algo_.c_str(), "CSVL") == 0) {
       BTagSF = SFb_CSVL->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVL_error[ptbin]) ) ; 
-    else if (strcmp(algo_.c_str(), "CSVM") == 0) 
+    }
+    else if (strcmp(algo_.c_str(), "CSVM") == 0) {
       BTagSF = SFb_CSVM->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVM_error[ptbin]) ) ;  
-    else if (strcmp(algo_.c_str(), "CSVT") == 0) 
+    }
+    else if (strcmp(algo_.c_str(), "CSVT") == 0) {
       BTagSF = SFb_CSVT->Eval(jet_et)*( 1 + (errscale*SFbShift_*SFb_CSVT_error[ptbin]) ) ;  
+    }
     else {
-      edm::LogError("ApplyBTagSF") << " Wrong b-tagging algo_ chosen: " << algo_ << ". Choose between CSVL, CSVM, or CSVT." ; 
+      edm::LogError("ApplyBTagSF") << " Wrong b-tagging bDisc_ chosen: " << bDisc_ << ". Choose either 0.244 or, 0.679, or 0.898." ; 
       return btaggedJetsWithSF_ ; 
     }
 
     if (strcmp(algo_.c_str(), "CSVL") == 0) {
       for (int ii = 0; ii < 4; ++ii) {
         if ( jet_eta >= SFlight_CSVL_etamin[ii] && jet_eta < SFlight_CSVL_etamax[ii] ) {
-          LightJetSF = (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) + 
-            SFlShift_ > 0 ? 
-            SFlShift_*( (GetSFlmax("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) - 
-                (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ) : 
-            SFlShift_*( (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) - 
-                (GetSFlmin("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ) ; 
+          LightJetSF = (GetSFlmean("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) ; 
+          if (SFlShift_ > 0) LightJetSF += SFlShift_*( (GetSFlmax("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) - LightJetSF ) ; 
+          else if (SFlShift_ < 0) LightJetSF += abs(SFlShift_)*( (GetSFlmin("CSV","L",SFlight_CSVL_etamin[ii], SFlight_CSVL_etamax[ii], "ABCD"))->Eval(jet_et) - LightJetSF ) ; 
+          break ;
         }
       }
     }
     else if (strcmp(algo_.c_str(), "CSVM") == 0) {
       for (int ii = 0; ii < 4; ++ii) {
         if ( jet_eta >= SFlight_CSVM_etamin[ii] && jet_eta < SFlight_CSVM_etamax[ii] ) {
-          LightJetSF = (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) + 
-            SFlShift_ > 0 ? 
-            SFlShift_*( (GetSFlmax("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) - 
-                (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ) : 
-            SFlShift_*( (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) - 
-                (GetSFlmin("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ) ; 
+          LightJetSF = (GetSFlmean("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) ; 
+          if (SFlShift_ > 0) LightJetSF += SFlShift_*( (GetSFlmax("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) - LightJetSF ) ; 
+          else if (SFlShift_ < 0) LightJetSF += abs(SFlShift_)*( (GetSFlmin("CSV","M",SFlight_CSVM_etamin[ii], SFlight_CSVM_etamax[ii], "ABCD"))->Eval(jet_et) - LightJetSF ) ; 
+          break ;
         }
       }
     }
     else if (algo_== "CSVT") {
-      LightJetSF = (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) + 
-        SFlShift_ > 0 ? 
-        SFlShift_*( (GetSFlmax("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) - 
-            (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) ) : 
-        SFlShift_*( (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) - 
-            (GetSFlmin("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) ) ; 
+      LightJetSF = (GetSFlmean("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) ; 
+      if (SFlShift_ > 0) LightJetSF += SFlShift_*( (GetSFlmax("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) - LightJetSF ) ; 
+      else if (SFlShift_ < 0) LightJetSF += abs(SFlShift_)*( (GetSFlmin("CSV","T",0.0, 2.4, "ABCD"))->Eval(jet_et) -LightJetSF ) ;  
     }
     else {
-      edm::LogError("ApplyBTagSF") << " Wrong b-tagging algo_ chosen: " << algo_ << ". Choose between CSVL, CSVM, or CSVT." ; 
+      edm::LogError("ApplyBTagSF") << " Wrong b-tagging bDisc_ chosen: " << bDisc_ << ". Choose either 0.244 or, 0.679, or 0.898." ; 
       return btaggedJetsWithSF_ ; 
     }
 
