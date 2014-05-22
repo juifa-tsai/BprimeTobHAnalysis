@@ -21,6 +21,11 @@ options.register('ttreedir', 'ntuple',
     VarParsing.varType.string,
     "Name of ROOT TTree dir: Either 'ntuple' or 'skim' or 'bVeto'"
     )
+options.register('JetPtMin', 50.,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Minimum b jet Pt"
+    )
 options.register('bJetPtMin', 80.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -190,9 +195,9 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.cout = cms.untracked.PSet(
 process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring(
-      'detailedInfo',
+      'BprimebH',
       ),
-    detailedInfo = cms.untracked.PSet(
+    BprimebH = cms.untracked.PSet(
       threshold = cms.untracked.string('INFO'),  
       ), 
     #suppressInfo = cms.untracked.vstring('BprimebH'),
@@ -217,8 +222,9 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
-    #InputFiles          = cms.vstring(FileNames), 
-    InputFiles          = cms.vstring(FileNames_BpBp800), 
+    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames_TTbar), 
+    #InputFiles          = cms.vstring(FileNames_BpBp800), 
     #InputFiles          = cms.vstring(FileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
@@ -233,6 +239,7 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     File_PUDistData     = cms.string('pileup_Data_Summer12_53X_S10.root'),
     Hist_PUDistMC       = cms.string(options.pileupmchist),
     Hist_PUDistData     = cms.string(options.pileupdatahist),
+    JetPtMin           = cms.double(options.JetPtMin),
     BJetPtMin           = cms.double(options.bJetPtMin),
     BJetCSVDiscMin  	  = cms.double(options.bjetCSVDiscMin),
     BJetCSVDiscMax   	  = cms.double(options.bjetCSVDiscMax),
@@ -249,7 +256,7 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     HTAK5Min            = cms.double(options.hTAK5Min),
     HTAK5Max            = cms.double(options.hTAK5Max), 
     JetSelParams        = defaultJetSelectionParameters.clone(
-      jetPtMin            = cms.double(50),
+      jetPtMin            = cms.double(30),
       ), 
     FatJetSelParams     = defaultFatJetSelectionParameters.clone(), 
     HiggsJetSelParams   = defaultHiggsJetSelectionParameters.clone(
@@ -275,5 +282,6 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     FillBDTTrees        = cms.double(options.FillBDTTrees), 
     ) 
 
+process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",ignoreTotal = cms.untracked.int32(1) )
 process.p = cms.Path(process.BprimebH)
 

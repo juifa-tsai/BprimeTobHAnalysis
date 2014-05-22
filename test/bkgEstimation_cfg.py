@@ -164,12 +164,12 @@ process = cms.Process("ABCD")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring(
-      'detailedInfo',
+      'ABCD',
       ),
-    detailedInfo = cms.untracked.PSet(
+    ABCD = cms.untracked.PSet(
       threshold = cms.untracked.string('INFO'),  
       ), 
-    suppressInfo = cms.untracked.vstring('ABCD'),
+    #suppressInfo = cms.untracked.vstring('ABCD'),
     ) 
 #process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 
