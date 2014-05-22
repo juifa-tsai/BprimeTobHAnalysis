@@ -126,6 +126,16 @@ options.register('JERShift', 0.0,
     VarParsing.varType.float,
     "JER shift in unit of sigmas" 
     )
+options.register('SFbShiftHtag', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "SFb shift (for Higgs-tagging) in unit of sigmas" 
+    )
+options.register('SFlShiftHtag', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "SFl shift (for Higgs-tagging) in unit of sigmas" 
+    )
 options.register('SFbShift', 0.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -136,6 +146,11 @@ options.register('SFlShift', 0.0,
     VarParsing.varType.float,
     "SFl shift in unit of sigmas" 
     )
+
+if options.SFbShiftHtag != 0.0 and options.SFlShiftHtag != 0.0: 
+  print "SFbshiftHtag = ",  options.SFbShiftHtag, " and SFlshiftHtag = ", options.SFlShiftHtag
+  print "Warning: must be varied independently."
+
 if options.SFbShift != 0.0 and options.SFlShift != 0.0: 
   print "SFbshift = ",  options.SFbShift, " and SFlshift = ", options.SFlShift
   print "Warning: must be varied independently."
@@ -246,6 +261,8 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     ApplyBTagSF         = cms.bool(options.ApplyBTagSF), 
     JESShift            = cms.double(options.JESShift), 
     JERShift            = cms.double(options.JERShift), 
+    SFbShiftHtag        = cms.double(options.SFbShiftHtag), 
+    SFlShiftHtag        = cms.double(options.SFlShiftHtag), 
     SFbShift            = cms.double(options.SFbShift), 
     SFlShift            = cms.double(options.SFlShift), 
     BuildMinTree        = cms.bool(True),

@@ -156,6 +156,8 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const bool   applyBTagSF_ ; 
 		const double jesShift_;
 		const double jerShift_; 
+    const double SFbShiftHtag_;
+    const double SFlShiftHtag_;
 		const double SFbShift_;
 		const double SFlShift_;
 
@@ -248,6 +250,8 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	applyBTagSF_(iConfig.getParameter<bool>("ApplyBTagSF")),
 	jesShift_(iConfig.getParameter<double>("JESShift")),
 	jerShift_(iConfig.getParameter<double>("JERShift")),
+  SFbShiftHtag_(iConfig.getParameter<double>("SFbShiftHtag")),
+  SFlShiftHtag_(iConfig.getParameter<double>("SFlShiftHtag")),
 	SFbShift_(iConfig.getParameter<double>("SFbShift")),
 	SFlShift_(iConfig.getParameter<double>("SFlShift")),
 	evtPass_ana(0),  
@@ -524,7 +528,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
               ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
                   double(subjet1.Eta()), double(subjet2.Eta()),
                   subjet1.GenFlavor(), subjet2.GenFlavor(), 
-                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags()) ; 
+                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags(), SFbShiftHtag_, SFlShiftHtag_) ; 
               evtwt *= higgsTagSF->GetHiggsTagSF() ;
               delete higgsTagSF ; 
             } //// Apply Higgs-tagging scale factor  
@@ -625,7 +629,11 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     int nC=0, nCv=0;
     int nD=0, nDv=0;
 
+    h1.GetTH1("ABCDana_NAK5_BeforeHTAK5")->Fill(selectedAK5Jets.size(),evtwt) ; 
     if( HTAllAK5.getHT() < HTAK5Min_ ) continue;
+    h1.GetTH1("ABCDana_NAK5")->Fill(selectedAK5Jets.size(),evtwt) ; 
+    h1.GetTH1("ABCDana_NumCA8")->Fill(AllHiggsJets.size()+AllAntiHiggsJets.size());
+    h1.GetTH1("ABCDana_Numbjet")->Fill(selectedBJets.size());
     h1.GetTH1("ABCDana_CutFlow")->Fill(double(3),evtwt);	
     h1.GetTH1("ABCDval_CutFlow")->Fill(double(3),evtwt);
 
@@ -846,8 +854,6 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       }
     }
 
-    h1.GetTH1("ABCDana_NumCA8")->Fill(AllHiggsJets.size()+AllAntiHiggsJets.size());
-    h1.GetTH1("ABCDana_Numbjet")->Fill(selectedBJets.size());
     if( nA+nB+nC+nD > 0){ 
       h1.GetTH1("ABCDana_Numbjet_ABCD")->Fill(selectedBJets.size());
       h1.GetTH1("ABCDana_NumCA8_ABCD")->Fill(nA+nB+nC+nD);

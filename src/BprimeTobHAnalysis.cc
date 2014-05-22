@@ -132,6 +132,8 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const bool   applyBTagSF_ ; 
     const double jesShift_;
     const double jerShift_; 
+    const double SFbShiftHtag_;
+    const double SFlShiftHtag_;
     const double SFbShift_;
     const double SFlShift_;
     const bool   doTrigEff_;
@@ -199,6 +201,8 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   applyBTagSF_(iConfig.getParameter<bool>("ApplyBTagSF")),
   jesShift_(iConfig.getParameter<double>("JESShift")),
   jerShift_(iConfig.getParameter<double>("JERShift")),
+  SFbShiftHtag_(iConfig.getParameter<double>("SFbShiftHtag")),
+  SFlShiftHtag_(iConfig.getParameter<double>("SFlShiftHtag")),
   SFbShift_(iConfig.getParameter<double>("SFbShift")),
   SFlShift_(iConfig.getParameter<double>("SFlShift")),
   doTrigEff_(iConfig.getParameter<double>("DoTrigEff")),
@@ -550,7 +554,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
               ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
                   double(subjet1.Eta()), double(subjet2.Eta()),
                   subjet1.GenFlavor(), subjet2.GenFlavor(), 
-                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags()) ; 
+                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags(), SFbShiftHtag_, SFlShiftHtag_) ; 
               evtwt *= higgsTagSF->GetHiggsTagSF() ;
               delete higgsTagSF ; 
             } //// Apply Higgs-tagging scale factor  

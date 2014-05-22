@@ -5,7 +5,7 @@
 
 class ApplyHiggsTagSF {
   public: 
-    ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double etaSubjet1, double etaSubjet2, int flavSubjet1, int flavSubjet2,  double csvSubjet1, double csvSubjet2) ; 
+    ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double etaSubjet1, double etaSubjet2, int flavSubjet1, int flavSubjet2,  double csvSubjet1, double csvSubjet2, double SFbShift, double SFlShift) ; 
     ~ApplyHiggsTagSF() { higgsTagSF_ = 1. ; } 
     double GetHiggsTagSF () { return higgsTagSF_ ; } 
 
@@ -18,6 +18,9 @@ class ApplyHiggsTagSF {
     int    flavSubjet2_ ; 
     double csvSubjet1_  ;
     double csvSubjet2_  ; 
+
+    double SFbShift_ ; 
+    double SFlShift_ ; 
 
     double higgsTagSF_ ; 
 
