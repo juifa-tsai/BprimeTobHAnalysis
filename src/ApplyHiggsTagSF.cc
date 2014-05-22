@@ -2,11 +2,13 @@
 #include "BpbH/BprimeTobHAnalysis/interface/SFb-pt_WITHttbar_payload_EPS13.h"
 #include "BpbH/BprimeTobHAnalysis/interface/SFlightFuncs_EPS2013.h"
 
-ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double etaSubjet1, double etaSubjet2, int flavSubjet1, int flavSubjet2,  double csvSubjet1, double csvSubjet2, double SFbShift, double SFlShift) :
+ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double etaSubjet1, double etaSubjet2, double phiSubjet1, double phiSubjet2, int flavSubjet1, int flavSubjet2,  double csvSubjet1, double csvSubjet2, double SFbShift, double SFlShift) :
   ptSubjet1_(ptSubjet1),
   ptSubjet2_(ptSubjet2),
   etaSubjet1_(etaSubjet1),
   etaSubjet2_(etaSubjet2),
+  phiSubjet1_(phiSubjet1),
+  phiSubjet2_(phiSubjet2),
   flavSubjet1_(flavSubjet1), 
   flavSubjet2_(flavSubjet2), 
   csvSubjet1_(csvSubjet1),
@@ -20,6 +22,12 @@ ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double eta
   if (ptSubjet1 > 800.) ptSubjet1 = 799.9; 
   if (ptSubjet2 < 20.)  ptSubjet2 = 20. ; 
   if (ptSubjet2 > 800.) ptSubjet2 = 799.9; 
+
+  double drSubjets = sqrt( pow((etaSubjet1_ - etaSubjet2_),2.) + pow((phiSubjet1_ - phiSubjet2_),2.)) ;
+  if (drSubjets > 0.3 && drSubjets <= 0.4) {
+    SFbShift_ *= 2. ; 
+    SFlShift_ *= 2. ; 
+  }
 
   double sf1(1.), sf2(1.)  ; 
 

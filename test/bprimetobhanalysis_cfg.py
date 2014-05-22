@@ -200,7 +200,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     BprimebH = cms.untracked.PSet(
       threshold = cms.untracked.string('INFO'),  
       ), 
-    #suppressInfo = cms.untracked.vstring('BprimebH'),
+    suppressInfo = cms.untracked.vstring('BprimebH'),
     ) 
 #process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 

@@ -555,7 +555,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
               && subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ) { //// fat jet pruned mass 
             if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
               ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
-                  double(subjet1.Eta()), double(subjet2.Eta()),
+                  double(subjet1.Eta()), double(subjet2.Eta()), double(subjet1.Phi()), double(subjet2.Phi()), 
                   subjet1.GenFlavor(), subjet2.GenFlavor(), 
                   subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags(), SFbShiftHtag_, SFlShiftHtag_) ; 
               evtwt *= higgsTagSF->GetHiggsTagSF() ;
