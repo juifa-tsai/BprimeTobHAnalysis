@@ -99,6 +99,7 @@ class BprimeTobHAnalysis : public edm::EDAnalyzer {
     const int                       reportEvery_; 
     const std::string               inputTTree_;
     const std::vector<std::string>  inputFiles_;
+    const edm::ParameterSet         preselHLTPaths_; 
     const edm::ParameterSet         hltPaths_; 
     const bool                      doPUReweighting_ ;
     const std::string               file_PUDistMC_ ;
@@ -171,6 +172,7 @@ BprimeTobHAnalysis::BprimeTobHAnalysis(const edm::ParameterSet& iConfig) :
   reportEvery_(iConfig.getParameter<int>("ReportEvery")),
   inputTTree_(iConfig.getParameter<std::string>("InputTTree")),
   inputFiles_(iConfig.getParameter<std::vector<std::string> >("InputFiles")),
+  preselHLTPaths_(iConfig.getParameter<edm::ParameterSet>("PreselHLTPaths")),
   hltPaths_(iConfig.getParameter<edm::ParameterSet>("HLTPaths")),
   doPUReweighting_(iConfig.getParameter<bool>("DoPUReweighting")),
   file_PUDistMC_(iConfig.getParameter<std::string>("File_PUDistMC")),
@@ -662,9 +664,12 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       retht.set(false) ; 
 
       if ( doTrigEff_ ) {
-        if ( HiggsJets.size() >= 1 && selectedBJets.size() >= 1 ) { 
-          FillHisto(TString("HTSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
-          if ( passHLT ) FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+        TriggerSelector trigPresel(preselHLTPaths_) ; 
+        if ( trigPresel.getTrigDecision(EvtInfo) ) {
+          if ( HiggsJets.size() >= 1 && selectedBJets.size() >= 1 ) { 
+            FillHisto(TString("HTSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+            if ( passHLT ) FillHisto(TString("TriggerSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+          }
         }
       }
       else if ( !doTrigEff_ && HiggsJets.size() >= 1
