@@ -629,9 +629,11 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     int nC=0, nCv=0;
     int nD=0, nDv=0;
 
-    h1.GetTH1("ABCDana_NAK5_BeforeHTAK5")->Fill(selectedAK5Jets.size(),evtwt) ; 
+    h1.GetTH1("ABCDval_NAK5_BeforeHTAK5")->Fill(selectedAK5Jets.size(),evtwt) ; 
+    h1.GetTH1("ABCDana_NumCA8_BeforeHTAK5")->Fill(AllHiggsJets.size()+AllAntiHiggsJets.size());
+    h1.GetTH1("ABCDana_Numbjet_BeforeHTAK5")->Fill(selectedBJets.size());
     if( HTAllAK5.getHT() < HTAK5Min_ ) continue;
-    h1.GetTH1("ABCDana_NAK5")->Fill(selectedAK5Jets.size(),evtwt) ; 
+    h1.GetTH1("ABCDval_NAK5")->Fill(selectedAK5Jets.size(),evtwt) ; 
     h1.GetTH1("ABCDana_NumCA8")->Fill(AllHiggsJets.size()+AllAntiHiggsJets.size());
     h1.GetTH1("ABCDana_Numbjet")->Fill(selectedBJets.size());
     h1.GetTH1("ABCDana_CutFlow")->Fill(double(3),evtwt);	
@@ -855,6 +857,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     }
 
     if( nA+nB+nC+nD > 0){ 
+      h1.GetTH1("ABCDval_NAK5_ABCD")->Fill(selectedAK5Jets.size(),evtwt) ; 
       h1.GetTH1("ABCDana_Numbjet_ABCD")->Fill(selectedBJets.size());
       h1.GetTH1("ABCDana_NumCA8_ABCD")->Fill(nA+nB+nC+nD);
     }
@@ -990,6 +993,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       h1.GetTH1("ABCDval_HT_B")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_HT")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_NumCA8_B")->Fill(nBv);
+      h1.GetTH1("ABCDval_NAK5_B")->Fill(selectedAK5Jets.size(),evtwt) ; 
       sumw2_bv += evtwt2;
       if( selectedAK5Jets.size() == 0 ){
         h1.GetTH1("ABCDval_CutRegion_0ak5")->Fill("B", evtwt); 
@@ -1006,6 +1010,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       h1.GetTH1("ABCDval_HT_D")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_HT")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_NumCA8_D")->Fill(nDv);
+      h1.GetTH1("ABCDval_NAK5_D")->Fill(selectedAK5Jets.size(),evtwt) ; 
       sumw2_dv += evtwt2;
       if( selectedAK5Jets.size() == 0 ){
         h1.GetTH1("ABCDval_CutRegion_0ak5")->Fill("D", evtwt); 
@@ -1022,6 +1027,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       h1.GetTH1("ABCDval_HT_A")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_HT")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_NumCA8_A")->Fill(nAv);
+      h1.GetTH1("ABCDval_NAK5_A")->Fill(selectedAK5Jets.size(),evtwt) ; 
       sumw2_av += evtwt2;
       if( selectedAK5Jets.size() == 0 ){
         h1.GetTH1("ABCDval_CutRegion_0ak5")->Fill("A", evtwt); 
@@ -1038,6 +1044,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       h1.GetTH1("ABCDval_HT_C")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_HT")->Fill( HTAllAK5.getHT(), evtwt);
       h1.GetTH1("ABCDval_NumCA8_C")->Fill(nCv);
+      h1.GetTH1("ABCDval_NAK5_C")->Fill(selectedAK5Jets.size(),evtwt) ; 
       sumw2_cv += evtwt2;
       if( selectedAK5Jets.size() == 0 ){
         h1.GetTH1("ABCDval_CutRegion_0ak5")->Fill("C", evtwt); 
