@@ -253,7 +253,7 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
       subjet2CSVDiscMin = cms.double(0.679),
       ), 
     HTSelParams         = defaultHTSelectionParameters.clone(
-      HTMin = cms.double(900), 
+      HTMin = cms.double(950), 
       ),
     EvtSelParams        = defaultEventSelectionParameters.clone(),
     JMEParams           = defaultJMEUncertUntilParameters.clone(), 
