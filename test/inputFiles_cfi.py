@@ -33,6 +33,10 @@ SkimmedFileNames_BpBp500 = [
     'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/BprimeBprimeToBHBHinc_M-500_TuneZ2star_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/evtSkim_0.root'
     ]
 
+SkimmedFileNames_BpBp800 = [
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/BprimeBprimeToBHBHinc_M-800_TuneZ2star_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM/evtSkim_0.root' 
+    ]
+
 SkimmedFileNames_BpBp1000 = [ 
     'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/BprimeToBHinc_M-1000_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V19-v1__AODSIM/evtSkim_0.root'
     ] 
@@ -1258,3 +1262,24 @@ SkimmedFileNames_QCD1800 = [
 #    'root://eoscms//eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/QCD_Pt-1800_TuneZ2star_8TeV_pythia6/BprimeTobH_v1_9_1_VZs.root', 
 #    ]
 
+SkimmedFileNames_JetHT__Run2012D = [ 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_0.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_1.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_10.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_11.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_12.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_13.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_14.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_15.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_16.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_17.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_18.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_2.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_3.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_4.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_5.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_6.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_7.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_8.root', 
+    'root://eoscms//eos/cms/store/user/devdatta/SkimsBprimeTobH_v1/JetHT__Run2012D-22Jan2013-v1__AOD/evtSkim_9.root', 
+    ]
