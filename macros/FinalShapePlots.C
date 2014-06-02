@@ -18,7 +18,6 @@
 #include "TAxis.h"
 #include "help.C"
 #include "CMSstyle.C"
-#include "/afs/cern.ch/work/j/jtsai/myAna/bpTobH/mywk/CMSSW_5_3_11/src/0527/interface/SetTitle.C"
 using namespace std;
 const int A = 0;
 const int B = 1;
