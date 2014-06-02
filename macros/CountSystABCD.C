@@ -130,4 +130,5 @@ void countAndStore( string title, string mean_h, string mean_f, string up_h, str
 	f<<"C\t"<<C<<"\t\t"<<CSystUp<<"\t\t"<<CSystDown<<endl;
 	f<<"D\t"<<D<<"\t\t"<<DSystUp<<"\t\t"<<DSystDown<<endl;
 	f<<endl;
+
 }
