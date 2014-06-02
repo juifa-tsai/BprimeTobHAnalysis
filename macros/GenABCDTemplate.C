@@ -62,7 +62,7 @@ void GenABCDTemplate(){
 	string cate[_cat]; cate[_nomal]=""; cate[_1b]="_1b"; cate[_2b]="_2b"; 
 
 	vector<string> hName; vector<int> rebin;
-	hName.push_back("HT");		rebin.push_back(100);
+	hName.push_back("HT");		rebin.push_back(400);
 	//hName.push_back("HT");	rebin.push_back(50);
 	//hName.push_back("bpMass");	rebin.push_back(10);
 	//hName.push_back("bpPt");	rebin.push_back(20);
