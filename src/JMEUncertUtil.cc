@@ -74,7 +74,10 @@ void JMEUncertUtil::jesUncert () {
     jecUncert_ -> setJetPt(ijet -> Pt());
     jecUncert_ -> setJetEta(ijet -> Eta()); 
     double uncert = jecUncert_ -> getUncertainty ( jecShift_ > 0. ); 
-    double rescaled = ( jecShift_ > 0. ) ? ( 1. + uncert ) : ( 1. - uncert ) ;
+    double rescaled(1.) ;
+    if ( jecShift_ > 0. ) rescaled = 1. + uncert ;
+    else if ( jecShift_ < 0. ) rescaled = 1. - uncert  ; 
+    else rescaled = 1. ; 
     LogDebug("JMEUncertUtil::jesUncert") << stype_ << " " << jecShift_ << " rescaled = " << rescaled  ; 
     Jet thisjet(*ijet) ;
     LogDebug("JMEUncertUtil::jesUncert") << " JES:jet pt before = " << thisjet.Pt() << " after = " << thisjet.Pt()*rescaled << " jet eta = " << thisjet.Eta() << std::endl ; 
@@ -112,12 +115,12 @@ void JMEUncertUtil::jerScale() {
     double sf = jerNominal_[etaB]; 
     if( jecShift_ < 0.) sf -= sqrt( pow(jerSigmaSym_[etaB], 2) + pow (jerSigmaNeg_[etaB], 2) ) ; 
     else if ( jecShift_ > 0. ) sf += sqrt( pow(jerSigmaSym_[etaB], 2)+pow(jerSigmaPos_[etaB], 2) ) ; 
-    LogDebug("JMEUncertUtil::jerScale") << stype_ << " " << jecShift_ << " sf = " << sf ;
+    edm::LogInfo("JMEUncertUtil::jerScale") << stype_ << " " << jecShift_ << " sf = " << sf ;
     double deltaPt = ( ijet -> Pt() - ijet ->GenJetPt() ) * sf ; 
     rescaled = std::max(0.0, ( ijet ->GenJetPt() + deltaPt ))/ijet -> Pt() ; 
     if ( rescaled <= 0. ) rescaled =  1. ; 
     Jet thisjet(*ijet) ;
-    LogDebug("JMEUncertUtil::jerScale") << " JER:jet pt before = " << thisjet.Pt() << " after = " << thisjet.Pt()*rescaled << " jet eta = " << thisjet.Eta() << std::endl ; 
+    edm::LogInfo("JMEUncertUtil::jerScale") << " Gen jet pt = " << ijet ->GenJetPt() << " reco jet pT = " << ijet -> Pt() << " sf = " << sf << " deltaPt = " << deltaPt ; 
     thisjet.Set_Pt        ( thisjet.Pt()        * rescaled ) ; 
     thisjet.Set_Et        ( thisjet.Et()        * rescaled ) ; 
     thisjet.Set_PtCorrRaw ( thisjet.PtCorrRaw() * rescaled ) ; 

@@ -598,20 +598,23 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
         if (ijet->CombinedSVBJetTags() > bJetCSVDiscMin_) allBJets.push_back(*ijet) ; 
       }
-    }
+    } //// Select all b-tagged AK5 jets 
 
     for (JetCollection::const_iterator ijet = allAK5Jets.begin(); ijet != allAK5Jets.end(); ++ijet) {
       if (ijet->Pt() > jetPtMin_ ) ak5JetsForHT.push_back(*ijet) ; 
-    }
+    } //// Select AK5 jets for HT definition 
+
+    for (JetCollection::const_iterator ijet = allBJets.begin(); ijet != allBJets.end(); ++ijet) {
+      if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
+    } //// Selected b-tagged AK5 jets with pT cut 
+
+    for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
+      if (ijet->Pt() > bVetoJetPtMin_ && ijet->CombinedSVBJetTags() > bVetoJetCSVDiscMin_ ) bJetsForVeto.push_back(*ijet) ; 
+    } //// Select b-tagged AK5 jets with lower pT cut for b-vetoed events 
 
     for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
       if (ijet->Pt() > bJetPtMin_ ) selectedAK5Jets.push_back(*ijet) ; 
-    }
-
-    for (JetCollection::const_iterator ijet = allBJets.begin(); ijet != allBJets.end(); ++ijet) {
-      if (ijet->Pt() > bVetoJetPtMin_ /*&& ijet->CombinedSVBJetTags() > bVetoJetCSVDiscMin_*/ ) bJetsForVeto.push_back(*ijet) ; 
-      if (ijet->Pt() > bJetPtMin_ /*&& ijet->CombinedSVBJetTags() > bJetCSVDiscMin_*/ ) selectedBJets.push_back(*ijet) ; 
-    }
+    } //// Select high pT AK5 jets for 1 AK5 and 2 AK5 categories in the validation samples 
 
     allAK5Jets.clear() ; 
     cleanedAK5Jets.clear() ;
