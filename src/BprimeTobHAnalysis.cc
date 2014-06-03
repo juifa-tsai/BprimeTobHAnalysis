@@ -445,12 +445,14 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
     chain_->GetEntry(entry);
 
     isdata   = EvtInfo.McFlag ? 0 : 1; 
-    if ( !isdata ) evtwt = EvtInfo.Weight ; 
+    if ( !isdata ) {
+      evtwt = EvtInfo.Weight ; 
+      if ( doPUReweighting_ ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]) ; 
+    }
     else {
       evtwt = 1. ; 
       puwt = 1. ; 
     }
-    if ( doPUReweighting_ && !isdata ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]) ; 
 
     if ( !isdata ) { //// Gen info 
       std::vector<int> gen_bp_indices, gen_higgs_indices ; 

@@ -683,9 +683,9 @@ void DrawStacked(TString name,
     leg->AddEntry(hist_bkg      , "All backgrounds"        , "f") ; 
   }
   //if ( name.Contains("h_cutflow") || name.Contains("HTSel") ) {
-    leg -> AddEntry(hist_sig0 ,"b'(500 GeV)"             ,"l") ; 
-    leg -> AddEntry(hist_sig1 ,"b'(800 GeV)"             ,"l") ; 
-    leg -> AddEntry(hist_sig2 ,"b'(1000 GeV)#times 10"   ,"l") ; 
+  leg -> AddEntry(hist_sig0 ,"b'(500 GeV)"             ,"l") ; 
+  leg -> AddEntry(hist_sig1 ,"b'(800 GeV)"             ,"l") ; 
+  leg -> AddEntry(hist_sig2 ,"b'(1000 GeV)#times 10"   ,"l") ; 
   //}
   if ( !name.Contains("nPVtx") && !name.Contains("h_cutflow") ) {
     leg->AddEntry(hist_ttjets   , "t#bar{t}+jets"          ,"f");
@@ -701,13 +701,13 @@ void DrawStacked(TString name,
 
   c1->cd();
 
-  if (doData) {
-    TPad* pad1 = new TPad("pad1", "",0,0,1,.25) ; 
-    pad1->Draw() ;  
-    pad1->cd() ;  
-    pad1->SetGridx() ; 
-    pad1->SetGridy() ; 
+  TPad* pad1 = new TPad("pad1", "",0,0,1,.25) ; 
+  pad1->Draw() ;  
+  pad1->cd() ;  
+  pad1->SetGridx() ; 
+  pad1->SetGridy() ; 
 
+  if (dodata) {
     hist_ratio->SetMarkerStyle(20);
     hist_ratio->SetMarkerSize(0.75);
     hist_ratio->SetLineWidth(2);
@@ -717,40 +717,43 @@ void DrawStacked(TString name,
       hist_ratioSigBlind->SetMarkerSize(0.75);
       hist_ratioSigBlind->SetLineWidth(2);
     }
+  }
 
-    hist_mcUnc->SetMarkerStyle(0);
-    hist_mcUnc->SetMarkerSize(0);
-    hist_mcUnc->SetLineWidth(0);
-    hist_mcUnc->SetFillStyle(1001);
-    hist_mcUnc->SetFillColor(kYellow);
+  hist_mcUnc->SetMarkerStyle(0);
+  hist_mcUnc->SetMarkerSize(0);
+  hist_mcUnc->SetLineWidth(0);
+  hist_mcUnc->SetFillStyle(1001);
+  hist_mcUnc->SetFillColor(kYellow);
 
-    hist_mcUnc->GetYaxis()->SetTitle("Data/MC");
-    hist_mcUnc->SetTitleOffset(0.9,"X");
-    hist_mcUnc->SetTitleOffset(0.31,"Y");
-    hist_mcUnc->GetXaxis()->SetTitle(histotitle);
-    hist_mcUnc->GetYaxis()->SetNdivisions( 505 );
+  if (dodata) hist_mcUnc->GetYaxis()->SetTitle("Data/MC");
+  else hist_mcUnc->GetYaxis()->SetTitle("MC uncert.");
+  hist_mcUnc->SetTitleOffset(0.9,"X");
+  hist_mcUnc->SetTitleOffset(0.31,"Y");
+  hist_mcUnc->GetXaxis()->SetTitle(histotitle);
+  hist_mcUnc->GetYaxis()->SetNdivisions( 505 );
 
-    TAxis* ax1 = hist_mcUnc->GetXaxis();
-    TAxis* ay1 = hist_mcUnc->GetYaxis();
+  TAxis* ax1 = hist_mcUnc->GetXaxis();
+  TAxis* ay1 = hist_mcUnc->GetYaxis();
 
-    beautifyBottomPad(pad1,ax1,ay1) ; 
+  beautifyBottomPad(pad1,ax1,ay1) ; 
 
-    if (setXRange) {
-      if (rangeXLow == rangeXHigh) std::cout << "Error: X-axis low and high ranges have same value\n" ;
-      else {
-        hist_mcUnc->GetXaxis()->SetRangeUser(rangeXLow, rangeXHigh) ;
-      }
+  if (setXRange) {
+    if (rangeXLow == rangeXHigh) std::cout << "Error: X-axis low and high ranges have same value\n" ;
+    else {
+      hist_mcUnc->GetXaxis()->SetRangeUser(rangeXLow, rangeXHigh) ;
     }
+  }
 
-    hist_mcUnc->SetMinimum(0.0);
-    hist_mcUnc->SetMaximum(2.6);
-    hist_mcUnc->Draw("E2");
-    if ( systUnc ) gr_uncUp_uncDown->Draw("2Z") ; 
+  hist_mcUnc->SetMinimum(0.0);
+  hist_mcUnc->SetMaximum(2.6);
+  hist_mcUnc->Draw("E2");
+  if ( systUnc ) gr_uncUp_uncDown->Draw("2Z") ; 
+  if (dodata) {
     if ( blindSigRegion && name.Contains("h_cutflow") ) hist_ratioSigBlind->Draw("SAMEE1");
     else hist_ratio->Draw("SAMEE1"); 
+  } 
 
-    pad1->Modified();
-  }
+  pad1->Modified();
 
   c1->cd();
 

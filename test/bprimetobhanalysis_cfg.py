@@ -200,7 +200,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     BprimebH = cms.untracked.PSet(
       threshold = cms.untracked.string('INFO'),  
       ), 
-    suppressInfo = cms.untracked.vstring('BprimebH'),
+    #suppressInfo = cms.untracked.vstring('BprimebH'),
     ) 
 #process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 
@@ -222,11 +222,11 @@ process.BprimebH = cms.EDAnalyzer('BprimeTobHAnalysis',
     MaxEvents           = cms.int32(options.maxEvents),
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
-    InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames), 
     #InputFiles          = cms.vstring(SkimmedFileNames_JetHT__Run2012D),
     #InputFiles          = cms.vstring(FileNames_TTbar), 
     #InputFiles          = cms.vstring(FileNames_BpBp800), 
-    #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
+    InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
     #InputFiles          = cms.vstring(FileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 

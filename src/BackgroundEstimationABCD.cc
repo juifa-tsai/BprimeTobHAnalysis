@@ -416,85 +416,87 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
 		chain_->GetEntry(entry);
 
-		isdata  = EvtInfo.McFlag ? 0 : 1; 
-		if( !isdata ) evtwt = EvtInfo.Weight; 
-		if( doPUReweighting_ && !isdata ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]); 
+    isdata  = EvtInfo.McFlag ? 0 : 1; 
+    if( !isdata ) {
+      evtwt = EvtInfo.Weight; 
+      if( doPUReweighting_ ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]); 
+    }
 
-		if ( !isdata ) { //// Gen info 
-			std::vector<int> gen_higgs_indices ; 
-			for (int igen = 0; igen < GenInfo.Size; ++igen) { 
-				if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ; 
-			}
-			//// Higgs BR reweighting
-			for (std::vector<int>::const_iterator ihig = gen_higgs_indices.begin(); ihig != gen_higgs_indices.end(); ++ihig) {
-				int higgsDau0(abs(GenInfo.Da0PdgID[*ihig])), higgsDau1(abs(GenInfo.Da1PdgID[*ihig])) ;
-				int higgsDau = higgsDau0+higgsDau1 ; 
-				if(higgsDau==10) evtwt *= HiggsBRscaleFactors::higgsBBSf;
-				else if(higgsDau==30) evtwt *= HiggsBRscaleFactors::higgsTauTauSf;
-				else if(higgsDau==26) evtwt *= HiggsBRscaleFactors::higgsMuMuSf;
-				else if(higgsDau==8)  evtwt *= HiggsBRscaleFactors::higgsCCSf;
-				else if(higgsDau==6)  evtwt *= HiggsBRscaleFactors::higgsSSSf;
-				else if(higgsDau==16) evtwt *= HiggsBRscaleFactors::higgsTTSf;
-				else if(higgsDau==42) evtwt *= HiggsBRscaleFactors::higgsGGSf;
-				else if(higgsDau==44) evtwt *= HiggsBRscaleFactors::higgsGammaGammaSf;
-				else if(higgsDau==45) evtwt *= HiggsBRscaleFactors::higgsZGammaSf;
-				else if(higgsDau==48) evtwt *= HiggsBRscaleFactors::higgsWWSf;
-				else if(higgsDau==46) evtwt *= HiggsBRscaleFactors::higgsZZSf; 
-				else evtwt *= 1 ; 
-			} //// Higgs BR reweighting  
-		} //// Gen info
+    if ( !isdata ) { //// Gen info 
+      std::vector<int> gen_higgs_indices ; 
+      for (int igen = 0; igen < GenInfo.Size; ++igen) { 
+        if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ; 
+      }
+      //// Higgs BR reweighting
+      for (std::vector<int>::const_iterator ihig = gen_higgs_indices.begin(); ihig != gen_higgs_indices.end(); ++ihig) {
+        int higgsDau0(abs(GenInfo.Da0PdgID[*ihig])), higgsDau1(abs(GenInfo.Da1PdgID[*ihig])) ;
+        int higgsDau = higgsDau0+higgsDau1 ; 
+        if(higgsDau==10) evtwt *= HiggsBRscaleFactors::higgsBBSf;
+        else if(higgsDau==30) evtwt *= HiggsBRscaleFactors::higgsTauTauSf;
+        else if(higgsDau==26) evtwt *= HiggsBRscaleFactors::higgsMuMuSf;
+        else if(higgsDau==8)  evtwt *= HiggsBRscaleFactors::higgsCCSf;
+        else if(higgsDau==6)  evtwt *= HiggsBRscaleFactors::higgsSSSf;
+        else if(higgsDau==16) evtwt *= HiggsBRscaleFactors::higgsTTSf;
+        else if(higgsDau==42) evtwt *= HiggsBRscaleFactors::higgsGGSf;
+        else if(higgsDau==44) evtwt *= HiggsBRscaleFactors::higgsGammaGammaSf;
+        else if(higgsDau==45) evtwt *= HiggsBRscaleFactors::higgsZGammaSf;
+        else if(higgsDau==48) evtwt *= HiggsBRscaleFactors::higgsWWSf;
+        else if(higgsDau==46) evtwt *= HiggsBRscaleFactors::higgsZZSf; 
+        else evtwt *= 1 ; 
+      } //// Higgs BR reweighting  
+    } //// Gen info
 
-		evtwt *= puwt ;
-		double evtwt2 = evtwt*evtwt;
+    evtwt *= puwt ;
+    double evtwt2 = evtwt*evtwt;
 
-		h1.GetTH1("ABCDana_CutFlow")->Fill(0);	
-		h1.GetTH1("ABCDval_CutFlow")->Fill(0);
+    h1.GetTH1("ABCDana_CutFlow")->Fill(0);	
+    h1.GetTH1("ABCDval_CutFlow")->Fill(0);
 
-		//// Trigger selection 
-		TriggerSelector trigSel(hltPaths_); 
-		passHLT = trigSel.getTrigDecision(EvtInfo); 
-		if( !passHLT ) continue; 
-		h1.GetTH1("ABCDana_CutFlow")->Fill(double(1),evtwt);	
-		h1.GetTH1("ABCDval_CutFlow")->Fill(double(1),evtwt);
+    //// Trigger selection 
+    TriggerSelector trigSel(hltPaths_); 
+    passHLT = trigSel.getTrigDecision(EvtInfo); 
+    if( !passHLT ) continue; 
+    h1.GetTH1("ABCDana_CutFlow")->Fill(double(1),evtwt);	
+    h1.GetTH1("ABCDval_CutFlow")->Fill(double(1),evtwt);
 
-		//// Vertex selection 
-		VertexSelector vtxSel(VtxInfo); 
-		nGoodVtxs = vtxSel.NGoodVtxs(); 
-		if( nGoodVtxs < 1){ edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex "; continue; }
-		h1.GetTH1("ABCDana_CutFlow")->Fill(double(2),evtwt);	
-		h1.GetTH1("ABCDval_CutFlow")->Fill(double(2),evtwt);
+    //// Vertex selection 
+    VertexSelector vtxSel(VtxInfo); 
+    nGoodVtxs = vtxSel.NGoodVtxs(); 
+    if( nGoodVtxs < 1){ edm::LogInfo("NoGoodPrimaryVertex") << " No good primary vertex "; continue; }
+    h1.GetTH1("ABCDana_CutFlow")->Fill(double(2),evtwt);	
+    h1.GetTH1("ABCDval_CutFlow")->Fill(double(2),evtwt);
 
-		JetCollection fatjets ; 
-		for (int ifatjet = 0; ifatjet < FatJetInfo.Size; ++ifatjet) { 
-			if (jetSelCA8(FatJetInfo, ifatjet, SubJetInfo, retjetidca8) == 0) continue ; //// pt > 150 GeV, |eta| < 2.4 tau2/tau1 < 0.5 
-			Jet thisjet(FatJetInfo, ifatjet) ; 
-			fatjets.push_back(thisjet) ; 
-		} //// Loop over fat jets 
+    JetCollection fatjets ; 
+    for (int ifatjet = 0; ifatjet < FatJetInfo.Size; ++ifatjet) { 
+      if (jetSelCA8(FatJetInfo, ifatjet, SubJetInfo, retjetidca8) == 0) continue ; //// pt > 150 GeV, |eta| < 2.4 tau2/tau1 < 0.5 
+      Jet thisjet(FatJetInfo, ifatjet) ; 
+      fatjets.push_back(thisjet) ; 
+    } //// Loop over fat jets 
 
-		//// Apply JEC and b-tagging SFs for CA8 jets in MC  
-		if ( !isdata && applyJEC_ ) {
-			JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, fatjets, "JERCA8MC", jerShift_) ; 
-			JetCollection ca8jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
-			delete jmeUtil_jer ; 
-			fatjets.clear() ; 
+    //// Apply JEC and b-tagging SFs for CA8 jets in MC  
+    if ( !isdata && applyJEC_ ) {
+      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, fatjets, "JERCA8MC", jerShift_) ; 
+      JetCollection ca8jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
+      delete jmeUtil_jer ; 
+      fatjets.clear() ; 
 
-			if ( abs(jesShift_) > 1E-6 ) {
-				JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ca8jets_jer, "JESCA8MC", jesShift_) ; 
-				JetCollection ca8jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
-				delete jmeUtil_jes ; 
+      if ( abs(jesShift_) > 1E-6 ) {
+        JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ca8jets_jer, "JESCA8MC", jesShift_) ; 
+        JetCollection ca8jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
+        delete jmeUtil_jes ; 
 
-				for (JetCollection::const_iterator ijet = ca8jets_jes.begin(); ijet != ca8jets_jes.end(); ++ijet) {
-					Jet thisjet(*ijet) ; 
-					fatjets.push_back(thisjet) ; 
-				}
-			}
-			else {
-				for (JetCollection::const_iterator ijet = ca8jets_jer.begin(); ijet != ca8jets_jer.end(); ++ijet) {
-					Jet thisjet(*ijet) ; 
-					fatjets.push_back(thisjet) ; 
-				}
-			}
-		} //// Apply JEC and b-tagging SFs for CA8 jets in MC 
+        for (JetCollection::const_iterator ijet = ca8jets_jes.begin(); ijet != ca8jets_jes.end(); ++ijet) {
+          Jet thisjet(*ijet) ; 
+          fatjets.push_back(thisjet) ; 
+        }
+      }
+      else {
+        for (JetCollection::const_iterator ijet = ca8jets_jer.begin(); ijet != ca8jets_jer.end(); ++ijet) {
+          Jet thisjet(*ijet) ; 
+          fatjets.push_back(thisjet) ; 
+        }
+      }
+    } //// Apply JEC and b-tagging SFs for CA8 jets in MC 
 
     JetCollection HiggsJets, HiggsLikeJets, AllHiggsJets, AllHiggsJetsDRCut;
     JetCollection AntiHiggsJets, AntiHiggsLikeJets, AllAntiHiggsJets, AllAntiHiggsJetsDRCut;
