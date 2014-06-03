@@ -12,20 +12,40 @@ int const Mean=0;
 int const Down=1;
 int const Up=2;
 void countAndStore( string title, string mean_h, string mean_f, string up_h, string up_f, string down_h, string down_f, fstream& f );
-void CountSystABCD(){
+void CountSystABCD_(){
 
 	string loadpath = "../test/OnLxplus/";
 	string savepath = "results/";
 	
 	vector<string> systType;
-	systType.push_back("PU_Uncertainty");
+	systType.push_back("JES");
+	systType.push_back("JER");
+	systType.push_back("SFb");
+	systType.push_back("SFl");
+	systType.push_back("SFHb");
+	systType.push_back("SFHl");
 	const int systTypeSize = systType.size();
 
 	string fileName[systTypeSize][3];	
-	fileName[0][Mean] = "14May_PU_Mean/Final_histograms_ABCD.root";
-	fileName[0][Down] = "14May_PU_Down/Final_histograms_ABCD.root";
-	fileName[0][Up]   = "14May_PU_UP/Final_histograms_ABCD.root";
-	
+	fileName[0][Mean] = "26May_HT950_Mean/Final_histograms_ABCD.root";
+	fileName[0][Down] = "26May_HT950_JESDown/Final_histograms_ABCD.root";
+	fileName[0][Up]   = "26May_HT950_JESUp/Final_histograms_ABCD.root";
+	fileName[1][Mean] = "26May_HT950_Mean/Final_histograms_ABCD.root";
+	fileName[1][Down] = "26May_HT950_JERDown/Final_histograms_ABCD.root";
+	fileName[1][Up]   = "26May_HT950_JERUp/Final_histograms_ABCD.root";
+	fileName[2][Mean] = "26May_HT950_Mean/Final_histograms_ABCD.root";
+	fileName[2][Down] = "26May_HT950_SFbDown/Final_histograms_ABCD.root";
+	fileName[2][Up]   = "26May_HT950_SFbUp/Final_histograms_ABCD.root";
+	fileName[3][Mean] = "26May_HT950_Mean/Final_histograms_ABCD.root";
+	fileName[3][Down] = "26May_HT950_SFlDown/Final_histograms_ABCD.root";
+	fileName[3][Up]   = "26May_HT950_SFlUp/Final_histograms_ABCD.root";
+	fileName[4][Mean] = "26May_HT950_Mean/Final_histograms_ABCD.root";
+	fileName[4][Down] = "26May_HT950_SFHbDown/Final_histograms_ABCD.root";
+	fileName[4][Up]   = "26May_HT950_SFHbUp/Final_histograms_ABCD.root";
+	fileName[5][Mean] = "26May_HT950_Mean/Final_histograms_ABCD.root";
+	fileName[5][Down] = "26May_HT950_SFHlDown/Final_histograms_ABCD.root";
+	fileName[5][Up]   = "26May_HT950_SFHlUp/Final_histograms_ABCD.root";
+
 	vector<string> hName;
 	hName.push_back("ABCDana_CutRegion");
 	hName.push_back("ABCDana_CutRegion_1b");
@@ -48,6 +68,7 @@ void CountSystABCD(){
 	const int titleSize = Title.size();
 	
 	fstream output[systTypeSize][hSize];
+
 
 	for( int i=0; i<systTypeSize; i++ ){
 		cout<<"[Uncertainty] "<<systType[i]<<endl;
@@ -109,4 +130,5 @@ void countAndStore( string title, string mean_h, string mean_f, string up_h, str
 	f<<"C\t"<<C<<"\t\t"<<CSystUp<<"\t\t"<<CSystDown<<endl;
 	f<<"D\t"<<D<<"\t\t"<<DSystUp<<"\t\t"<<DSystDown<<endl;
 	f<<endl;
+
 }
