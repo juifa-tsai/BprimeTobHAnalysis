@@ -106,6 +106,7 @@ class EvtSkim : public edm::EDAnalyzer{
     GenInfoBranches    GenInfo;
     EvtInfoBranches    EvtInfo;
     VertexInfoBranches VtxInfo;
+		JetInfoBranches    GenJetInfo;
     JetInfoBranches    JetInfo;
     JetInfoBranches    FatJetInfo;
     JetInfoBranches    SubJetInfo;
@@ -182,6 +183,7 @@ void EvtSkim::beginJob(){
   EvtInfo.Register(chain_);
   VtxInfo.Register(chain_);
   GenInfo.Register(chain_);
+	GenJetInfo.Register(chain_,"GenJetInfo");
   JetInfo.Register(chain_,"JetInfo");
   FatJetInfo.Register(chain_,"FatJetInfo");
   SubJetInfo.Register(chain_,"SubJetInfo");
@@ -237,6 +239,14 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if( eSelector_ -> passes() ) { 
 
+      JetCollection genjets ; 
+      if ( !isData_ ) {
+        for (int igenjet = 0; igenjet < GenJetInfo.Size; ++igenjet) { 
+          Jet thisjet(GenJetInfo, igenjet) ; 
+          genjets.push_back(thisjet) ; 
+        } //// Loop over gen jets 
+      }
+
       JetCollection myjets ;
 
       for (int ijet = 0; ijet < JetInfo.Size; ++ijet) {
@@ -244,23 +254,23 @@ void EvtSkim::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
         myjets.push_back(thisjet) ; 
       }
 
-      JMEUncertUtil* jmeUtil_jesUp = new JMEUncertUtil(jmeParams_, myjets, "JES", 1.0) ; 
+      JMEUncertUtil* jmeUtil_jesUp = new JMEUncertUtil(jmeParams_, myjets, genjets, "JES", 1.0) ; 
       JetCollection myjets_jesUp = jmeUtil_jesUp->GetModifiedJetColl() ; 
       delete jmeUtil_jesUp ; 
 
-      JMEUncertUtil* jmeUtil_jesDown = new JMEUncertUtil(jmeParams_, myjets, "JES", -1.0) ; 
+      JMEUncertUtil* jmeUtil_jesDown = new JMEUncertUtil(jmeParams_, myjets, genjets, "JES", -1.0) ; 
       JetCollection myjets_jesDown = jmeUtil_jesDown->GetModifiedJetColl() ; 
       delete jmeUtil_jesDown ; 
 
-      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, myjets, "JER", 0.0) ; 
+      JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, myjets, genjets, "JER", 0.0) ; 
       JetCollection myjets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
       delete jmeUtil_jer ; 
 
-      JMEUncertUtil* jmeUtil_jerUp = new JMEUncertUtil(jmeParams_, myjets, "JER", 1.0) ; 
+      JMEUncertUtil* jmeUtil_jerUp = new JMEUncertUtil(jmeParams_, myjets, genjets, "JER", 1.0) ; 
       JetCollection myjets_jerUp = jmeUtil_jerUp->GetModifiedJetColl() ; 
       delete jmeUtil_jerUp ; 
 
-      JMEUncertUtil* jmeUtil_jerDown = new JMEUncertUtil(jmeParams_, myjets, "JER", -1.0) ; 
+      JMEUncertUtil* jmeUtil_jerDown = new JMEUncertUtil(jmeParams_, myjets, genjets, "JER", -1.0) ; 
       JetCollection myjets_jerDown = jmeUtil_jerDown->GetModifiedJetColl() ; 
       delete jmeUtil_jerDown ; 
 

@@ -16,7 +16,7 @@ using std::string;
 class JMEUncertUtil {
 
   public: 
-    JMEUncertUtil (const edm::ParameterSet& iConfig, JetCollection &jets, std::string stype, double jecShift) ; 
+    JMEUncertUtil (const edm::ParameterSet& iConfig, JetCollection &jets, JetCollection &genjets, std::string stype, double jecShift) ; 
     ~JMEUncertUtil () ; 
 
     JetCollection GetModifiedJetColl() const ;  
@@ -38,6 +38,7 @@ class JMEUncertUtil {
     std::string stype_ ; 
     double jecShift_ ; 
     const JetCollection jets_ ; 
+    const JetCollection genjets_ ; 
 
     JEC_TYPE jecType_ ; 
 

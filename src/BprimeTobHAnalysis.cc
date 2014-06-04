@@ -435,7 +435,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
   edm::LogInfo("StartingAnalysisLoop") << "Starting analysis loop\n";
 
   for(int entry=0; entry<maxEvents_; entry++) {
-    if((entry%reportEvery_) == 0) edm::LogInfo("Event") << entry << " of " << maxEvents_ ; 
+    if((entry%reportEvery_) == 0) edm::LogInfo("BprimeTobHAnalysis::analyze") << " >>>>>>>> Event " << entry << " of " << maxEvents_ ;
 
     HT HTAllAK5, MyHT ; 
     std::vector<TLorentzVector>p4bprimes ; 
@@ -524,6 +524,14 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
       evtwt *= puwt ; 
 
+      JetCollection genjets ; 
+      if ( !isdata ) {
+        for (int igenjet = 0; igenjet < GenJetInfo.Size; ++igenjet) { 
+          Jet thisjet(GenJetInfo, igenjet) ; 
+          genjets.push_back(thisjet) ; 
+        } //// Loop over gen jets 
+      }
+
       JetCollection fatjets ; 
       for (int ifatjet = 0; ifatjet < FatJetInfo.Size; ++ifatjet) { 
         if (jetSelCA8(FatJetInfo, ifatjet, SubJetInfo, retjetidca8) == 0) continue ; //// pt > 150 GeV, |eta| < 2.4 tau2/tau1 < 0.5 
@@ -533,13 +541,13 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
 
       //// Apply JEC and b-tagging SFs for CA8 jets in MC  
       if ( !isdata && applyJEC_ ) {
-        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, fatjets, "JERCA8MC", jerShift_) ; 
+        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, fatjets, genjets, "JERCA8MC", jerShift_) ; 
         JetCollection ca8jets_jer = jmeUtil_jer->GetModifiedJetColl() ; 
         delete jmeUtil_jer ; 
         fatjets.clear() ; 
 
         if ( abs(jesShift_) > 1E-6 ) {
-          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ca8jets_jer, "JESCA8MC", jesShift_) ; 
+          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, ca8jets_jer, genjets, "JESCA8MC", jesShift_) ; 
           JetCollection ca8jets_jes = jmeUtil_jes->GetModifiedJetColl() ; 
           delete jmeUtil_jes ; 
 
@@ -602,13 +610,13 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       if ( !isdata && applyJEC_ ) { //// Apply JEC for MC   
 
         //// All AK5 jets 
-        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, "JERAK5MC", jerShift_) ; 
+        JMEUncertUtil* jmeUtil_jer = new JMEUncertUtil(jmeParams_, allAK5Jets, genjets, "JERAK5MC", jerShift_) ; 
         JetCollection allAK5JetsJER = jmeUtil_jer->GetModifiedJetColl() ; 
         delete jmeUtil_jer ; 
         allAK5Jets.clear() ; 
 
         if ( abs(jesShift_) > 1E-6 ) {
-          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, "JESAK5MC", jesShift_) ; 
+          JMEUncertUtil* jmeUtil_jes = new JMEUncertUtil(jmeParams_, allAK5JetsJER, genjets, "JESAK5MC", jesShift_) ; 
           JetCollection allAK5JetsJES = jmeUtil_jes->GetModifiedJetColl() ; 
           delete jmeUtil_jes ; 
 
