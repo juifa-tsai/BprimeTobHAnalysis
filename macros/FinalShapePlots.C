@@ -49,6 +49,9 @@ void FinalShapePlots(){
 		draw( f, c1, Path, all, hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], unblind );	
 		draw( f, c1, Path, b1,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], unblind );	
 		draw( f, c1, Path, b2,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], unblind );
+		draw( f, c1, Path, all, hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], blind );	
+		draw( f, c1, Path, b1,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], blind );	
+		draw( f, c1, Path, b2,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], blind );
 	}
 }
 //CatAll_data_obs
@@ -158,7 +161,7 @@ void draw( string fs, TCanvas* c1, string save, int cate, string hName, string x
 	tlumi_->SetTextAlign(12);
 	tlumi_->SetTextSize(0.05);
 
-	TPaveText *cate_ = new TPaveText(0.2,0.25,0.4, 0.35,"NDC"); ;
+	TPaveText *cate_ = new TPaveText(0.2,0.2,0.4,0.32,"NDC"); ;
 	if( cate == all ) cate_->AddText("1b and #geq 2b categories");
 	else if( cate == b1 ) cate_->AddText("1b category");
 	else if( cate == b2 ) cate_->AddText("#geq 2b category");
