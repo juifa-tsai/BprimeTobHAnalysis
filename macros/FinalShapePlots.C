@@ -39,7 +39,7 @@ void FinalShapePlots(){
 	string Path="results/bin400GeV";
 
 	vector<string> hName, xTitle, yTitle, xUnit; vector<double> xmin, xmax;
-	hName.push_back("HT"); xTitle.push_back("HT(AK5)"); yTitle.push_back("Events"); xUnit.push_back("GeV"); xmin.push_back(800); xmax.push_back(1800);
+	hName.push_back("HT"); xTitle.push_back("H_{T}"); yTitle.push_back("Events"); xUnit.push_back("GeV"); xmin.push_back(800); xmax.push_back(1800);
 
 	TCanvas* c1 = new TCanvas("c1", "", 425, 350);
 	const int hNameSize = hName.size();
@@ -112,7 +112,8 @@ void draw( string fs, TCanvas* c1, string save, int cate, string hName, string x
 	TAxis* ax = hEr_bkg->GetXaxis() ; 
 	TAxis* ay = hEr_bkg->GetYaxis() ; 
 	beautifyAxis(ax); 
-	beautifyAxis(ay); 
+	beautifyAxis(ay);
+	ax->SetTitleOffset(0.8); 
 	h_bkg->SetLineStyle(1);
 	h_bkg->SetLineWidth(3);
 	h_bkg->SetLineColor(9);
