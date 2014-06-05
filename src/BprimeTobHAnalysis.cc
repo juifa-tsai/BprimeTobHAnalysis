@@ -581,12 +581,13 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
             if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
               ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double(subjet1.Pt()), double(subjet2.Pt()), 
                   double(subjet1.Eta()), double(subjet2.Eta()), double(subjet1.Phi()), double(subjet2.Phi()), 
-                  subjet1.GenFlavor(), subjet2.GenFlavor(), 
+                  abs(subjet1.GenFlavor()), abs(subjet2.GenFlavor()), 
                   subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags(), SFbShiftHtag_, SFlShiftHtag_) ; 
               evtwt *= higgsTagSF->GetHiggsTagSF() ;
               delete higgsTagSF ; 
             } //// Apply Higgs-tagging scale factor  
             HiggsJets.push_back(thisjet);
+            edm::LogInfo("HiggsTagging::SubjetFlavour") << " HiggsJetFlavour" <<  thisjet.GenFlavor() << " subjet1 flavour = " << subjet1.GenFlavor() << " subjet2 flavour = " << subjet2.GenFlavor() ; 
           } //// fat jet pruned mass   
         } //// Subjet CSV 
 

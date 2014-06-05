@@ -31,6 +31,9 @@ ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double eta
 
   double sf1(1.), sf2(1.)  ; 
 
+  flavSubjet1_ = abs(flavSubjet1_) ; 
+  flavSubjet2_ = abs(flavSubjet2_) ; 
+
   if (flavSubjet1_ == 4 || flavSubjet1_ == 5) {
     double errscale(1.);
     if ( flavSubjet1_ == 4) errscale *= 2. ; 
