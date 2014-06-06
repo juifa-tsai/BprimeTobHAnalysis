@@ -605,7 +605,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     } //// Select AK5 jets for HT definition 
 
     for (JetCollection::const_iterator ijet = allBJets.begin(); ijet != allBJets.end(); ++ijet) {
-      if (ijet->Pt() > bJetPtMin_ && ijet->CombinedSVBJetTags() > bJetCSVDiscMin_ ) selectedBJets.push_back(*ijet) ; 
+      if (ijet->Pt() > bJetPtMin_ ) selectedBJets.push_back(*ijet) ; 
     } //// Selected b-tagged AK5 jets with pT cut 
 
     for (JetCollection::const_iterator ijet = cleanedAK5Jets.begin(); ijet != cleanedAK5Jets.end(); ++ijet) {
