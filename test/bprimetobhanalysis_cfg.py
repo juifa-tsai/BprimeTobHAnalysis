@@ -91,7 +91,7 @@ options.register('subjet2CSVDiscMax', 1.000,
     VarParsing.varType.float,
     "Maximum subjet2 b discriminator"
     )
-options.register('hTAK5Min', 900,
+options.register('hTAK5Min', 950,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum HT"
