@@ -39,7 +39,7 @@ void FinalShapePlots(){
 	string Path="results/bin400GeV";
 
 	vector<string> hName, xTitle, yTitle, xUnit; vector<double> xmin, xmax;
-	hName.push_back("HT"); xTitle.push_back("HT(AK5)"); yTitle.push_back("Events"); xUnit.push_back("GeV"); xmin.push_back(800); xmax.push_back(1800);
+	hName.push_back("HT"); xTitle.push_back("H_{T}"); yTitle.push_back("Events"); xUnit.push_back("GeV"); xmin.push_back(800); xmax.push_back(1800);
 
 	TCanvas* c1 = new TCanvas("c1", "", 425, 350);
 	const int hNameSize = hName.size();
@@ -49,6 +49,9 @@ void FinalShapePlots(){
 		draw( f, c1, Path, all, hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], unblind );	
 		draw( f, c1, Path, b1,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], unblind );	
 		draw( f, c1, Path, b2,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], unblind );
+		draw( f, c1, Path, all, hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], blind );	
+		draw( f, c1, Path, b1,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], blind );	
+		draw( f, c1, Path, b2,  hName[h], xTitle[h], yTitle[h], xUnit[h], xmin[h], xmax[h], blind );
 	}
 }
 //CatAll_data_obs
@@ -112,7 +115,8 @@ void draw( string fs, TCanvas* c1, string save, int cate, string hName, string x
 	TAxis* ax = hEr_bkg->GetXaxis() ; 
 	TAxis* ay = hEr_bkg->GetYaxis() ; 
 	beautifyAxis(ax); 
-	beautifyAxis(ay); 
+	beautifyAxis(ay);
+	ax->SetTitleOffset(0.8); 
 	h_bkg->SetLineStyle(1);
 	h_bkg->SetLineWidth(3);
 	h_bkg->SetLineColor(9);
@@ -157,7 +161,7 @@ void draw( string fs, TCanvas* c1, string save, int cate, string hName, string x
 	tlumi_->SetTextAlign(12);
 	tlumi_->SetTextSize(0.05);
 
-	TPaveText *cate_ = new TPaveText(0.2,0.25,0.4, 0.35,"NDC"); ;
+	TPaveText *cate_ = new TPaveText(0.2,0.2,0.4,0.32,"NDC"); ;
 	if( cate == all ) cate_->AddText("1b and #geq 2b categories");
 	else if( cate == b1 ) cate_->AddText("1b category");
 	else if( cate == b2 ) cate_->AddText("#geq 2b category");
