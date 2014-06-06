@@ -650,7 +650,7 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
       }
 
       for (JetCollection::const_iterator ijet = allBJets.begin(); ijet != allBJets.end(); ++ijet) {
-        if (ijet->Pt() > bJetPtMin_ /*&& ijet->CombinedSVBJetTags() > bJetCSVDiscMin_*/ ) selectedBJets.push_back(*ijet) ; 
+        if (ijet->Pt() > bJetPtMin_ ) selectedBJets.push_back(*ijet) ; 
       }
 
       for (JetCollection::const_iterator ijet = allAK5Jets.begin(); ijet != allAK5Jets.end(); ++ijet) {
