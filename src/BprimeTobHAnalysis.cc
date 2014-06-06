@@ -595,7 +595,6 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
               delete higgsTagSF ; 
             } //// Apply Higgs-tagging scale factor  
             HiggsJets.push_back(thisjet);
-            edm::LogInfo("HiggsTagging::SubjetFlavour") << " HiggsJetFlavour" <<  thisjet.GenFlavor() << " subjet1 flavour = " << subjet1.GenFlavor() << " subjet2 flavour = " << subjet2.GenFlavor() ; 
           } //// fat jet pruned mass   
         } //// Subjet CSV 
 
@@ -730,7 +729,6 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
             FillHisto(TString("BJetsSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
             h_cutflow -> Fill("BJetsSel", evtwt) ; 
             if ( HTAllAK5.getHT() >= HTAK5Min_ ) {
-              edm::LogInfo("BprimeTobHAnalysis") << " Evt pass all sell: HT = " << HTAllAK5.getHT() << " evtwt = " << evtwt << " puwt = " << puwt ; 
               passAllSel = true ; 
               h_cutflow -> Fill("HTSel", evtwt) ; 
               FillHisto(TString("HTSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ; 
