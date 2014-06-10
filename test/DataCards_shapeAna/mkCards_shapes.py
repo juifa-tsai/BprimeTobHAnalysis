@@ -1,5 +1,96 @@
-#!/usr/bin/python
-import os, sys, math, ROOT
+#!/usr/bin/env python
+import os, re, sys, shutil
+import math, ROOT
+
+datacard_template_Cat1b = """---------------------------------------------------------------------------------------------
+imax 1 number of channels
+jmax 1 number of backgrounds
+kmax * number of nuisance parameters (sources of systematical uncertainties)
+---------------------------------------------------------------------------------------------
+shapes * * BprimeBprimeToBHBH_Shapes.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+----------------------------------------------------------------------------------------------
+bin                Cat1b           
+observation        NOBSCAT1B
+---------------------------------------------
+bin                Cat1b           Cat1b     
+process            BHBHMBP         background
+process            0               1         
+rate               NSIGCAT1B       NBKGCAT1B 
+---------------------------------------------
+lumi        lnN    1.026           -         
+purewt      lnN    0.990/1.010     -         
+pdfrewt     lnN    0.990/1.010     -         
+trigsf      lnN    1.01            -         
+Syst        shape  -               1         
+JES         shape  1               -         
+JER         shape  1               -         
+SFHb        shape  1               -         
+SFHl        shape  1               -         
+SFb         shape  1               -         
+SFl         shape  1               -         
+MH          shape  1               -         
+---------------------------------------------
+"""
+
+datacard_template_Cat2b = """---------------------------------------------------------------------------------------------
+imax 1 number of channels
+jmax 1 number of backgrounds
+kmax * number of nuisance parameters (sources of systematical uncertainties)
+---------------------------------------------------------------------------------------------
+shapes * * BprimeBprimeToBHBH_Shapes.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+----------------------------------------------------------------------------------------------
+bin                Cat2b
+observation        NOBSCAT2B
+---------------------------------------------------------------
+bin                Cat2b           Cat2b     
+process            BHBHMBP         background
+process            0               1         
+rate               NSIGCAT2B       NBKGCAT2B
+----------------------------------------------------------------
+lumi        lnN    1.026           -         
+purewt      lnN    0.990/1.010     -         
+pdfrewt     lnN    0.990/1.010     -         
+trigsf      lnN    1.02            -         
+Syst        shape  -               1
+JES         shape  1               - 
+JER         shape  1               - 
+SFHb        shape  1               - 
+SFHl        shape  1               - 
+SFb         shape  1               - 
+SFl         shape  1               - 
+MH          shape  1               -         
+---------------------------------------------------------------
+"""
+
+datacard_template = """---------------------------------------------------------------------------------------------
+imax 2 number of channels
+jmax 1 number of backgrounds
+kmax * number of nuisance parameters (sources of systematical uncertainties)
+---------------------------------------------------------------------------------------------
+shapes * * BprimeBprimeToBHBH_Shapes.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+----------------------------------------------------------------------------------------------
+bin                Cat1b                         Cat2b
+observation        NOBSCAT1B                     NOBSCAT2B
+---------------------------------------------------------------------------------------------
+bin                Cat1b           Cat1b         Cat2b           Cat2b     
+process            BHBHMBP         background    BHBHMBP         background
+process            0               1             0               1         
+rate               NSIGCAT1B       NBKGCAT1B     NSIGCAT2B       NBKGCAT2B
+----------------------------------------------------------------------------------------------
+lumi        lnN    1.026           -             1.026           -         
+purewt      lnN    0.990/1.010     -             0.990/1.010     -         
+pdfrewt     lnN    0.990/1.010     -             0.990/1.010     -         
+trigsf      lnN    1.01            -             1.02            -         
+Syst        shape  -               1             -               1
+JES         shape  1               -             1               - 
+JER         shape  1               -             1               - 
+SFHb        shape  1               -             1               - 
+SFHl        shape  1               -             1               - 
+SFb         shape  1               -             1               - 
+SFl         shape  1               -             1               - 
+MH          shape  1               -             1               - 
+---------------------------------------------------------------------------------------------
+"""
 
 ROOT.gROOT.SetBatch() 
 
@@ -18,57 +109,58 @@ if __name__  == "__main__":
 
   file = ROOT.TFile(rootFileName)
 
-  hdata1b = file.Get("DATA_HT_1bjet_Observe")
-  hdata2b = file.Get("DATA_HT_over1bjet_Observe")
-  hbkg1b = file.Get("DATA_HT_1bjet_Expect")
-  hbkg2b = file.Get("DATA_HT_over1bjet_Expect")
+  hdata1b = file.Get("Cat1b_data_obs")
+  hdata2b = file.Get("Cat2b_data_obs")
+  hbkg1b = file.Get("Cat1b_background")
+  hbkg2b = file.Get("Cat2b_background")
   hsig1b = [ 
-   file.Get("BHBH500_HT_1bjet_Signal"), 
-   file.Get("BHBH600_HT_1bjet_Signal"), 
-   file.Get("BHBH700_HT_1bjet_Signal"), 
-   file.Get("BHBH800_HT_1bjet_Signal"), 
-   file.Get("BHBH1000_HT_1bjet_Signal"), 
-   file.Get("BHBH1200_HT_1bjet_Signal"), 
+   file.Get("Cat1b_BHBH500"), 
+   file.Get("Cat1b_BHBH600"), 
+   file.Get("Cat1b_BHBH700"), 
+   file.Get("Cat1b_BHBH800"), 
+   file.Get("Cat1b_BHBH1000"), 
+   file.Get("Cat1b_BHBH1200"), 
   ] 
   hsig2b = [ 
-   file.Get("BHBH500_HT_over1bjet_Signal"), 
-   file.Get("BHBH600_HT_over1bjet_Signal"), 
-   file.Get("BHBH700_HT_over1bjet_Signal"), 
-   file.Get("BHBH800_HT_over1bjet_Signal"), 
-   file.Get("BHBH1000_HT_over1bjet_Signal"), 
-   file.Get("BHBH1200_HT_over1bjet_Signal"), 
+   file.Get("Cat2b_BHBH500"), 
+   file.Get("Cat2b_BHBH600"), 
+   file.Get("Cat2b_BHBH700"), 
+   file.Get("Cat2b_BHBH800"), 
+   file.Get("Cat2b_BHBH1000"), 
+   file.Get("Cat2b_BHBH1200"), 
   ] 
 
   for hist1b in hsig1b:
     index = hsig1b.index(hist1b) 
     hist2b = hsig2b[index]
-    mass =  (hist1b.GetName().split('BHBH')[1]).split('_')[0]
-    fname = 'datacard_BHBH'+'_M-'+str(mass)+'_normalizedShapes.txt'
-    print index, fname
-    outf = open(fname, 'w')
-    outf.write("------------------------------------------------------------------------------------\n")
-    outf.write("imax 2 number of channels\n")
-    outf.write("jmax 2 number of backgrounds\n")
-    outf.write("kmax * number of nuisance parameters (sources of systematical uncertainties)\n")
-    outf.write("------------------------------------------------------------------------------------\n")
-    outf.write("shapes BHBH"+str(mass)+"  Cat1b  "+rootFileName+"  BHBH"+str(mass)+"_HT_1bjet_Signal\n")
-    outf.write("shapes Bkg      Cat1b  "+rootFileName+"  DATA_HT_1bjet_Expect\n")
-    outf.write("shapes data_obs Cat1b  "+rootFileName+"  DATA_HT_1bjet_Observe\n")
-    outf.write("shapes BHBH"+str(mass)+"  Cat2b  "+rootFileName+"  BHBH"+str(mass)+"_HT_over1bjet_Signal\n")
-    outf.write("shapes Bkg      Cat2b  "+rootFileName+"  DATA_HT_over1bjet_Expect\n")
-    outf.write("shapes data_obs Cat2b  "+rootFileName+"  DATA_HT_over1bjet_Observe\n")
-    outf.write("------------------------------------------------------------------------------------\n")
-    outf.write("bin         Cat1b  Cat2b\n")
-    outf.write("observation "+str(hdata1b.Integral())+"   "+str(hdata2b.Integral())+"\n")
-    outf.write("------------------------------------------------------------------------------------\n")
-    outf.write("bin                Cat1b      Cat1b      Cat1b      Cat2b      Cat2b  Cat2b\n")
-    outf.write("process            BHBH"+str(mass)+"    Bkg        data_obs   BHBH"+str(mass)+"    Bkg    data_obs\n")
-    outf.write("process            0          1          2          0          1      2\n")
-    outf.write("rate               "+str(round(hist1b.Integral(),3))+"     "+str(round(hbkg1b.Integral(),2))+"    "+str(round(hdata1b.Integral(),3))+"     "+str(round(hist2b.Integral(),3))+"     "+str(round(hbkg2b.Integral(),3))+"  "+str(round(hdata2b.Integral(),3))+" \n") 
-    outf.write("------------------------------------------------------------------------------------\n")
-    outf.write("lumi        lnN    1.026      1.026      -          1.026      1.026  -\n")
-    outf.write("norm_sig    lnN    1.30       -          -          1.30       -      -\n")
-    outf.write("norm_bkg    lnN    -          1.30       -          -          1.30   -\n")
-    outf.write("------------------------------------------------------------------------------------\n")
-    outf.close() 
-
+    mass =  hist1b.GetName().split('BHBH')[1]
+    card = open(os.path.join('datacard_BHBH_M-'+str(mass)+'_shapes_allSysts.txt'), 'w')
+    card_content = re.sub('BHBHMBP','BHBH'+str(mass),datacard_template)
+    card_content = re.sub('NOBSCAT1B',str(round(hdata1b.Integral(),3)),card_content)
+    card_content = re.sub('NOBSCAT2B',str(round(hdata2b.Integral(),3)),card_content)
+    card_content = re.sub('NSIGCAT1B',str(round(hist1b.Integral(),3)),card_content)
+    card_content = re.sub('NSIGCAT2B',str(round(hist2b.Integral(),3)),card_content)
+    card_content = re.sub('NBKGCAT1B',str(round(hbkg1b.Integral(),3)),card_content)
+    card_content = re.sub('NBKGCAT2B',str(round(hbkg2b.Integral(),3)),card_content)
+    card.write(card_content)
+    card.close() 
+    card1b = open(os.path.join('datacard_BHBH_Cat1b_M-'+str(mass)+'_shapes_allSysts.txt'), 'w')
+    card1b_content = re.sub('BHBHMBP','BHBH'+str(mass),datacard_template_Cat1b)
+    card1b_content = re.sub('NOBSCAT1B',str(round(hdata1b.Integral(),3)),card1b_content)
+    card1b_content = re.sub('NOBSCAT2B',str(round(hdata2b.Integral(),3)),card1b_content)
+    card1b_content = re.sub('NSIGCAT1B',str(round(hist1b.Integral(),3)),card1b_content)
+    card1b_content = re.sub('NSIGCAT2B',str(round(hist2b.Integral(),3)),card1b_content)
+    card1b_content = re.sub('NBKGCAT1B',str(round(hbkg1b.Integral(),3)),card1b_content)
+    card1b_content = re.sub('NBKGCAT2B',str(round(hbkg2b.Integral(),3)),card1b_content)
+    card1b.write(card1b_content)
+    card1b.close() 
+    card2b = open(os.path.join('datacard_BHBH_Cat2b_M-'+str(mass)+'_shapes_allSysts.txt'), 'w')
+    card2b_content = re.sub('BHBHMBP','BHBH'+str(mass),datacard_template_Cat2b)
+    card2b_content = re.sub('NOBSCAT1B',str(round(hdata1b.Integral(),3)),card2b_content)
+    card2b_content = re.sub('NOBSCAT2B',str(round(hdata2b.Integral(),3)),card2b_content)
+    card2b_content = re.sub('NSIGCAT1B',str(round(hist1b.Integral(),3)),card2b_content)
+    card2b_content = re.sub('NSIGCAT2B',str(round(hist2b.Integral(),3)),card2b_content)
+    card2b_content = re.sub('NBKGCAT1B',str(round(hbkg1b.Integral(),3)),card2b_content)
+    card2b_content = re.sub('NBKGCAT2B',str(round(hbkg2b.Integral(),3)),card2b_content)
+    card2b.write(card2b_content)
+    card2b.close() 

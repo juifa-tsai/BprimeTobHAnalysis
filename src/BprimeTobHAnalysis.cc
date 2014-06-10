@@ -732,10 +732,22 @@ void BprimeTobHAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup
               passAllSel = true ; 
               h_cutflow -> Fill("HTSel", evtwt) ; 
               FillHisto(TString("HTSel")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ; 
-              if ( selectedBJets.size() == 1 ) h_cutflow -> Fill("HTSel_1b", evtwt) ;
-              if ( selectedBJets.size() >= 2 ) h_cutflow -> Fill("HTSel_2b", evtwt) ;
-              if ( HiggsJets.size() >= 2 && selectedBJets.size() == 1 ) h_cutflow -> Fill("HTSel_2H_1b", evtwt) ;
-              if ( HiggsJets.size() >= 2 && selectedBJets.size() >= 2 ) h_cutflow -> Fill("HTSel_2H_2b", evtwt) ;
+              if ( selectedBJets.size() == 1 ) { 
+                h_cutflow -> Fill("HTSel_1b", evtwt) ;
+                FillHisto(TString("HTSel_1b")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+              }
+              if ( selectedBJets.size() >= 2 ) {
+                h_cutflow -> Fill("HTSel_2b", evtwt) ;
+                FillHisto(TString("HTSel_2b")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+              }
+              if ( HiggsJets.size() >= 2 && selectedBJets.size() == 1 ) {
+                h_cutflow -> Fill("HTSel_2H_1b", evtwt) ;
+                FillHisto(TString("HTSel_2H_1b")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+              }
+              if ( HiggsJets.size() >= 2 && selectedBJets.size() >= 2 ) {
+                h_cutflow -> Fill("HTSel_2H_2b", evtwt) ;
+                FillHisto(TString("HTSel_2H_2b")+TString("_HTAK5"), HTAllAK5.getHT(), evtwt) ;
+              }
             }
           }
         }

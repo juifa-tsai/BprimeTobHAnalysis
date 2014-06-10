@@ -8,10 +8,10 @@
 /JetHT/Run2012D-22Jan2013-v1/AOD              20 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/Data_bugfix/JetHT_Run2012D 
 /JetHT/Run2012D_missingPart-22Jan2013-v1/AOD   2 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/Data_bugfix/JetHT_Run2012D_missingPart 
 
-/BprimeToBHinc_M-1000_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-1000_8TeV-madgraph
-/BprimeToBHinc_M-800_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-800_8TeV-madgraph
-/BprimeToBHinc_M-500_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-500_8TeV-madgraph
-/BprimeToBHinc_M-600_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-600_8TeV-madgraph
+#/BprimeToBHinc_M-1000_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-1000_8TeV-madgraph
+#/BprimeToBHinc_M-800_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-800_8TeV-madgraph
+#/BprimeToBHinc_M-500_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-500_8TeV-madgraph
+#/BprimeToBHinc_M-600_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeToBHinc_M-600_8TeV-madgraph
 
 /BprimeBprimeToBHBHinc_M-1000_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-1000_TuneZ2star_8TeV-madgraph
 /BprimeBprimeToBHBHinc_M-1200_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-1200_TuneZ2star_8TeV-madgraph
@@ -24,6 +24,7 @@
 /BprimeBprimeToBHBHinc_M-700_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM  1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-700_TuneZ2star_8TeV-madgraph
 /BprimeBprimeToBHBHinc_M-750_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM  1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-750_TuneZ2star_8TeV-madgraph
 /BprimeBprimeToBHBHinc_M-800_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM  1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-800_TuneZ2star_8TeV-madgraph
+/BprimeBprimeToBHBHinc_M-900_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM 1 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/BprimeBprimeToBHBHinc_M-900_TuneZ2star_8TeV-madgraph
 
 /QCD_Pt-1000to1400_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM  2 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/QCD_Pt-1000to1400_TuneZ2star_8TeV_pythia6
 /QCD_Pt-1400to1800_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM  2 /eos/cms/store/user/devdatta/NtuplesBprimeTobH_v1/QCD_Pt-1400to1800_TuneZ2star_8TeV_pythia6
