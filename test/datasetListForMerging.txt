@@ -57,7 +57,7 @@ BprimeBprimeToBHBHinc_M-700: L=19707
 #/BprimeBprimeToBHBHinc_M-750_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM 0.0350
 BprimeBprimeToBHBHinc_M-800: L=19707
 /BprimeBprimeToBHBHinc_M-800_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM 0.0213
-/BprimeBprimeToBHBHinc_M-900: L=19707
+BprimeBprimeToBHBHinc_M-900: L=19707
 /BprimeBprimeToBHBHinc_M-900_TuneZ2star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM 0.00828
 
 # Dataset_name xs (in pb, for data set to -1)
