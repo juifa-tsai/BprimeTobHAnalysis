@@ -86,7 +86,7 @@ options.register('subjet2CSVDiscMax', 1.000,
     VarParsing.varType.float,
     "Maximum subjet2 b discriminator"
     )
-options.register('hTMin', 1000,
+options.register('hTMin', 950,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum HT"
@@ -130,6 +130,7 @@ process.BTagEff = cms.EDAnalyzer('BTagEff',
     ReportEvery          = cms.int32(options.reportEvery),  
     InputTTree           = cms.string('ntuple/tree'),
     InputFiles           = cms.vstring(FileNames), 
+    #InputFiles           = cms.vstring(FileNames_BpBp500), 
     HLTPaths             = defaultTriggerSelectionParameters.clone(), 
     DoPUReweighting      = cms.bool(options.doPUReweighting),
     File_PUDistMC        = cms.string('pileup_Data_Summer12_53X_S10.root'),

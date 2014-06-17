@@ -7,7 +7,7 @@ imax 1 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
-shapes * * BprimeBprimeToBHBH_Shapes.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+shapes * * BprimeBprimeToBHBH_Shapes_1.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------
 bin                Cat1b           
 observation        NOBSCAT1B
@@ -28,7 +28,7 @@ SFHb        shape  1               -
 SFHl        shape  1               -         
 SFb         shape  1               -         
 SFl         shape  1               -         
-MH          shape  1               -         
+HM          shape  1               -         
 ---------------------------------------------
 """
 
@@ -37,7 +37,7 @@ imax 1 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
-shapes * * BprimeBprimeToBHBH_Shapes.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+shapes * * BprimeBprimeToBHBH_Shapes_1.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------
 bin                Cat2b
 observation        NOBSCAT2B
@@ -58,7 +58,7 @@ SFHb        shape  1               -
 SFHl        shape  1               - 
 SFb         shape  1               - 
 SFl         shape  1               - 
-MH          shape  1               -         
+HM          shape  1               -         
 ---------------------------------------------------------------
 """
 
@@ -67,7 +67,7 @@ imax 2 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
-shapes * * BprimeBprimeToBHBH_Shapes.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+shapes * * BprimeBprimeToBHBH_Shapes_1.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------
 bin                Cat1b                         Cat2b
 observation        NOBSCAT1B                     NOBSCAT2B
@@ -88,7 +88,7 @@ SFHb        shape  1               -             1               -
 SFHl        shape  1               -             1               - 
 SFb         shape  1               -             1               - 
 SFl         shape  1               -             1               - 
-MH          shape  1               -             1               - 
+HM          shape  1               -             1               - 
 ---------------------------------------------------------------------------------------------
 """
 
@@ -118,6 +118,7 @@ if __name__  == "__main__":
    file.Get("Cat1b_BHBH600"), 
    file.Get("Cat1b_BHBH700"), 
    file.Get("Cat1b_BHBH800"), 
+   file.Get("Cat1b_BHBH900"), 
    file.Get("Cat1b_BHBH1000"), 
    file.Get("Cat1b_BHBH1200"), 
   ] 
@@ -126,6 +127,7 @@ if __name__  == "__main__":
    file.Get("Cat2b_BHBH600"), 
    file.Get("Cat2b_BHBH700"), 
    file.Get("Cat2b_BHBH800"), 
+   file.Get("Cat2b_BHBH900"), 
    file.Get("Cat2b_BHBH1000"), 
    file.Get("Cat2b_BHBH1200"), 
   ] 
