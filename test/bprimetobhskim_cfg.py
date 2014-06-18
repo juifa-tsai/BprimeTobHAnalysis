@@ -50,7 +50,6 @@ process.skim = cms.EDAnalyzer('BprimebHSkim',
     ReportEvery          = cms.int32(options.reportEvery),  
     InputTTree           = cms.string('ntuple/tree'),
     InputFiles           = cms.vstring(FileNames), 
-    #InputFiles          = cms.vstring(FileNames_TTbar), 
     ) 
 
 process.p = cms.Path(process.skim)
