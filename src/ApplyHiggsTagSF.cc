@@ -2,9 +2,11 @@
 #include "BpbH/BprimeTobHAnalysis/interface/SFb-pt_WITHttbar_payload_EPS13.h"
 #include "BpbH/BprimeTobHAnalysis/interface/SFlightFuncs_EPS2013.h"
 
-ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double etaSubjet1, double etaSubjet2, double phiSubjet1, double phiSubjet2, int flavSubjet1, int flavSubjet2,  double csvSubjet1, double csvSubjet2, double SFbShift, double SFlShift) :
+ApplyHiggsTagSF::ApplyHiggsTagSF (double ptFatJet, double ptSubjet1, double ptSubjet2, double etaFatJet, double etaSubjet1, double etaSubjet2, double phiSubjet1, double phiSubjet2, int flavSubjet1, int flavSubjet2,  double csvSubjet1, double csvSubjet2, double SFbShift, double SFlShift) :
+  ptFatJet_(ptFatJet), 
   ptSubjet1_(ptSubjet1),
   ptSubjet2_(ptSubjet2),
+  etaFatJet_(etaFatJet), 
   etaSubjet1_(etaSubjet1),
   etaSubjet2_(etaSubjet2),
   phiSubjet1_(phiSubjet1),
@@ -79,6 +81,19 @@ ApplyHiggsTagSF::ApplyHiggsTagSF (double ptSubjet1, double ptSubjet2, double eta
   }
 
   higgsTagSF_ = sf1*sf2 ; 
+
+  double SF_mass_partonshower = 1.007 ; 
+  double SF_mass_frag = 0.955 ; 
+  double SF_nsubjettiness_etaLE1 = 0.967 ; 
+  double SF_nsubjettiness_etaGT1 = 0.967 ; 
+
+  double err_SF_mass_partonshower = 0.004 ; 
+  double err_SF_mass_frag = 0.011 ; 
+  double err_SF_nsubjettiness_etaLE1 = .024*0.967 ; 
+  double err_SF_nsubjettiness_etaGT1 = .056*0.967 ; 
+
+  if ( abs(etaFatJet) <= 1. ) higgsTagSF_ *= SF_mass_partonshower*SF_mass_frag*SF_nsubjettiness_etaLE1 ; 
+  else if ( abs(etaFatJet) > 1. && abs(etaFatJet) < 2.4 ) higgsTagSF_ *= SF_mass_partonshower*SF_mass_frag*SF_nsubjettiness_etaGT1 ; 
 
 }
 
