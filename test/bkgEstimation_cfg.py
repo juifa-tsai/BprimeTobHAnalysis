@@ -111,6 +111,11 @@ options.register('ApplyJEC', True,
     VarParsing.varType.bool,
     "Apply JEC" 
     )
+options.register('ApplyCA8SF', True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply CA8 jet scale factors" 
+    )
 options.register('ApplyBTagSF', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
@@ -125,6 +130,11 @@ options.register('JERShift', 0.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "JER shift in unit of sigmas" 
+    )
+options.register('SFShiftCA8', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "SF shift (for CA8 jets selection) in unit of sigmas" 
     )
 options.register('SFbShiftHtag', 0.0,
     VarParsing.multiplicity.singleton,
@@ -252,9 +262,11 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     EvtSelParams        = defaultEventSelectionParameters.clone(),
     JMEParams           = defaultJMEUncertUntilParameters.clone(), 
     ApplyJEC            = cms.bool(options.ApplyJEC), 
+    ApplyCA8SF          = cms.bool(options.ApplyCA8SF),
     ApplyBTagSF         = cms.bool(options.ApplyBTagSF), 
     JESShift            = cms.double(options.JESShift), 
     JERShift            = cms.double(options.JERShift), 
+    SFShiftCA8          = cms.double(options.SFShiftCA8), 
     SFbShiftHtag        = cms.double(options.SFbShiftHtag), 
     SFlShiftHtag        = cms.double(options.SFlShiftHtag), 
     SFbShift            = cms.double(options.SFbShift), 

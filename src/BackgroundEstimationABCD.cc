@@ -153,9 +153,11 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const edm::ParameterSet evtSelParams_ ; 
 		const edm::ParameterSet jmeParams_; 
 		const bool   applyJEC_ ; 
+    const bool   applyCA8SF_ ; 
 		const bool   applyBTagSF_ ; 
 		const double jesShift_;
 		const double jerShift_; 
+    const double SFShiftCA8_;
     const double SFbShiftHtag_;
     const double SFlShiftHtag_;
 		const double SFbShift_;
@@ -247,9 +249,11 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	evtSelParams_(iConfig.getParameter<edm::ParameterSet>("EvtSelParams")),
 	jmeParams_(iConfig.getParameter<edm::ParameterSet>("JMEParams")),
 	applyJEC_(iConfig.getParameter<bool>("ApplyJEC")),
+  applyCA8SF_(iConfig.getParameter<bool>("ApplyCA8SF")),
 	applyBTagSF_(iConfig.getParameter<bool>("ApplyBTagSF")),
 	jesShift_(iConfig.getParameter<double>("JESShift")),
 	jerShift_(iConfig.getParameter<double>("JERShift")),
+  SFShiftCA8_(iConfig.getParameter<double>("SFShiftCA8")),
   SFbShiftHtag_(iConfig.getParameter<double>("SFbShiftHtag")),
   SFlShiftHtag_(iConfig.getParameter<double>("SFlShiftHtag")),
 	SFbShift_(iConfig.getParameter<double>("SFbShift")),
@@ -534,12 +538,13 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
         AllHiggsJets.push_back(thisjet);
         if (thisjet.MassPruned() > HJetPrunedMassMin_ && thisjet.MassPruned() < HJetPrunedMassMax_ ) { //// fat jet pruned mass 
           if( subjet_dyphi >= dRSubjetsMin_ && subjet_dyphi <= dRSubjetsMax_  ){
-            if ( !isdata && applyBTagSF_ ) { //// Apply Higgs-tagging scale factor 
+            if ( !isdata && (applyBTagSF_ || applyCA8SF_) ) { //// Apply Higgs-tagging scale factor 
               ApplyHiggsTagSF* higgsTagSF = new ApplyHiggsTagSF(double (thisjet.Pt()), double(subjet1.Pt()), double(subjet2.Pt()), 
                   double(thisjet.Eta()), double(subjet1.Eta()), double(subjet2.Eta()), 
                   double(subjet1.Phi()), double(subjet2.Phi()), abs(subjet1.GenFlavor()), abs(subjet2.GenFlavor()), 
-                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags(), SFbShiftHtag_, SFlShiftHtag_) ; 
-              evtwt *= higgsTagSF->GetHiggsTagSF() ;
+                  subjet1.CombinedSVBJetTags(), subjet2.CombinedSVBJetTags(), SFShiftCA8_, SFbShiftHtag_, SFlShiftHtag_) ; 
+              if (applyBTagSF_) evtwt *= higgsTagSF->GetHiggsTagSF() ;
+              if (applyCA8SF_) evtwt *= higgsTagSF->GetCA8JetSF() ; 
               delete higgsTagSF ; 
             } //// Apply Higgs-tagging scale factor  
             HiggsJets.push_back(thisjet);
