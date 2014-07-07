@@ -7,7 +7,7 @@ imax 1 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
-shapes * * BprimeBprimeToBHBH_Shapes_1.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+shapes * * ROOTFILENAME $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------
 bin                Cat1b           
 observation        NOBSCAT1B
@@ -24,11 +24,11 @@ trigsf      lnN    1.01            -
 Syst        shape  -               1         
 JES         shape  1               -         
 JER         shape  1               -         
+SFCA8       shape  1               -         
 SFHb        shape  1               -         
 SFHl        shape  1               -         
 SFb         shape  1               -         
 SFl         shape  1               -         
-HM          shape  1               -         
 ---------------------------------------------
 """
 
@@ -37,7 +37,7 @@ imax 1 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
-shapes * * BprimeBprimeToBHBH_Shapes_1.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+shapes * * ROOTFILENAME $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------
 bin                Cat2b
 observation        NOBSCAT2B
@@ -54,11 +54,11 @@ trigsf      lnN    1.02            -
 Syst        shape  -               1
 JES         shape  1               - 
 JER         shape  1               - 
+SFCA8       shape  1               -         
 SFHb        shape  1               - 
 SFHl        shape  1               - 
 SFb         shape  1               - 
 SFl         shape  1               - 
-HM          shape  1               -         
 ---------------------------------------------------------------
 """
 
@@ -67,7 +67,7 @@ imax 2 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
-shapes * * BprimeBprimeToBHBH_Shapes_1.root $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
+shapes * * ROOTFILENAME $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------
 bin                Cat1b                         Cat2b
 observation        NOBSCAT1B                     NOBSCAT2B
@@ -84,11 +84,11 @@ trigsf      lnN    1.01            -             1.02            -
 Syst        shape  -               1             -               1
 JES         shape  1               -             1               - 
 JER         shape  1               -             1               - 
+SFCA8       shape  1               -             1               - 
 SFHb        shape  1               -             1               - 
 SFHl        shape  1               -             1               - 
 SFb         shape  1               -             1               - 
 SFl         shape  1               -             1               - 
-HM          shape  1               -             1               - 
 ---------------------------------------------------------------------------------------------
 """
 
@@ -137,7 +137,8 @@ if __name__  == "__main__":
     hist2b = hsig2b[index]
     mass =  hist1b.GetName().split('BHBH')[1]
     card = open(os.path.join('datacard_BHBH_M-'+str(mass)+'_shapes_allSysts.txt'), 'w')
-    card_content = re.sub('BHBHMBP','BHBH'+str(mass),datacard_template)
+    card_content = re.sub('ROOTFILENAME',rootFileName,datacard_template)
+    card_content = re.sub('BHBHMBP','BHBH'+str(mass),card_content)
     card_content = re.sub('NOBSCAT1B',str(round(hdata1b.Integral(),3)),card_content)
     card_content = re.sub('NOBSCAT2B',str(round(hdata2b.Integral(),3)),card_content)
     card_content = re.sub('NSIGCAT1B',str(round(hist1b.Integral(),3)),card_content)
@@ -147,7 +148,8 @@ if __name__  == "__main__":
     card.write(card_content)
     card.close() 
     card1b = open(os.path.join('datacard_BHBH_Cat1b_M-'+str(mass)+'_shapes_allSysts.txt'), 'w')
-    card1b_content = re.sub('BHBHMBP','BHBH'+str(mass),datacard_template_Cat1b)
+    card1b_content = re.sub('ROOTFILENAME',rootFileName,datacard_template_Cat1b)
+    card1b_content = re.sub('BHBHMBP','BHBH'+str(mass),card1b_content)
     card1b_content = re.sub('NOBSCAT1B',str(round(hdata1b.Integral(),3)),card1b_content)
     card1b_content = re.sub('NOBSCAT2B',str(round(hdata2b.Integral(),3)),card1b_content)
     card1b_content = re.sub('NSIGCAT1B',str(round(hist1b.Integral(),3)),card1b_content)
@@ -157,7 +159,8 @@ if __name__  == "__main__":
     card1b.write(card1b_content)
     card1b.close() 
     card2b = open(os.path.join('datacard_BHBH_Cat2b_M-'+str(mass)+'_shapes_allSysts.txt'), 'w')
-    card2b_content = re.sub('BHBHMBP','BHBH'+str(mass),datacard_template_Cat2b)
+    card2b_content = re.sub('ROOTFILENAME',rootFileName,datacard_template_Cat2b)
+    card2b_content = re.sub('BHBHMBP','BHBH'+str(mass),card2b_content)
     card2b_content = re.sub('NOBSCAT1B',str(round(hdata1b.Integral(),3)),card2b_content)
     card2b_content = re.sub('NOBSCAT2B',str(round(hdata2b.Integral(),3)),card2b_content)
     card2b_content = re.sub('NSIGCAT1B',str(round(hist1b.Integral(),3)),card2b_content)

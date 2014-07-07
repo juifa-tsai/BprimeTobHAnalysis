@@ -363,8 +363,8 @@ void BprimeTobHAnalysis::CreateHistos(const TString& cutname) {
   AddHisto(cutname ,"_BJet_Pt"                     ,"p_{T} (b jet)[GeV]"                           ,200    ,0.       ,2000.   ) ;
   AddHisto(cutname ,"_BJet_Eta"                    ,"#eta (b jet)"                                 ,50     ,-4.      ,4.      ) ;
 
-  AddHisto(cutname ,"_HT"                          ,"H_{T}[GeV]"                                   ,2400  ,-50.     ,2350.   ) ;
-  AddHisto(cutname ,"_HTAK5"                       ,"H_{T} (AK5 jets) [GeV]"                       ,2400  ,-50.     ,2350.   ) ;
+  AddHisto(cutname ,"_HT"                          ,"H_{T}[GeV]"                                   ,2700  ,-250.    ,2450.   ) ;
+  AddHisto(cutname ,"_HTAK5"                       ,"H_{T} (AK5 jets) [GeV]"                       ,2700  ,-250.    ,2450.   ) ;
   AddHisto(cutname ,"_Nbprimes"                    ,";N (b' candidates); Events"                   ,5     ,-0.5     ,4.5     ) ;
   AddHisto(cutname ,"_bprimePt"                    ,"b' p_{T} [GeV]"                               ,200   ,0.       ,2000.   ) ;
   AddHisto(cutname ,"_bprimeMass"                  ,"b' mass [GeV]"                                ,200   ,0.       ,2000.   ) ;
