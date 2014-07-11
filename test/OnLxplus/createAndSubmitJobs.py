@@ -34,9 +34,9 @@ def process_input_dir(input_dir, match, filelist):
         elif re.search('_\d+.root', filename):
           m1 = re.search('_\d+.root', filename)
         if name=='':
-          if re.split('_\d+_\d+_\w+.root', filename)[0]:
+          if re.search('_\d+_\d+_\w+.root', filename):
             name = re.split('_\d+_\d+_\w+.root', filename)[0]
-          elif re.split('_\d+.root', filename)[0]: 
+          elif re.search('_\d+.root', filename):
             name = re.split('_\d+.root', filename)[0]
         jobstring = filename[m1.start():].lstrip('_').replace('.root','').split('_')
         job = int(jobstring[0])
@@ -63,7 +63,7 @@ def process_input_dir(input_dir, match, filelist):
           maxsub = max(jobdict[job][0])
           filename = (path+name+'_%i_%i_%s.root')%(job, maxsub, jobdict[job][1][jobdict[job][0].index(maxsub)])
         else:
-          filename = (path+name)
+          filename = (path+name+'_%i.root')%(job)
         filelist.append(filename)
 
     return
