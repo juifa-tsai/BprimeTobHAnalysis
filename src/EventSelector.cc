@@ -56,6 +56,10 @@ int EventSelector::nGoodHiggsJets () {
   return goodHiggsJets_.size() ; 
 }
 
+int EventSelector::nNonHiggsJets () {
+  return nonHiggsJets_.size() ; 
+}
+
 JetCollection EventSelector::goodJets () {
   return goodJets_ ; 
 }
@@ -70,6 +74,10 @@ JetCollection EventSelector::goodFatJets () {
 
 JetCollection EventSelector::goodHiggsJets () {
   return goodHiggsJets_ ; 
+}
+
+JetCollection EventSelector::nonHiggsJets () {
+  return nonHiggsJets_ ; 
 }
 
 bool EventSelector::passes() {
@@ -161,9 +169,13 @@ void EventSelector::fatjetSel () {
 void EventSelector::higgsjetSel () {
   pat::strbitset retjetidca8 = higgsjetSelector_->getBitTemplate() ;
   for (int ijet = 0; ijet < fatjetInfo_->Size; ++ijet) {
-    if (higgsjetSelector_->operator()(*fatjetInfo_, ijet, *subjetInfo_, retjetidca8) == 0) continue ;
-    Jet thishiggsjet(*fatjetInfo_, ijet) ; 
-    goodHiggsJets_.push_back(thishiggsjet) ; 
+    Jet thisjet(*fatjetInfo_, ijet) ; 
+    if (higgsjetSelector_->operator()(*fatjetInfo_, ijet, *subjetInfo_, retjetidca8) != 0) {
+      goodHiggsJets_.push_back(thisjet) ; 
+    }
+    else {
+      nonHiggsJets_.push_back(thisjet) ; 
+    }
   }
 
 }
@@ -197,6 +209,7 @@ void EventSelector::reset() {
   goodBJets_.clear();
   goodFatJets_.clear();
   goodHiggsJets_.clear();
+  nonHiggsJets_.clear();
   HT_.clearJetCollections() ; 
   HTVal_ = 0 ; 
 

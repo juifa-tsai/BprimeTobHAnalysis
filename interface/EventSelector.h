@@ -40,6 +40,7 @@ class EventSelector {
     int primaryVertex();
     int nGoodFatJets();
     int nGoodHiggsJets(); 
+    int nNonHiggsJets(); 
     int nGoodJets();
     int nGoodBJets();
 
@@ -47,6 +48,7 @@ class EventSelector {
     JetCollection goodBJets();
     JetCollection goodFatJets();
     JetCollection goodHiggsJets();
+    JetCollection nonHiggsJets();
 
   private: 
 
@@ -81,6 +83,7 @@ class EventSelector {
     JetCollection goodBJets_;
     JetCollection goodFatJets_;
     JetCollection goodHiggsJets_;
+    JetCollection nonHiggsJets_;
     HT HT_ ; 
 
     int    minNJets_ ; 

@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 from BpbH.BprimeTobH.TriggerSelector_cfi import *
 from BpbH.BprimeTobH.JetSelector_cfi import *
 from BpbH.BprimeTobH.BJetSelector_cfi import *
+from BpbH.BprimeTobH.BtaggedFatJetSelector_cfi import *
 from BpbH.BprimeTobH.FatJetSelector_cfi import * 
 from BpbH.BprimeTobH.HiggsJetSelector_cfi import * 
 from BpbH.BprimeTobH.HTSelector_cfi import * 

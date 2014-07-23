@@ -41,22 +41,22 @@ options.register('fatJetPtMax', 1.E6,
     VarParsing.varType.float,
     "Maximum fat jet Pt"
     )
-options.register('fatJetMassMin', 100.,
+options.register('fatJetMassMin', 0.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum fat jet mass"
     )
-options.register('fatJetMassMax', 150.,
+options.register('fatJetMassMax', 100000.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum fat jet mass"
     )
-options.register('fatJetPrunedMassMin', 75.,
+options.register('fatJetPrunedMassMin', 90.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum fat jet pruned mass"
     )
-options.register('fatJetPrunedMassMax', 1.E6,
+options.register('fatJetPrunedMassMax', 140.,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Maximum fat jet pruned mass"
@@ -86,7 +86,7 @@ options.register('subjet2CSVDiscMax', 1.000,
     VarParsing.varType.float,
     "Maximum subjet2 b discriminator"
     )
-options.register('hTMin', 950,
+options.register('hTMin', 900,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum HT"
@@ -129,8 +129,9 @@ process.BTagEff = cms.EDAnalyzer('BTagEff',
     MaxEvents            = cms.int32(options.maxEvents),
     ReportEvery          = cms.int32(options.reportEvery),  
     InputTTree           = cms.string('ntuple/tree'),
-    InputFiles           = cms.vstring(FileNames), 
-    #InputFiles           = cms.vstring(FileNames_BpBp500), 
+    #InputFiles           = cms.vstring(FileNames), 
+    InputFiles           = cms.vstring(FileNames_BpBp500), 
+    #InputFiles           = cms.vstring(FileNames_TTbar), 
     HLTPaths             = defaultTriggerSelectionParameters.clone(), 
     DoPUReweighting      = cms.bool(options.doPUReweighting),
     File_PUDistMC        = cms.string('pileup_Data_Summer12_53X_S10.root'),
@@ -138,10 +139,31 @@ process.BTagEff = cms.EDAnalyzer('BTagEff',
     Hist_PUDistMC        = cms.string('pileup_mc'),
     Hist_PUDistData      = cms.string('pileup_data'),
     EvtSelParams         = defaultEventSelectionParameters.clone(
-      CutLevels         = cms.vstring('Trigger', 'Vertex', 'MinHiggsjets', 'MaxHiggsjets', 'MinNJets', 'MaxNJets', 'HT'),  
-      ),
-    JetSelParams      = defaultJetSelectionParameters.clone(), 
-    BJetSelParams     = defaultBJetSelectionParameters.clone(), 
+      CutLevels          = cms.vstring('Trigger', 'Vertex', 'MinHiggsjets', 'MaxHiggsjets', 'MinNJets', 'MaxNJets', 'HT'),
+      FatJetSelParams          = defaultFatJetSelectionParameters.clone(
+        fatJetPtMin        = cms.double(300), 
+        ), 
+      HiggsJetSelParams        = defaultHiggsJetSelectionParameters.clone(
+        fatJetPtMin        = cms.double(300), 
+        ), 
+      ), 
+    FatJetSelParams     = defaultFatJetSelectionParameters.clone(
+      jettype = cms.string('CA8JET'), 
+      fatJetPtMin = cms.double(30.),
+      fatJetTau2ByTau1Max = cms.double(1.),
+      ), 
+    FatBJetSelParams     = defaultBTaggedFatJetSelectionParameters.clone(
+      fatJetPtMin = cms.double(30.),
+      fatJetTau2ByTau1Max = cms.double(1.),
+      fatJetCSVDiscMin    = cms.double(-2000), 
+      fatJetCSVDiscMax    = cms.double(1.000), 
+      subjet1CSVDiscMin   = cms.double(-2000),
+      subjet1CSVDiscMax   = cms.double(1.000),
+      subjet2CSVDiscMin   = cms.double(-2000),
+      subjet2CSVDiscMax   = cms.double(1.000),
+      ), 
+    JetSelParams        = defaultJetSelectionParameters.clone(), 
+    BJetSelParams       = defaultBJetSelectionParameters.clone(), 
     ) 
 
 process.p = cms.Path(process.BTagEff)
