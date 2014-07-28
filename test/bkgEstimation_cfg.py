@@ -157,6 +157,14 @@ options.register('SFlShift', 0.0,
     "SFl shift in unit of sigmas" 
     )
 
+if options.SFbShiftHtag != options.SFbShift:
+  print "Warning: SFbshiftHtag and SFbshift not equal. Setting them to be the same."
+  options.SFbShiftHtag = options.SFbShift
+
+if options.SFlShiftHtag != options.SFlShift:
+  print "Warning: SFlshiftHtag and SFlshift not equal. Setting them to be the same."
+  options.SFlShiftHtag = options.SFlShift
+
 if options.SFbShiftHtag != 0.0 and options.SFlShiftHtag != 0.0: 
   print "SFbshiftHtag = ",  options.SFbShiftHtag, " and SFlshiftHtag = ", options.SFlShiftHtag
   print "Warning: must be varied independently."
