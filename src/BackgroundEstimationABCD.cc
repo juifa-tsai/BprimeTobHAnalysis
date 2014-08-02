@@ -439,13 +439,17 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 
     if ( !isdata ) { //// Gen info
 	double tPt(0), tbarPt(0), ttbarReWeight(1);
+	int numTop(0);
       std::vector<int> gen_higgs_indices ; 
       for (int igen = 0; igen < GenInfo.Size; ++igen) { 
         if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ;
-	if ( GenInfo.PdgID[igen] == 6 ) tPt=GenInfo.Pt[igen]; 
-	else if ( GenInfo.PdgID[igen] == -6 ) tbarPt=GenInfo.Pt[igen]; 
+	if ( abs(GenInfo.PdgID[igen]) == 6 ){
+		if ( GenInfo.PdgID[igen] == 6 ) tPt=GenInfo.Pt[igen]; 
+		else if ( GenInfo.PdgID[igen] == -6 ) tbarPt=GenInfo.Pt[igen];
+		numTop++; 
+	}
       }
-	if( applyTopPtReWeighting_ ){
+	if( applyTopPtReWeighting_ && numTop==2){
 		ttbarReWeight=sqrt(exp(0.156-0.00137*tPt)*exp(0.156-0.00137*tbarPt)); //re-weight = sqrt(SF(top)*SF(anti-top))
 		double ttbarReWeightShift(1);
 		if( topPtReWeightShift_ == 0 )	ttbarReWeightShift = ttbarReWeight;
@@ -453,7 +457,7 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
 		else if( topPtReWeightShift_ == -1 )	ttbarReWeightShift = 1; 
 		else edm::LogInfo("WrongTopPtReWeightShift") << "Wrong topPtReWeightShift_ "<<topPtReWeightShift_;
 		evtwt *= ttbarReWeightShift;
-		//cout<<entry<<", "<<tPt<<", "<<tbarPt<<", "<<evtwt<<", "<<topPtReWeightShift_<<", "<<ttbarReWeight<<", "<<ttbarReWeightShift<<endl; 
+		//cout<<entry<<", "<<numTop<<", "<<tPt<<", "<<tbarPt<<", "<<evtwt<<", "<<topPtReWeightShift_<<", "<<ttbarReWeight<<", "<<ttbarReWeightShift<<endl; 
 	}
       //// Higgs BR reweighting
       for (std::vector<int>::const_iterator ihig = gen_higgs_indices.begin(); ihig != gen_higgs_indices.end(); ++ihig) {
