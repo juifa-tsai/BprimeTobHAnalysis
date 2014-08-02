@@ -21,14 +21,12 @@ lumi        lnN    1.026           -
 purewt      lnN    0.990/1.010     -         
 pdfrewt     lnN    0.990/1.010     -         
 trigsf      lnN    1.01            -         
-Syst        shape  -               1         
-JES         shape  1               -         
-JER         shape  1               -         
-SFCA8       shape  1               -         
-SFHb        shape  1               -         
-SFHl        shape  1               -         
-SFb         shape  1               -         
-SFl         shape  1               -         
+JES         shape  1               1         
+JER         shape  1               1         
+CA8         shape  1               1         
+SFb         shape  1               1         
+SFl         shape  1               1         
+Stat        shape  1               1
 ---------------------------------------------
 """
 
@@ -51,14 +49,12 @@ lumi        lnN    1.026           -
 purewt      lnN    0.990/1.010     -         
 pdfrewt     lnN    0.990/1.010     -         
 trigsf      lnN    1.02            -         
-Syst        shape  -               1
-JES         shape  1               - 
-JER         shape  1               - 
-SFCA8       shape  1               -         
-SFHb        shape  1               - 
-SFHl        shape  1               - 
-SFb         shape  1               - 
-SFl         shape  1               - 
+JES         shape  1               1 
+JER         shape  1               1 
+CA8         shape  1               1         
+SFb         shape  1               1 
+SFl         shape  1               1 
+Stat        shape  1               1
 ---------------------------------------------------------------
 """
 
@@ -81,14 +77,12 @@ lumi        lnN    1.026           -             1.026           -
 purewt      lnN    0.990/1.010     -             0.990/1.010     -         
 pdfrewt     lnN    0.990/1.010     -             0.990/1.010     -         
 trigsf      lnN    1.01            -             1.02            -         
-Syst        shape  -               1             -               1
-JES         shape  1               -             1               - 
-JER         shape  1               -             1               - 
-SFCA8       shape  1               -             1               - 
-SFHb        shape  1               -             1               - 
-SFHl        shape  1               -             1               - 
-SFb         shape  1               -             1               - 
-SFl         shape  1               -             1               - 
+JES         shape  1               1             1               1 
+JER         shape  1               1             1               1 
+CA8         shape  1               1             1               1 
+SFb         shape  1               1             1               1 
+SFl         shape  1               1             1               1 
+Stat        shape  1               1             1               1
 ---------------------------------------------------------------------------------------------
 """
 
