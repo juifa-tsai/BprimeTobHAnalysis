@@ -155,6 +155,7 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const bool   applyJEC_ ; 
     const bool   applyCA8SF_ ; 
 		const bool   applyBTagSF_ ; 
+	const bool applyTopPtReWeighting_;
 		const double jesShift_;
 		const double jerShift_; 
     const double SFShiftCA8_;
@@ -162,6 +163,7 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
     const double SFlShiftHtag_;
 		const double SFbShift_;
 		const double SFlShift_;
+		const double topPtReWeightShift_;
 
 		EvtInfoBranches    EvtInfo;
 		VertexInfoBranches VtxInfo;
@@ -251,6 +253,7 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	applyJEC_(iConfig.getParameter<bool>("ApplyJEC")),
   applyCA8SF_(iConfig.getParameter<bool>("ApplyCA8SF")),
 	applyBTagSF_(iConfig.getParameter<bool>("ApplyBTagSF")),
+	applyTopPtReWeighting_(iConfig.getParameter<bool>("ApplyTopPtReWeighting")),
 	jesShift_(iConfig.getParameter<double>("JESShift")),
 	jerShift_(iConfig.getParameter<double>("JERShift")),
   SFShiftCA8_(iConfig.getParameter<double>("SFShiftCA8")),
@@ -258,6 +261,7 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
   SFlShiftHtag_(iConfig.getParameter<double>("SFlShiftHtag")),
 	SFbShift_(iConfig.getParameter<double>("SFbShift")),
 	SFlShift_(iConfig.getParameter<double>("SFlShift")),
+topPtReWeightShift_(iConfig.getParameter<double>("TopPtReWeightShift")),
 	evtPass_ana(0),  
 	evtPass_val(0), 
 	BuildMiniTree_(iConfig.getParameter<bool>("BuildMinTree")) 
@@ -433,11 +437,24 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       if( doPUReweighting_ ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]); 
     }
 
-    if ( !isdata ) { //// Gen info 
+    if ( !isdata ) { //// Gen info
+	double tPt(0), tbarPt(0), ttbarReWeight(1);
       std::vector<int> gen_higgs_indices ; 
       for (int igen = 0; igen < GenInfo.Size; ++igen) { 
-        if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ; 
+        if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ;
+	if ( GenInfo.PdgID[igen] == 6 ) tPt=GenInfo.Pt[igen]; 
+	else if ( GenInfo.PdgID[igen] == -6 ) tbarPt=GenInfo.Pt[igen]; 
       }
+	if( applyTopPtReWeighting_ ){
+		ttbarReWeight=sqrt(exp(0.156-0.00137*tPt)*exp(0.156-0.00137*tbarPt)); //re-weight = sqrt(SF(top)*SF(anti-top))
+		double ttbarReWeightShift(1);
+		if( topPtReWeightShift_ == 0 )	ttbarReWeightShift = ttbarReWeight;
+		else if( topPtReWeightShift_ == 1 )	ttbarReWeightShift = ttbarReWeight*ttbarReWeight;
+		else if( topPtReWeightShift_ == -1 )	ttbarReWeightShift = 1; 
+		else edm::LogInfo("WrongTopPtReWeightShift") << "Wrong topPtReWeightShift_ "<<topPtReWeightShift_;
+		evtwt *= ttbarReWeightShift;
+		//cout<<entry<<", "<<tPt<<", "<<tbarPt<<", "<<evtwt<<", "<<topPtReWeightShift_<<", "<<ttbarReWeight<<", "<<ttbarReWeightShift<<endl; 
+	}
       //// Higgs BR reweighting
       for (std::vector<int>::const_iterator ihig = gen_higgs_indices.begin(); ihig != gen_higgs_indices.end(); ++ihig) {
         int higgsDau0(abs(GenInfo.Da0PdgID[*ihig])), higgsDau1(abs(GenInfo.Da1PdgID[*ihig])) ;
