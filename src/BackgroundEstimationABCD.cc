@@ -326,11 +326,41 @@ void BackgroundEstimationABCD::isolateCollection( JetCollection control, JetColl
 
 // ------------ method called once each job just before starting event loop  ------------
 void BackgroundEstimationABCD::beginJob(){ 
+	h2.CreateTH2(fs); h2.Sumw2();
+	h1.CreateTH1(fs); h1.Sumw2();
+
+	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(1,"All_Evt");	
+	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(2,"Trigger_Sel");	
+	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(3,"Vertex_Sel");	
+	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(4,"HT_Sel");	
+	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(5,"ABCD_Sel");
+
+	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(1,"All_Evt");	
+	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(2,"Trigger_Sel");	
+	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(3,"Vertex_Sel");	
+	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(4,"HT_Sel");	
+	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(5,"ABCD_Sel");	
+
+	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion"));	
+	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_1b"));	
+	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_2b"));	
+	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion"));
+	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_0ak5"));	
+	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_1ak5"));	
+	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_2ak5"));
+
 	chain_  = new TChain(inputTTree_.c_str());
 
 	for(unsigned i=0; i<inputFiles_.size(); ++i){
 		chain_->Add(inputFiles_.at(i).c_str());
 		TFile *f = TFile::Open(inputFiles_.at(i).c_str(),"READ");
+		if ( TString(inputTTree_).Contains("skim") ) {
+			if ( maxEvents_ < 0 ) {
+				TH1F* h_events = (TH1F*)f->Get("skim/h_cutflow") ;
+				h1.GetTH1("ABCDana_CutFlow")->Fill("All_Evt",h_events->GetBinContent(1) );	
+				h1.GetTH1("ABCDval_CutFlow")->Fill("All_Evt",h_events->GetBinContent(1) );
+			}
+		}
 		f->Close();
 	}
 
@@ -361,29 +391,6 @@ void BackgroundEstimationABCD::beginJob(){
 		AntiHiggsSubJet1InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet1Info");
 		AntiHiggsSubJet2InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet2Info");
 	}
-
-	h2.CreateTH2(fs); h2.Sumw2();
-	h1.CreateTH1(fs); h1.Sumw2();
-
-	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(1,"All_Evt");	
-	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(2,"Trigger_Sel");	
-	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(3,"Vertex_Sel");	
-	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(4,"HT_Sel");	
-	h1.GetTH1("ABCDana_CutFlow")->GetXaxis()->SetBinLabel(5,"ABCD_Sel");
-
-	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(1,"All_Evt");	
-	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(2,"Trigger_Sel");	
-	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(3,"Vertex_Sel");	
-	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(4,"HT_Sel");	
-	h1.GetTH1("ABCDval_CutFlow")->GetXaxis()->SetBinLabel(5,"ABCD_Sel");	
-
-	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion"));	
-	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_1b"));	
-	setABCDcutRegion(h1.GetTH1("ABCDana_CutRegion_2b"));	
-	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion"));
-	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_0ak5"));	
-	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_1ak5"));	
-	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_2ak5"));	
 
 	return;  
 }
@@ -453,8 +460,10 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     evtwt *= puwt ;
     double evtwt2 = evtwt*evtwt;
 
-    h1.GetTH1("ABCDana_CutFlow")->Fill(0);	
-    h1.GetTH1("ABCDval_CutFlow")->Fill(0);
+    if ( TString(inputTTree_).Contains("ntuple") ) {
+	    h1.GetTH1("ABCDana_CutFlow")->Fill(0);	
+	    h1.GetTH1("ABCDval_CutFlow")->Fill(0);
+    }
 
     //// Trigger selection 
     TriggerSelector trigSel(hltPaths_); 
