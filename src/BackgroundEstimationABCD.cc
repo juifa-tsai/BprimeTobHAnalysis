@@ -190,6 +190,10 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		JetInfoBranches HiggsSubJet1InfoAna, HiggsSubJet2InfoAna, 
 				AntiHiggsSubJet1InfoAna, AntiHiggsSubJet2InfoAna;
 		bool   McFlagana;
+		int RunNo;
+		long int EvtNo;
+		int LumiNo;
+		int EvtCat;
 		double PUana;
 		double evtWtana;
 		double HTak5, HThiggsbjet;
@@ -385,7 +389,11 @@ void BackgroundEstimationABCD::beginJob(){
 		newtree_ana->Branch("EvtInfo.PU", 		&PUana, 	"EvtInfo.PU/D"); // store weight of evt and pu for each event
 		newtree_ana->Branch("EvtInfo.WeightEvt",	&evtWtana, 	"EvtInfo.WeightEvt/D"); 	
 		newtree_ana->Branch("EvtInfo.HT_AK5",		&HTak5, 	"EvtInfo.HT_AK5/D"); 	
-		newtree_ana->Branch("EvtInfo.HT_HiggsbJets",	&HThiggsbjet, 	"EvtInfo.HT_HiggsbJets/D"); 	
+		newtree_ana->Branch("EvtInfo.HT_HiggsbJets",	&HThiggsbjet, 	"EvtInfo.HT_HiggsbJets/D"); 
+		newtree_ana->Branch("EvtInfo.RunNo",	&RunNo, 	"EvtInfo.RunNo/I"); 
+		newtree_ana->Branch("EvtInfo.EvtNo",	&EvtNo, 	"EvtInfo.EvtNo/L"); 
+		newtree_ana->Branch("EvtInfo.LumiNo",	&LumiNo, 	"EvtInfo.LumiNo/I"); 
+		newtree_ana->Branch("EvtInfo.EvtCat",	&EvtCat, 	"EvtInfo.EvtCat/I"); 
 		HiggsJetInfoAna.RegisterTree(newtree_ana,"HiggsJetInfo");
 		AntiHiggsJetInfoAna.RegisterTree(newtree_ana,"AntiHiggsJetInfo");
 		bJetInfoAna.RegisterTree(newtree_ana,"bJetInfo");
@@ -1127,8 +1135,15 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     h1.GetTH1("ABCDval_Sumw2_D")->Fill( 0., sumw2_dv);
     //// Store new tree, new branch with Jet correction  
     if( BuildMiniTree_ ){
-      if( nA+nB+nC+nD > 0 ){ 	
+      //if( nA+nB+nC+nD > 0 ){ 	
+      if( nB > 0 ){ //Record final evt	
         McFlagana = EvtInfo.McFlag;
+        RunNo = EvtInfo.RunNo;
+        EvtNo = EvtInfo.EvtNo;
+        LumiNo = EvtInfo.LumiNo;
+     	if( selectedBJets.size() == 1 ) EvtCat = 1;
+	else if( selectedBJets.size()>= 2 ) EvtCat = 2;
+	else EvtCat = 0;
         PUana = puwt;
         evtWtana = evtwt;
         HTak5 = HTAllAK5.getHT();
