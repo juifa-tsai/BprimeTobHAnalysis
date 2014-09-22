@@ -8,82 +8,97 @@ jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
 shapes * * ROOTFILENAME $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
-----------------------------------------------------------------------------------------------
-bin                Cat1b           
-observation        NOBSCAT1B
----------------------------------------------
-bin                Cat1b           Cat1b     
-process            BHBHMBP         background
-process            0               1         
-rate               NSIGCAT1B       NBKGCAT1B 
----------------------------------------------
-lumi        lnN    1.026           -         
-purewt      lnN    0.990/1.010     -         
-pdfrewt     lnN    0.990/1.010     -         
-trigsf      lnN    1.01            -         
-JES         shape  1               1         
-JER         shape  1               1         
-CA8         shape  1               1         
-SFb         shape  1               1         
-SFl         shape  1               1         
-Stat        shape  1               1
----------------------------------------------
+---------------------------------------------------------------------------------------------
+bin                 Cat1b           
+observation         NOBSCAT1B
+-----------------------------------------------------
+bin                        Cat1b           Cat1b     
+process                    BHBHMBP         background
+process                    0               1         
+rate                       NSIGCAT1B       NBKGCAT1B 
+-----------------------------------------------------
+lumi                lnN    1.026           -         
+purewt              lnN    0.990/1.010     -         
+pdfrewt             lnN    0.990/1.010     -         
+trigsf              lnN    1.01            -         
+ca8misc             lnN    1.15            -
+JES                 shape  1               1         
+JER                 shape  1               1         
+CA8                 shape  1               1         
+SFb                 shape  1               1         
+SFl                 shape  1               1         
+SigStat             shape  1               -
+Stat                shape  -               1
+TTJetsScale         shape  -               1
+TTJetsMatching      shape  -               1
+TopPtReWrt          lnN    -               0.992/1.005
+---------------------------------------------------------------------------------------------
 """
 
-datacard_template_Cat2b = """---------------------------------------------------------------------------------------------
+datacard_template_Cat2b = """--------------------------------------------------------------------------------------------- 
 imax 1 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
 ---------------------------------------------------------------------------------------------
 shapes * * ROOTFILENAME $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
-----------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 bin                Cat2b
 observation        NOBSCAT2B
----------------------------------------------------------------
-bin                Cat2b           Cat2b     
-process            BHBHMBP         background
-process            0               1         
-rate               NSIGCAT2B       NBKGCAT2B
-----------------------------------------------------------------
-lumi        lnN    1.026           -         
-purewt      lnN    0.990/1.010     -         
-pdfrewt     lnN    0.990/1.010     -         
-trigsf      lnN    1.02            -         
-JES         shape  1               1 
-JER         shape  1               1 
-CA8         shape  1               1         
-SFb         shape  1               1 
-SFl         shape  1               1 
-Stat        shape  1               1
----------------------------------------------------------------
+-----------------------------------------------------
+bin                       Cat2b           Cat2b     
+process                   BHBHMBP         background
+process                   0               1         
+rate                      NSIGCAT2B       NBKGCAT2B
+-----------------------------------------------------
+lumi               lnN    1.026           -         
+purewt             lnN    0.990/1.010     -         
+pdfrewt            lnN    0.990/1.010     -         
+trigsf             lnN    1.02            -         
+ca8misc            lnN    1.15            -
+JES                shape  1               1 
+JER                shape  1               1 
+CA8                shape  1               1         
+SFb                shape  1               1 
+SFl                shape  1               1 
+SigStat            shape  1               -
+Stat               shape  -               1
+TTJetsScale        shape  -               1
+TTJetsMatching     shape  -               1
+TopPtReWrt         lnN    -               0.996/1.002
+---------------------------------------------------------------------------------------------
 """
 
 datacard_template = """---------------------------------------------------------------------------------------------
 imax 2 number of channels
 jmax 1 number of backgrounds
 kmax * number of nuisance parameters (sources of systematical uncertainties)
----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
 shapes * * ROOTFILENAME $CHANNEL_$PROCESS $CHANNEL_$PROCESS_$SYSTEMATIC
-----------------------------------------------------------------------------------------------
-bin                Cat1b                         Cat2b
-observation        NOBSCAT1B                     NOBSCAT2B
----------------------------------------------------------------------------------------------
-bin                Cat1b           Cat1b         Cat2b           Cat2b     
-process            BHBHMBP         background    BHBHMBP         background
-process            0               1             0               1         
-rate               NSIGCAT1B       NBKGCAT1B     NSIGCAT2B       NBKGCAT2B
-----------------------------------------------------------------------------------------------
-lumi        lnN    1.026           -             1.026           -         
-purewt      lnN    0.990/1.010     -             0.990/1.010     -         
-pdfrewt     lnN    0.990/1.010     -             0.990/1.010     -         
-trigsf      lnN    1.01            -             1.02            -         
-JES         shape  1               1             1               1 
-JER         shape  1               1             1               1 
-CA8         shape  1               1             1               1 
-SFb         shape  1               1             1               1 
-SFl         shape  1               1             1               1 
-Stat        shape  1               1             1               1
----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+bin                        Cat1b                         Cat2b
+observation               NOBSCAT1B                     NOBSCAT2B
+------------------------------------------------------------------------------------------
+bin                       Cat1b           Cat1b         Cat2b           Cat2b     
+process                   BHBHMBP         background    BHBHMBP         background
+process                   0               1             0               1         
+rate                      NSIGCAT1B       NBKGCAT1B     NSIGCAT2B       NBKGCAT2B
+------------------------------------------------------------------------------------------
+lumi               lnN    1.026           -             1.026           -         
+purewt             lnN    0.990/1.010     -             0.990/1.010     -         
+pdfrewt            lnN    0.990/1.010     -             0.990/1.010     -         
+trigsf             lnN    1.01            -             1.02            -         
+ca8misc            lnN    1.15            -             1.15            -
+JES                shape  1               1             1               1 
+JER                shape  1               1             1               1 
+CA8                shape  1               1             1               1 
+SFb                shape  1               1             1               1 
+SFl                shape  1               1             1               1 
+SigStat            shape  1               -             1               -
+Stat               shape  -               1             -               1
+TTJetsScale        shape  -               1             -               1
+TTJetsMatching     shape  -               1             -               1
+TopPtReWrt         lnN    -               0.992/1.005   -               0.996/1.002
+------------------------------------------------------------------------------------------
 """
 
 ROOT.gROOT.SetBatch() 
