@@ -155,6 +155,7 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		const bool   applyJEC_ ; 
     const bool   applyCA8SF_ ; 
 		const bool   applyBTagSF_ ; 
+	const bool applyTopPtReWeighting_;
 		const double jesShift_;
 		const double jerShift_; 
     const double SFShiftCA8_;
@@ -162,6 +163,7 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
     const double SFlShiftHtag_;
 		const double SFbShift_;
 		const double SFlShift_;
+		const double topPtReWeightShift_;
 
 		EvtInfoBranches    EvtInfo;
 		VertexInfoBranches VtxInfo;
@@ -188,6 +190,10 @@ class BackgroundEstimationABCD : public edm::EDAnalyzer{
 		JetInfoBranches HiggsSubJet1InfoAna, HiggsSubJet2InfoAna, 
 				AntiHiggsSubJet1InfoAna, AntiHiggsSubJet2InfoAna;
 		bool   McFlagana;
+		int RunNo;
+		long int EvtNo;
+		int LumiNo;
+		int EvtCat;
 		double PUana;
 		double evtWtana;
 		double HTak5, HThiggsbjet;
@@ -251,6 +257,7 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
 	applyJEC_(iConfig.getParameter<bool>("ApplyJEC")),
   applyCA8SF_(iConfig.getParameter<bool>("ApplyCA8SF")),
 	applyBTagSF_(iConfig.getParameter<bool>("ApplyBTagSF")),
+	applyTopPtReWeighting_(iConfig.getParameter<bool>("ApplyTopPtReWeighting")),
 	jesShift_(iConfig.getParameter<double>("JESShift")),
 	jerShift_(iConfig.getParameter<double>("JERShift")),
   SFShiftCA8_(iConfig.getParameter<double>("SFShiftCA8")),
@@ -258,6 +265,7 @@ BackgroundEstimationABCD::BackgroundEstimationABCD(const edm::ParameterSet& iCon
   SFlShiftHtag_(iConfig.getParameter<double>("SFlShiftHtag")),
 	SFbShift_(iConfig.getParameter<double>("SFbShift")),
 	SFlShift_(iConfig.getParameter<double>("SFlShift")),
+topPtReWeightShift_(iConfig.getParameter<double>("TopPtReWeightShift")),
 	evtPass_ana(0),  
 	evtPass_val(0), 
 	BuildMiniTree_(iConfig.getParameter<bool>("BuildMinTree")) 
@@ -326,42 +334,6 @@ void BackgroundEstimationABCD::isolateCollection( JetCollection control, JetColl
 
 // ------------ method called once each job just before starting event loop  ------------
 void BackgroundEstimationABCD::beginJob(){ 
-	chain_  = new TChain(inputTTree_.c_str());
-
-	for(unsigned i=0; i<inputFiles_.size(); ++i){
-		chain_->Add(inputFiles_.at(i).c_str());
-		TFile *f = TFile::Open(inputFiles_.at(i).c_str(),"READ");
-		f->Close();
-	}
-
-	EvtInfo.Register(chain_);
-	VtxInfo.Register(chain_);
-	GenInfo.Register(chain_);
-	GenJetInfo.Register(chain_,"GenJetInfo");
-	JetInfo.Register(chain_,"JetInfo");
-	FatJetInfo.Register(chain_,"FatJetInfo");
-	SubJetInfo.Register(chain_,"SubJetInfo");
-	LepInfo.Register(chain_);
-
-	if(  maxEvents_<0 || maxEvents_>chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
-
-	if( BuildMiniTree_ ){
-		newtree_ana = fs->make<TTree>("tree", "");
-		newtree_ana->Branch("EvtInfo.McFlag", 		&McFlagana, 	"EvtInfo.McFlag/O"); // store weight of evt and pu for each event
-		newtree_ana->Branch("EvtInfo.PU", 		&PUana, 	"EvtInfo.PU/D"); // store weight of evt and pu for each event
-		newtree_ana->Branch("EvtInfo.WeightEvt",	&evtWtana, 	"EvtInfo.WeightEvt/D"); 	
-		newtree_ana->Branch("EvtInfo.HT_AK5",		&HTak5, 	"EvtInfo.HT_AK5/D"); 	
-		newtree_ana->Branch("EvtInfo.HT_HiggsbJets",	&HThiggsbjet, 	"EvtInfo.HT_HiggsbJets/D"); 	
-		HiggsJetInfoAna.RegisterTree(newtree_ana,"HiggsJetInfo");
-		AntiHiggsJetInfoAna.RegisterTree(newtree_ana,"AntiHiggsJetInfo");
-		bJetInfoAna.RegisterTree(newtree_ana,"bJetInfo");
-		Final_bJetInfoAna.RegisterTree(newtree_ana,"FinalbJetInfo");
-		HiggsSubJet1InfoAna.RegisterTree(newtree_ana,"HiggsSubJet1Info");
-		HiggsSubJet2InfoAna.RegisterTree(newtree_ana,"HiggsSubJet2Info");
-		AntiHiggsSubJet1InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet1Info");
-		AntiHiggsSubJet2InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet2Info");
-	}
-
 	h2.CreateTH2(fs); h2.Sumw2();
 	h1.CreateTH1(fs); h1.Sumw2();
 
@@ -383,7 +355,54 @@ void BackgroundEstimationABCD::beginJob(){
 	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion"));
 	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_0ak5"));	
 	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_1ak5"));	
-	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_2ak5"));	
+	setABCDcutRegion(h1.GetTH1("ABCDval_CutRegion_2ak5"));
+
+	chain_  = new TChain(inputTTree_.c_str());
+
+	for(unsigned i=0; i<inputFiles_.size(); ++i){
+		chain_->Add(inputFiles_.at(i).c_str());
+		TFile *f = TFile::Open(inputFiles_.at(i).c_str(),"READ");
+		if ( TString(inputTTree_).Contains("skim") ) {
+			if ( maxEvents_ < 0 ) {
+				TH1F* h_events = (TH1F*)f->Get("skim/h_cutflow") ;
+				h1.GetTH1("ABCDana_CutFlow")->Fill("All_Evt",h_events->GetBinContent(1) );	
+				h1.GetTH1("ABCDval_CutFlow")->Fill("All_Evt",h_events->GetBinContent(1) );
+			}
+		}
+		f->Close();
+	}
+
+	EvtInfo.Register(chain_);
+	VtxInfo.Register(chain_);
+	GenInfo.Register(chain_);
+	GenJetInfo.Register(chain_,"GenJetInfo");
+	JetInfo.Register(chain_,"JetInfo");
+	FatJetInfo.Register(chain_,"FatJetInfo");
+	SubJetInfo.Register(chain_,"SubJetInfo");
+	LepInfo.Register(chain_);
+
+	if(  maxEvents_<0 || maxEvents_>chain_->GetEntries()) maxEvents_ = chain_->GetEntries();
+
+	if( BuildMiniTree_ ){
+		newtree_ana = fs->make<TTree>("tree", "");
+		newtree_ana->Branch("EvtInfo.McFlag", 		&McFlagana, 	"EvtInfo.McFlag/O"); // store weight of evt and pu for each event
+		newtree_ana->Branch("EvtInfo.PU", 		&PUana, 	"EvtInfo.PU/D"); // store weight of evt and pu for each event
+		newtree_ana->Branch("EvtInfo.WeightEvt",	&evtWtana, 	"EvtInfo.WeightEvt/D"); 	
+		newtree_ana->Branch("EvtInfo.HT_AK5",		&HTak5, 	"EvtInfo.HT_AK5/D"); 	
+		newtree_ana->Branch("EvtInfo.HT_HiggsbJets",	&HThiggsbjet, 	"EvtInfo.HT_HiggsbJets/D"); 
+		newtree_ana->Branch("EvtInfo.RunNo",	&RunNo, 	"EvtInfo.RunNo/I"); 
+		newtree_ana->Branch("EvtInfo.EvtNo",	&EvtNo, 	"EvtInfo.EvtNo/L"); 
+		newtree_ana->Branch("EvtInfo.LumiNo",	&LumiNo, 	"EvtInfo.LumiNo/I"); 
+		newtree_ana->Branch("EvtInfo.EvtCat",	&EvtCat, 	"EvtInfo.EvtCat/I"); 
+		HiggsJetInfoAna.RegisterTree(newtree_ana,"HiggsJetInfo");
+		AntiHiggsJetInfoAna.RegisterTree(newtree_ana,"AntiHiggsJetInfo");
+		bJetInfoAna.RegisterTree(newtree_ana,"bJetInfo");
+		Final_bJetInfoAna.RegisterTree(newtree_ana,"FinalbJetInfo");
+		HiggsSubJet1InfoAna.RegisterTree(newtree_ana,"HiggsSubJet1Info");
+		HiggsSubJet2InfoAna.RegisterTree(newtree_ana,"HiggsSubJet2Info");
+		AntiHiggsSubJet1InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet1Info");
+		AntiHiggsSubJet2InfoAna.RegisterTree(newtree_ana,"AntiHiggsSubJet2Info");
+	}
 
 	return;  
 }
@@ -426,11 +445,28 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
       if( doPUReweighting_ ) puwt = LumiWeights_.weight(EvtInfo.TrueIT[0]); 
     }
 
-    if ( !isdata ) { //// Gen info 
+    if ( !isdata ) { //// Gen info
+	double tPt(0), tbarPt(0), ttbarReWeight(1);
+	int numTop(0);
       std::vector<int> gen_higgs_indices ; 
       for (int igen = 0; igen < GenInfo.Size; ++igen) { 
-        if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ; 
+        if ( GenInfo.Status[igen] == 3 && abs(GenInfo.PdgID[igen]) == 25 && GenInfo.nDa[igen] >= 2  ) gen_higgs_indices.push_back(igen) ;
+	if ( abs(GenInfo.PdgID[igen]) == 6 ){
+		if ( GenInfo.PdgID[igen] == 6 ) tPt=GenInfo.Pt[igen]; 
+		else if ( GenInfo.PdgID[igen] == -6 ) tbarPt=GenInfo.Pt[igen];
+		numTop++; 
+	}
       }
+	if( applyTopPtReWeighting_ && numTop==2){
+		ttbarReWeight=sqrt(exp(0.156-0.00137*tPt)*exp(0.156-0.00137*tbarPt)); //re-weight = sqrt(SF(top)*SF(anti-top))
+		double ttbarReWeightShift(1);
+		if( topPtReWeightShift_ == 0 )	ttbarReWeightShift = ttbarReWeight;
+		else if( topPtReWeightShift_ == 1 )	ttbarReWeightShift = ttbarReWeight*ttbarReWeight;
+		else if( topPtReWeightShift_ == -1 )	ttbarReWeightShift = 1; 
+		else edm::LogInfo("WrongTopPtReWeightShift") << "Wrong topPtReWeightShift_ "<<topPtReWeightShift_;
+		evtwt *= ttbarReWeightShift;
+		//cout<<entry<<", "<<numTop<<", "<<tPt<<", "<<tbarPt<<", "<<evtwt<<", "<<topPtReWeightShift_<<", "<<ttbarReWeight<<", "<<ttbarReWeightShift<<endl; 
+	}
       //// Higgs BR reweighting
       for (std::vector<int>::const_iterator ihig = gen_higgs_indices.begin(); ihig != gen_higgs_indices.end(); ++ihig) {
         int higgsDau0(abs(GenInfo.Da0PdgID[*ihig])), higgsDau1(abs(GenInfo.Da1PdgID[*ihig])) ;
@@ -453,8 +489,10 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     evtwt *= puwt ;
     double evtwt2 = evtwt*evtwt;
 
-    h1.GetTH1("ABCDana_CutFlow")->Fill(0);	
-    h1.GetTH1("ABCDval_CutFlow")->Fill(0);
+    if ( TString(inputTTree_).Contains("ntuple") ) {
+	    h1.GetTH1("ABCDana_CutFlow")->Fill(0);	
+	    h1.GetTH1("ABCDval_CutFlow")->Fill(0);
+    }
 
     //// Trigger selection 
     TriggerSelector trigSel(hltPaths_); 
@@ -1097,8 +1135,15 @@ void BackgroundEstimationABCD::analyze(const edm::Event& iEvent, const edm::Even
     h1.GetTH1("ABCDval_Sumw2_D")->Fill( 0., sumw2_dv);
     //// Store new tree, new branch with Jet correction  
     if( BuildMiniTree_ ){
-      if( nA+nB+nC+nD > 0 ){ 	
+      //if( nA+nB+nC+nD > 0 ){ 	
+      if( nB > 0 ){ //Record final evt	
         McFlagana = EvtInfo.McFlag;
+        RunNo = EvtInfo.RunNo;
+        EvtNo = EvtInfo.EvtNo;
+        LumiNo = EvtInfo.LumiNo;
+     	if( selectedBJets.size() == 1 ) EvtCat = 1;
+	else if( selectedBJets.size()>= 2 ) EvtCat = 2;
+	else EvtCat = 0;
         PUana = puwt;
         evtWtana = evtwt;
         HTak5 = HTAllAK5.getHT();

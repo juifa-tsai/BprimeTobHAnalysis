@@ -121,6 +121,11 @@ options.register('ApplyBTagSF', True,
     VarParsing.varType.bool,
     "Apply b-tagging scale factors" 
     )
+options.register('ApplyTopPtReWeighting', True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Apply Top Pt re-Weighting" 
+    )
 options.register('JESShift', 0.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
@@ -156,6 +161,12 @@ options.register('SFlShift', 0.0,
     VarParsing.varType.float,
     "SFl shift in unit of sigmas" 
     )
+options.register('TopPtReWeightShift', 0.0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "TopPtReWeightShift in unit of sigmas" 
+    )
+
 
 if options.SFbShiftHtag != options.SFbShift:
   print "Warning: SFbshiftHtag and SFbshift not equal. Setting them to be the same."
@@ -211,6 +222,8 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     ReportEvery         = cms.int32(options.reportEvery),  
     InputTTree          = cms.string(options.ttreedir+'/tree'),
     InputFiles          = cms.vstring(FileNames), 
+    #InputFiles          = cms.vstring(FileNames_TTbar), 
+    #InputFiles          = cms.vstring(FileNames_BpBp800), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp500), 
     #InputFiles          = cms.vstring(SkimmedFileNames_BpBp1000), 
     #InputFiles          = cms.vstring(SkimmedFileNames_QCD300to470), 
@@ -272,6 +285,7 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     ApplyJEC            = cms.bool(options.ApplyJEC), 
     ApplyCA8SF          = cms.bool(options.ApplyCA8SF),
     ApplyBTagSF         = cms.bool(options.ApplyBTagSF), 
+    ApplyTopPtReWeighting= cms.bool(options.ApplyTopPtReWeighting), 
     JESShift            = cms.double(options.JESShift), 
     JERShift            = cms.double(options.JERShift), 
     SFShiftCA8          = cms.double(options.SFShiftCA8), 
@@ -279,7 +293,9 @@ process.ABCD = cms.EDAnalyzer('BackgroundEstimationABCD',
     SFlShiftHtag        = cms.double(options.SFlShiftHtag), 
     SFbShift            = cms.double(options.SFbShift), 
     SFlShift            = cms.double(options.SFlShift), 
-    BuildMinTree        = cms.bool(True),
+    TopPtReWeightShift            = cms.double(options.TopPtReWeightShift), 
+    BuildMinTree        = cms.bool(False),
+    #BuildMinTree        = cms.bool(True),
     ) 
 
 process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",ignoreTotal = cms.untracked.int32(1) )
