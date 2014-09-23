@@ -11,3 +11,7 @@
 </bin>
 
 
+<bin name="BpMixedWts" file="BpMixedWts.C">
+  <use name="root"/>
+</bin>
+
