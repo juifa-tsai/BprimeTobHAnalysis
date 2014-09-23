@@ -1,0 +1,25 @@
+***** The workflow to grnerate template *****
+// Since the technical issue and some question which came from different time, 
+// so the template macros are dealing with different issue.
+// The workflow is 1->2 and 2->3, 
+
+1. GenTemplateWithTTJetCut.C
+	* Generate a original template from the analysis results. ( Extraplation and creating up/down histogram)
+	* Substracting the tt+Jets MC.
+	* Dosen't change the range of x-axis for 2b category (Since 1b and 2b are different)
+
+2. FixTemplateAndCombSysUnc.C
+	* Fix the range of x-axis of 2b category
+	* Combining some of systemtics uncertainties to one uncertaities.
+	* This template is for caculating the up limit for b'b'->bHbH (B2G-14-001)
+
+3. bprimeCombTemplate.C
+	* Discard some unused histogram from 2.
+	* Only keep data, background and 1b/2b category.
+	* Creating new histogram which is mixed whole signal MC with different weight.
+	* Naming is "Category"_bpM"masspoint"_bH"bHRatio"_bZ"bZRatio"_tW"tWRatio"_"SystermaticUncertaity"
+		e.g. 1b_bpM500_bH00_bZ05_tW05_JERUp
+			1b: 1b category
+			500: Mix all signal MC with mass point 500GeV (b'b'->bHbH, b'b'->bZbH, b'b'->bZbZ, b'b'->bZtW,  b'b'->bHtW and  b'b'->tWtW)
+			bH00_bZ05_tW05: The wieght of BR is bH=0, bZ=0.5 and tW=0.5
+			JERUp : The systematics uncertainty of jet energy resulotion with +1 sigma
