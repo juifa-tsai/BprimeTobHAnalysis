@@ -1,10 +1,12 @@
-# [Particle search] b' quarks decaying to b quark and Higgs boson in LHC data
+# [Statistics] b' quarks decaying to b quark and Higgs boson in LHC data
 
 <div style="text-align: center;" markdown="1"><a href="http://dx.doi.org/10.1103/PhysRevD.93.112009">Phys. Rev. D 93 (2016) 112009</a></div>
 
 *"Search for pair-produced vector-like quarks of charge -1/3 decaying to bH using boosted Higgs jet-tagging in pp collisions at sqrt(s) = 8 TeV"*
 
-*<div style="text-align: center;" markdown="1">`model prediction` `upper limits` `Monte Carol` `particle physics` `big data`</div>*
+*<div style="text-align: center;" markdown="1">`upper limit` `background model` `Monte Carol` `big data` `statistics`</div>*
+
+Same article: https://hackmd.io/s/S1mZHTeNb
 
 ## Introduction
 
@@ -52,8 +54,8 @@ The total background in following Figure shows the predicted background model, w
 
 <div style="text-align: center;" markdown="1"><img src="http://hep1.phys.ntu.edu.tw/~alpha78718/cv/bpht1.png" height="250"> <img src="http://hep1.phys.ntu.edu.tw/~alpha78718/cv/bpht2.png" height="250"></div>  
 
-#### 3. Results
-Although there is no any singal data found, it doesn't mean the physics mechanism is failed. We can still estimated the possible energy region which the new physics may exist there, i.e. the energy of LHC is not large enough to produce the new particle. Thus, we provide the **up-limit** of the probabilities of $\text{b}'\bar{\text{b}'}$ pair production as function of mass of $\text{b}'$ to shows the possible region to have $\text{b}'$.
+## Results
+Although there is no any signal found in data, it doesn't mean the physics mechanism is failed. We can still estimated the possible energy region which the new physics may exist there, i.e. the energy of LHC is not large enough to produce the new particle. Thus, we provide the **up-limit** of the probabilities of $\text{b}'\bar{\text{b}'}$ pair production as function of mass of $\text{b}'$ to shows the possible region to have $\text{b}'$.
 
 The **up-limit** is estimated by [*Hypothesis Testing*](https://onlinecourses.science.psu.edu/statprogram/node/138) which give the conferdence interval with 95% by using data, predicted backgroud (from the ***Data-drven ABCD method***) and $\text{b}'$-MC samples. The following Figure shows the up-limit of the $\text{b}'$ mass.
 
